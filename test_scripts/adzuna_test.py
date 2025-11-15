@@ -27,7 +27,10 @@ def debug_api_access():
         'app_id': APP_ID,
         'app_key': APP_KEY,
         'results_per_page': 5,
-        'what': 'data'  # Very common term
+        'where': 'london',
+        'what': 'software developer',  # Very common term
+        'results_per_page': 50,  # Increase from default (usually 10) to maximum
+        'max_days_old': 3
     }
     
     response = requests.get(search_url, params=search_params)
@@ -39,8 +42,21 @@ def debug_api_access():
     print(f"Search test - Found {response_count} results")
     print(f"Response keys: {list(response_keys)}")
     print(f"Search test - Status: {response.status_code}")
+    for i, result in enumerate(results, 1):
+        # Extract category information
+         # Extract category information
+        category = result.get('category', {})
+        category_tag = category.get('tag', 'N/A') if category else 'N/A'
+        category_label = category.get('label', 'N/A') if category else 'N/A'
+               
+        # Extract title
+        title = result.get('title', 'N/A')
+        print(f"Result {i}:"+f" Title: {title}, Category: {category_label} ({category_tag})")
     #print(f"Response: {response.text}")
+
     
     return response.status_code == 200
+
+
 
 debug_api_access()
