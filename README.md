@@ -10,5 +10,5 @@ Employeah 🔍
 The project is divided into three main distinct applications:
 
 1. **`client/`**: The Frontend. Built with **React**.
-2. **`server/`**: The REST API. Built with **Node.js and Prisma**.
-3. **`data-pipeline/`**: The Scraper & Processor. Built with **Python**.
+2. **`server/`**: The "online" Backend. Built with **Node.js and Prisma**.
+3. **`data-pipeline/`**: The "offline" Backend: the Scraper & Processor. Built with **Python**.
