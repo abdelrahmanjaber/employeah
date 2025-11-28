@@ -1,0 +1,3 @@
+selenium #package for web scraping, that can "pretend" to be a human who's browsing. We need it for scraping tum courses from tum online.
+webdriver-manager #checks your installed Chrome version, automatically downloads the matching ChromeDriver, and sets it up for Selenium to use.
+spacy # used to extract location from job threads, natural language processing library.
