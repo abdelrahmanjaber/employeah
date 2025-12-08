@@ -3,4 +3,7 @@
 
 # Python bytecode
 __pycache__
-*.pyc
+*.pyc.env
+# .gitignore
+*.csv
+!job_titles.csv  # (Optional: If you have small CSVs you WANT to keep, add exceptions like this)

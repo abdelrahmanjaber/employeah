@@ -1,0 +1,413 @@
+Title,Semester,Description,Skills,URL
+Dodo Alive! - Resurrecting the Dodo with Robotics and AI,2025 W,"--- LERNERGEBNISSE ---
+After completing this module, students will have gained broad knowledge in developing legged robots. They will also acquire problem solving and team-working skills. The students will have obtained practical and methodological skills to gain diverse competencies far beyond basic theory.
+
+--- INHALT ---
+Imagine that you are at the natural history museum. You wander around and take a look at different parts of the museum. Suddenly, a robot in the form of a long extinct species – the Dodo – moves towards you, starts talking to you and tells you about itself. This course covers constructing an autonomous, intelligent, walking, Dodo-like robot, which requires a combination of a wide spectrum of fields, including design, control, navigation, locomotion, perception and AI. During this laboratory course, the students will develop the necessary skills to design and construct various components of “Robo-Dodo”, as part of a long-term, iterative project.
+In the “Hardware & Design” course we aim towards the physical realization of the Robo-Dodo within a group project. HW/SW components that have been developed previously are now integrated into prototypes.
+Here, the focus is less on constructing a “perfect system”. Rather, students should understand the fundamental mechanical principles that enable locomotion. In this context, it is important to comprehend the role of elastic elements that have been used to successfully construct bio-inspired robots (Cotton et al.). By leveraging fast prototyping methods, students use their creativity to explore different mechanical solutions. Another part of the project are the actuation and control of the mechanical system by brushless DC motors.
+
+--- LERNMETHODE ---
+• Introductory classes
+• Independent student work
+• Team work (including supervised and unsupervised work in the laboratory)",Pending...,https://campus.tum.de/tumonline/ee/ui/ca2/app/desktop/#/slc.tm.cp/student/courses/950840402
+Biochemie reaktiver Sauerstoffspezies und freier Radikale,2025 W,"--- LERNERGEBNISSE ---
+Bestimmung der ""antioxidativen Kapazität"" von Naturstoffen
+
+--- INHALT ---
+In dieser Veranstaltung sollen Grundlagen der Biochemie reaktiver Sauerstoffspezies und freier Radikale erarbeitet werden. Ihre Rolle in der Biologie sowie Medizin als auch die Kontrolle dieser Oxidantien durch sog. ""Antioxidantien"" stehen dabei im Mittelpunkt. Anhand ausgewählter, physiologisch relevanter in-vitro Modellsysteme sollen die Vorgehensweise zur Bestimmung der antioxidativen Kapazität einer Substanz am Beispiel einiger Naturstoffe (etherische Öle, pflanzliche Arzneimittel, Nahrungsergänzungsmittel, Vitamine) vermittelt und die Aussagekraft der Ergebnisse wissenschaftlich kritisch betrachtet werden.
+
+--- LERNMETHODE ---
+Vorlesung, Laborübung bzw. Praktikum und Seminar",Pending...,https://campus.tum.de/tumonline/ee/ui/ca2/app/desktop/#/slc.tm.cp/student/courses/950877556
+Instationäre hygrothermische Berechnungsverfahren,2025 W,"--- LERNERGEBNISSE ---
+Nach Teilnahme an der Modulveranstaltung sind die Studierenden in der Lage, wesentliche Aspekte des instationären gekoppelten dynamisch-thermischen Verhaltens von Gebäuden zu verstehen und den Nutzen von verschiedenen thermischen und hygrischen Verfahren zur Schadensvermeidung und Energieeinsparung, sowie der Behaglichkeit zu bewerten sowie zugehörige Werkzeuge situativ anzuwenden.
+
+--- INHALT ---
+- Ein- und zweidimensionaler gekoppelter Wärme und Feuchtetransport bei verschiedenen Gebäudetypen und unter verschiedenen äußeren und inneren Randbedingungen (Klima- und Standortabhängigkeit sowie Nutzungsabhängigkeit)
+- Methoden zur Bewertung der oben genannten Effekte
+- Simulation von Raumverbänden und Bewertung der Behaglichkeit.
+
+--- LERNMETHODE ---
+Die Veranstaltung wird als Vorlesung mit Powerpoint-Präsentationen und Softwaredemonstration durchgeführt.",Pending...,https://campus.tum.de/tumonline/ee/ui/ca2/app/desktop/#/slc.tm.cp/student/courses/950841592
+"A Google-Earth Perspective on Nutrition, Health and Sustainability",2025 W,"--- LERNERGEBNISSE ---
+• After successful completion of the module, students will comprehend the context of nutrition, health and sustainability from molecular nutrition via population health to planetary health. They will understand that nature and especially food material contain molecular solutions for many, if not most, issues in human health and environmental preservation. They will also appreciate the difference between, and the increasing overlap across nutrition and medicine: nutrition is a powerful means for health maintenance and disease prevention.
+• At the end of the module students will be able to evaluate related basic research publications, clinical and population studies, concept and opinion papers and perspectives, put them into a scientific context. Additionally, students will be able to independently retrieve, review and apply information required to draft an e.g. research, project or grant proposal. They will be able to present the results of their investigation in a comprehensive and appealing way to their peers and defend their opinions and hypotheses in a rigorous scientific debate.
+
+--- INHALT ---
+• Humanity in the Anthropocene
+o Human Life, Health and Wealth
+o Major sustainability challenges (Energy, Food)
+o Geographic relevance of science and solutions
+• One Health Concept
+• Planetary Health Diet
+o EAT-Lancet Commission
+• The Food System
+o Agriculture, Transport, Processing, Production, Retail, Consumer
+• Nutrition & Health
+o Dimensions of Food & Health
+ Survival, enough calories, enough nutrients, health optimization, disease prevention
+ Early-Life Health and Perinatal Nutrition
+ Human Longevity
+• Personalised / Precision Nutrition
+o From classical nutrition science to ‚Systems Nutrition‘
+ Clinical Studies
+ Molecular Phenotyping
+ Economics
+ Citizen Science, Society & Culture
+o Molecular Nutrition
+ Natural Bioactives (Micronutrients, Phytonutrients, Bioactive Peptides, Biotics)
+ Food – Diet – Nutrients – Supplements
+• Nutrition and Technology
+o Bioanalytics
+ Sequencing (Genomics)
+ Mass Spectrometry (Proteomics, Metabolomics, Micronutrients)
+o Artificial Intelligence
+ AI in science, technology and society
+ Systems Biology
+ Computational leverage of nature’s molecular reservoir (prediction of bioactives)
+ In vivo HTS of bioactives
+o Digital Health
+ Apps & Wearables for Monitoring (Health, Nutrition, Lifestyle)
+ Data generation, sharing, protection, leverage
+• Professional Perspective on Nutrition, Health & Sustainability
+o Relevance & impact
+ Academia
+ Industry; Bio-/Food-Tech, SMEs, Start-Ups
+ Non-for-profit, NGO, Government, Interfaces
+
+--- LERNMETHODE ---
+Methods
+• The theoretical part of the course will be conferred as a lecture series.
+• Depending on course attendance (number of participants), students may in addition work in small teams (2-3 students) to deepen their knowledge e.g. independent literature research or addressing a specific question related to a specific topic in the lecture series.
+• The results of this group work may be presented to the course plenum (if appropriate in terms of number of participants).
+• Homework may be required, e.g. as
+o Literature search (PubMed)
+o Paper review (specific recommended articles)
+• Depending on course attendance, short presentations of nutrition, health and sustainability scenarios from international students may be solicited.
+• If logistically feasible, one excursion may be organized, to either
+o TUM Venture Labs, or
+o A food/nutrition research lab on the TUM/HSWT/LfL campus, or
+o A food-tech start-up or food corporation
+
+Media
+• Presentations in PowerPoint, Canva or similar formats
+• Original research papers, reviews, perspectives, opinions
+• Scientifically sound internet resources",Pending...,https://campus.tum.de/tumonline/ee/ui/ca2/app/desktop/#/slc.tm.cp/student/courses/950873589
+A MOOC-supported compact introduction to the Economics of the Agro-food Value Chains,2025 W,"--- LERNERGEBNISSE ---
+At the end of the course, students should be able to:
+- Explain current challenges and trends in the agro-food value chain.
+- Describe consumer choices in a differentiated market and explain the link between quality and value.
+- Define market research and understand the role, types, process and ethics of market research.
+- Explain the role of information for the functioning of a market.
+- Explain how labels work as a tools to alleviate asymmetric information in market including its various mechanisms.
+- Describe the effect of price as a signal for quality.
+- Explain about consumer behaviour, and the dimension and use of brand personalities.
+- Explain the notion of “Geographical Indication” and its importance within the EU market.
+- Define innovation, highlight the many types of innovations, explain how innovations are generated and identify the drivers and barriers of innovation.
+- Explain Corporate Social Responsibility in the Agro-food Sector and its Relevance for Food Companies.
+- Explain the coordination continuum, when coordination is profitable and possible incentive conflicts.
+- Understand the modern retail sector and its procurement contracts, and the issues around shelf allocation and supplier selection.
+- Explain vertical coordination and its relation to transaction costs and quality, standards, meta-standards and meta-systems.
+
+--- INHALT ---
+Subjects covered in the course encompass the following areas:
+- Quality and consumers
+- Market research
+- Asymmetric information about quality
+- Food labelling
+- Pricing Strategies and Implications Brand personality
+- Geographical Indication
+- Innovation and quality
+- Corporate social responsibility
+- Introduction to incentive problems
+- Pricing schemes for cooperative
+- Industrial standards
+
+--- LERNMETHODE ---
+Weekly discussion, Questions and Answers centred around materials included in the weekly sessions of the MOOC called “the Economics of the Agro-food Value Chains” available on the courser platform with free access: https://coursera.org/learn/valuechains.",Pending...,https://campus.tum.de/tumonline/ee/ui/ca2/app/desktop/#/slc.tm.cp/student/courses/950841675
+A Practical Course in Numerical Methods for Engineers,2025 W,"--- LERNERGEBNISSE ---
+Nach der erfolgreichen Teilnahme am Modul sind die Studierenden in der Lage, die wichtigsten numerischen Algorithmen mithilfe von Matlab praktisch umzusetzen. Mit den daraus gewonnenen Erkenntnissen sind sie weiterhin in der Lage, geeignete Verfahren auszuwählen und diese selbstständig auf weitere Problemstellungen anzuwenden.
+
+--- INHALT ---
+Ziel der Veranstaltung ist die praktische Anwendung der grundlegenden numerischen Methoden im Ingenieurwesen anhand ausgewählter Problemstellungen.
+
+Analog zur Gliederung der Vorlesung Numerische Methoden für Ingenieure des Lehrstuhls werden nach einer
+(1) Einführung in die numerischen Methoden und Matlab,
+Problemstellungen aus folgenden Themenbereichen bearbeitet:
+(2) Interpolation und Approximation,
+(3) Numerische Differentiation und Integration,
+(4) Numerische Lösung von Anfangswertproblemen,
+(5) Approximation von Eigenwerten,
+(6) Einführung in die Methode der Finiten Elemente,
+(7) Grundlagen der linearen Algebra,
+(8) Lösung von linearen Gleichungssystemen: direkt und iterativ, und
+(9) Lösung von nichtlinearen Gleichungssystemen.
+
+--- LERNMETHODE ---
+Das Modul besteht aus einer Vorlesung mit Übungen. Während der Lehrveranstaltung erfolgt jeweils ein einstündiger PowerPoint Vortrag mit kurzer Einführung in die theoretischen Grundlagen des jeweiligen Themengebiets und die Präsentation der Aufgabenstellung. Die Studierenden bearbeiten anschließend selbstständig die wöchentlichen Aufgaben. Die Ausarbeitung erfolgt dann selbstständig in der folgenden Woche am Studenten-eigenen Notebook bzw. am Rechner des Lehrstuhls. Die Studierenden sollen so lernen, die wichtigsten numerischen Algorithmen mithilfe von Matlab praktisch umzusetzen sowie geeignete Verfahren selbstständig auf weitere Problemstellungen anzuwenden. Zur Klärung hierbei auftretender Fragen werden zusätzliche wöchentliche Termine mit der/dem Übungsleiter(in) sowie Tutoren angeboten.",Pending...,https://campus.tum.de/tumonline/ee/ui/ca2/app/desktop/#/slc.tm.cp/student/courses/950839572
+Abwehrender Brandschutz,2025 W,"--- LERNERGEBNISSE ---
+Nach erfolgreicher Teilnahme sind die Studierenden in der Lage, Konzepte des abwehrenden Brandschutzes in Bauvorhaben zu integrieren und risikoorientiert zu bewerten. Sie verstehen die physikalischen Grundlagen der Brandausbreitung sowie der Branddetektion und -bekämpfung, können die Wirkung technischer Brandschutzanlagen beurteilen und deren Einsatz in Gebäuden ingenieurmäßig bewerten. Zudem kennen sie die organisatorischen Strukturen des Feuerwehrwesens und sind in der Lage, diese in die Planung und Bemessung von Brandschutzmaßnahmen einzubeziehen.
+
+--- INHALT ---
+- Grundlagen des abwehrenden Brandschutzes (Aufbau und Aufgaben der Feuerwehr, Einsatzgrundsätze, Gefahrenabwehrplanung)
+- Physikalische Grundlagen (Brandentstehung, thermische und chemische Prozesse, Rauchentwicklung, Wärmeleitung und -strahlung)
+- Schnittstellen zwischen baulichem, anlagentechnischem und organisatorischem Brandschutz
+- Exkursionen zu Feuerwachen, Brandmeldezentralen, Prüfinstituten und Rechenzentren zur praktischen Veranschaulichung
+
+--- LERNMETHODE ---
+Das Modul besteht aus einer Kombination aus Vorlesungen, interaktiven Übungen, Fallstudien und Exkursionen. Die Vorlesung vermittelt die theoretischen und physikalischen Grundlagen. In den Übungen werden praktische Anwendungsfälle, Bemessungen und Anlagenkonzepte vertieft. Die Exkursionen bieten Einblicke in reale Strukturen und Prozesse der Gefahrenabwehr und technischen Brandschutzpraxis.",Pending...,https://campus.tum.de/tumonline/ee/ui/ca2/app/desktop/#/slc.tm.cp/student/courses/950877506
+Academic Skills,2025 W,"--- LERNERGEBNISSE ---
+Upon successful completion of this module students are able to
+- understand, analyze and critically discuss current examples of STS research (e.g. practices of evidence for technical safety in times of societal uncertainty or how novel approaches to gene-environment interaction from the field of epigenetics are changing understandings of health, illness, environment and body)
+- apply academic skills i.e. search for appropriate literature, write essays in compliance with good academic practice, present their academic findings to an audience in a clear and concise manner
+
+--- INHALT ---
+This module is an integral part of the M.A. program's didactic approach to introducing students to a range of concepts, topics and discourses in STS.
+It consists of
+1) a lecture series that gives an overview of the spectrum of issues and empirical cases in STS and provides students with an insight into current research in STS
+2) accompanying class sessions focusing on academic skills such as literature search, academic writing, presentations in front of a general and/or an academic audience.
+
+--- LERNMETHODE ---
+A range of topic-specific lectures introduce students to current examples of STS research. By analyzing reference materials, they acquire skills to evaluate empirical cases. In individual and group work they learn to compare and discuss different approaches and to use these for their own academic work. Various writing assignments train students to apply good academic practices and prepare them for the research paper. Giving oral presentations trains them to present their findings in a clear and concise manner.",Pending...,https://campus.tum.de/tumonline/ee/ui/ca2/app/desktop/#/slc.tm.cp/student/courses/950838232
+Accounting - Lecture,2025 W,"--- LERNERGEBNISSE ---
+The modul consists of two parts:
+(1) Upon successful completion of the module on financial accounting, students are able to understand the construction of individual and consolidated financial statements and to apply the accounting regulations practically. They can read and draw up balance sheets. Students are also able to evaluate which enterprises have to put up consolidated financial statements and which subsidiaries have to be included. Furthermore, they can independently carry out different consolidations correctly.
+(2) After participating in this introductory module on controlling, students will be able to remember and understand the basic concepts, tasks and conception of controlling systems and coordination systems, to analyze problems concerning the coordination of planning and control in management systems and to apply the newly acquired knowledge to solve these problems.
+
+--- INHALT ---
+The module on financial accounting gives an overview over basic financial accounting, focusing on regulations regarding commercial accounting in individual and consolidated financial statements. In the first part of the module, basic principles of financial accounting are introduced, dealing with general economic accounting and special financial accounting. In the second part, individual financial statements in terms of commercial law are explained and regulations for annual accounts and annual reports are discussed in detail. The third part deals with consolidated financial statements and consolidation principles as well as corresponding postings in accounting. In the fourth part of the module, fundamentals of balance sheet policy and analysis are discussed.
+
+The module on controlling introduces students to the basics and instruments of Controlling. It covers the following
+topics:
+(a) Description of controlling functions, tools of operative and strategic controlling
+(b) Identification and application of key performance indicators
+(c) Planning and monitoring: Operative, tactical and strategic planning and monitoring
+(d) Case examples especially in business administration, environmental management and corporate social responsibility (CSR)
+
+--- LERNMETHODE ---
+The financial accounting module consists of a lecture and a corresponding exercise, which is integrated into the lecture. In the exercise the content of the lecture and its understanding is deepened and extended by exercises and case studies. The lectures content is conveyed by means of presentation, while in the tutorial parts students can practise how to apply theoretical concepts practically.
+
+The controlling module consists of lectures, exercises and tutorials. During the lectures, the contents are delivered by presentations and discussions. The lectures are used to convey the theoretical. In the exercises, students apply the acquired knowledge in solving exercises and implementing case studies. Students deepen their understanding through working in small student groups as well as solving exercises on their own.",Pending...,https://campus.tum.de/tumonline/ee/ui/ca2/app/desktop/#/slc.tm.cp/student/courses/950841524
+Accounting and Value-Based Management,2025 W,"--- LERNERGEBNISSE ---
+After successfully completing the module, participants have gained the competencies to:
+• value a company given corporate objectives,
+• systematically record business transactions,
+• classify, distribute, assign, and analyze costs for operating performance management,
+• produce and analyze financial and sustainability reports in line with major reporting standards,
+• evaluate value-based performance measures and value drivers, and to
+• create managerial incentive structures, evaluate ethical implications, and to analyze accounting policies.
+
+--- INHALT ---
+The module introduces to the essential techniques and requirements how companies generate/collect, aggregate/process, and use/report corporate data for both managerial decision-making and communication with stakeholders outside the company. The course takes a value-based perspective and captures the fundamental steps from defining corporate objectives based on the business model and corporate values, measurement of key performance indicators, using these indicators for decision-making, and evaluation of corporate performance. The module likewise introduces and discusses established accounting techniques, legal requirements, managerial incentives, ethical considerations of accounting practices, and contemporary developments in the context of digital technologies. The module includes the following topics:
+• Corporate objectives and valuation.
+• Business activities and recording of business transactions.
+• Cost accounting and operating performance management.
+• Financial reporting in line with the International Financial Reporting Standards (IFRS).
+• Sustainability reporting in line with major reporting standards,
+• Value-based performance measures and value drivers.
+• Managerial incentives, business ethics, and accounting policies.
+
+--- LERNMETHODE ---
+The module consists of a lecture with integrated exercise. In the lecture, the methods, regulations, practices, and ethics of accounting are presented and discussed with the participants. The lecture introduces to both the theoretical fundament and real-life practices of accounting and value-based management reporting. In the exercise, the content is trained with practical examples through exercise sheets and case studies.",Pending...,https://campus.tum.de/tumonline/ee/ui/ca2/app/desktop/#/slc.tm.cp/student/courses/950876378
+Active Distribution Grids,2025 W,"--- LERNERGEBNISSE ---
+Nach dem Besuch des Kurses sind die Studierenden in der Lage,
+- Herausforderungen zu Planung- und Betrieb eines Verteilnetzes zu beschreiben.
+- mit MATLAB einfache dynamische Modelle eines Microgrids zu erstellen.
+- Lastflussanalysen durchzuführen.
+- Regler für den Betrieb von leistungselektronik-basierten Mikronetzen zu entwerfen.
+
+--- INHALT ---
+Verteilnetze sind aufgrund der sich ändernden Energiepolitik wichtiger denn je, da der steigende Anteil an erneuerbaren Energien auf Verbraucherseite und das Aufkommen von intelligenten leistungselektronischen Geräten nun einen bidirektionalen Leistungsfluss ermöglichen. Um das sogenannte „Active Distribution Grid“ zu verstehen, muss zu nächst erarbeitet werden, wie Verteilnetze traditionell geplant, dimensioniert und betrieben werden. Anschließend wird der Blick auf Microgrid-Konzepte erweitert und erläutert, wie dies die konventionellen Paradigmen verändert. Der Modellierung der einzelnen Komponenten und die unterschiedlichen Philosophien für die Steuerung eines Microgrids werden untersucht. In bereitgestellten Übungen werden die in den Vorlesungen erläuterten Methoden vertieft. Einige dieser Übungen enthalten MATLAB-Aufgaben, welche einen größeren Bezug zur konkreten Anwendbarkeit herstellen.
+
+--- LERNMETHODE ---
+Die Vorlesung besteht hauptsächlich aus Präsentationen des Dozenten. Die Folien werden den Studierenden vor der Vorlesung in Moodle zur Verfügung gestellt. Die Tafel wird verwendet, um einige einfache Berechnungen durchzuführen. Die Übungen für die Tutorials werden ebenfalls vor jedem Tutorial auf Moodle hochgeladen. Es wird erwartet, dass die Studierenden versuchen, die Übungen selbst zu lösen - vorzugsweise in Teams, bevor diese vom Übungsleiter besprochen wird. Eine Musterlösung wird ebenfalls zur Verfügung gestellt. Die Tutorials erfordern die Teilnahme der Studierenden und es wird empfohlen, Laptops / Tablets mitzubringen, um den Programmcode auszuführen. Außerdem werden Foren in Moodle als Plattform verwendet, auf der die Studierenden Fragen stellen und Antworten sowohl von den Dozenten als auch von den anderen Studierenden erhalten können. Zusätzliche Funktionen von Moodle (z. B. Quiz) werden eventuell verwendet, um die Studierenden beim Verständnis des Inhalts der Vorlesungen zu unterstützen. Die Studierenden erhalten Hausaufgaben, für welche MATLAB erforderlich ist. Ein letzter Teil der Vorlesung wird im CoSES-Labor als Gruppenarbeit (3-4 Studenten) durchgeführt. Die Studierenden erhalten vorinstallierte Computer für diesen Teil.",Pending...,https://campus.tum.de/tumonline/ee/ui/ca2/app/desktop/#/slc.tm.cp/student/courses/950838188
+Active Learning,2025 W,"--- LERNERGEBNISSE ---
+At the end of the module, students will be familiar with the theoretical background and the computational bases of information search and active learning theories and models, tackled from a develpomental perspective, and will have developed an understanding of how the results from active learning research can impact education.
+
+--- INHALT ---
+How do young children learn so much about the world, so quickly? A rich body of research has demonstrated that that active engagement with the world is a crucial component of learning: As soon as they can sit or walk,
+infants spontaneously grab and manipulate objects and approach or avoid people. As language develops, young children ask about the meaning of words, request the labels of objects, and inquire about the many new and puzzling phenomena they encounter. Active learning has been a topic of interest for philosophers, psychologists, cognitive and computer scientists.
+
+What is active learning? Are children efficient active learners? Is there a developmental trajectory for active learning? Is active learning better than more passive forms of instruction? This seminar examines these questions across domains such as visual attention, hysical reasoning, causal learning, and problem solving; readings will also address issues in explanation, exploration, and other related topics. The seminar involves a mix of lectures, group readings and discussions, as well as an active learning workshop designed to offer students a hands-on experience on how questions related to active learning are investigated experimentally, from identifying the research questions and hypotheses to interpreting and presenting the results obtained.
+
+--- LERNMETHODE ---
+This course is an active experience, and requires students' full engagement. Participation includes active involvement in class discussions and activities: asking questions about the topics and subject matter and expressing themselves through comments and opinions.
+
+Lectures. The seminar comprises four lectures, corresponding to the four seminar days. For all lectures we will suggest a few readings. Students are supposed to read suggested papers prior to the class for which they are listed. Lectures will not go over the specific content of the readings, but rather build upon the content of the readings. In other words, lectures will never merely repeat information in the readings. Therefore, students are responsible for understanding what they read, asking questions about what they do not understand, and being prepared to go beyond the readings in class. All suggested readings will be available on Moodle.
+
+Research Article Commentaries, Discussions and Presentation.
+Throughout the seminar, students will be asked to read eight research articles (two per day) and to prepare at least two written questions and/or critical comments per paper, demonstrating that they have horoughly read, understood, and thought about each article. Discussion will take place in class, and will be followed by a group activity, in which students will be asked to either prepare a short presentation or to write a blog post about one of the research articles discussed. All research articles will be available on Moodle.
+
+Active Learning workshop. This group workshop is designed to offer students a hands-on experience on how questions related to active learning are investigated experimentally. It is divided in four blocks (one per seminar day), each roughly corresponding to an experimental research phase:
+1. Identify an interesting research topic; narrow it down to a research question; do some background research to get familiar with what has been done on the topic, and to make sure the question is original; evelop one or few competing hypotheses;
+2. Design a simple study aimed at answer the research question and test the hypotheses; prepare the materials and the instructions;
+3. Test (test modalities will depend on the design the group has developed);
+4. Analyze, interpret and present the results. At the end of each seminar day, each group will present its progress to the rest of the class.",Pending...,https://campus.tum.de/tumonline/ee/ui/ca2/app/desktop/#/slc.tm.cp/student/courses/950838175
+Actuarial Risk Theory,2025 W,"--- LERNERGEBNISSE ---
+After successful completion of the module students are able to understand and apply the basic notions, concepts, and methods of actuarial risk theory. They master methods of Poisson and compound Poisson process theory as well as renewal theory, and also ruin theory for light- and heavy-tailed claim size distributions.
+
+--- INHALT ---
+I) Some auxiliary tools
+a. Probability generating functions
+b. Recursion formula for convolutions
+c. Moment generating functions
+II) The collective model
+III) The risk process
+a. Poisson process
+b. Compound Poisson process
+IV) Ruin theory in the classical risk model
+a. Renewal theory
+b. The Pollaczek-Khinchine formula
+c. Asymptotic estimates of the ruin probability
+V) Martingales in risk theory
+VI) Dependence models in insurance
+
+--- LERNMETHODE ---
+Lecture course, exercise module, R programming
+The module is offered as lectures with accompanying practice sessions. In the lectures, the contents will be presented in a talk with demonstrative examples, as well as through discussion with the students. The lectures should motivate the students to carry out their own analysis of the themes presented and to independently study the relevant literature. Corresponding to each lecture, practice sessions will be offered, in which exercise sheets and solutions will be available. In this way, students can deepen their understanding of the methods and concepts taught in the lectures and independently check their progress.",Pending...,https://campus.tum.de/tumonline/ee/ui/ca2/app/desktop/#/slc.tm.cp/student/courses/950876863
+Additive Fertigung im Bauwesen - Materialien und Prozesse,2025 W,"--- LERNERGEBNISSE ---
+Nach der Teilnahme am Modul sind die Studierenden in der Lage, eine einsatzorientierte Wahl additiver Fertigungsmethoden im Bauwesen zu treffen und die baustofftechnologischen, prozesstechnischen und robotischen Aspekte zu charakterisieren und zu beurteilen.
+Die Studierenden können wichtige Material-Prozess-Interaktionen erkennen und anhand erlernter Zusammenhänge bewerten. Grundlegende Berechnungsmethoden zum Material- und Strukturverhalten werden erlernt und auf verschiedene Anwendungsfälle angewendet. Zudem liegen Kenntnisse über die Zusammensetzung von Materialien für die additive Fertigung vor, die mittels des erlernten Wissens weiterentwickelt und anschließend hergestellt werden können. Die Studierenden kennen zudem relevante Untersuchungsmethoden zur Bewertung eines additiven Fertigungsprozesses, können diese anwenden und die gewonnen Daten evaluieren.
+
+--- INHALT ---
+Im Modul werden zunächst werkstoffübergreifend grundlegende Kenntnisse zu den verschiedenen additiven Fertigungsverfahren im Bauwesen vermittelt. Anschließend wird ein besonderer Fokus auf den 3D-Betondruck und die digitale Fertigung mit Lehm gelegt. Es werden die übergeordneten Themenbereiche 3D- Betondruck-Verfahren (Selective Cement Activation, Selective Paste Intrusion, Large Particle 3D Concrete Printing, Beton-Extrusion, Shotcrete 3D Printing, Injection 3D Concrete Printing), Werkstoffentwicklung (betontechnologische Zusammensetzung, Einsatz von Zusatzmitteln), Prüfung von additiv gefertigten Objekten (Rheologie, Mechanik), Qualitätskontrolle und Anwendung in der Praxis behandelt.
+
+--- LERNMETHODE ---
+Die theoretischen Grundlagen werden in der Vorlesung anhand von Präsentationen vermittelt. Besondere Detailaspekte oder für das Gesamtverständnis bedeutende Gesichtspunkte werden durch schriftliche Notizen schrittweise hergeleitet und anschaulich erläutert. Dieses Vorgehen ermöglicht den Studierenden eine übersichtliche und klar lesbare Darstellung der Inhalte und fördert das konzentrierte Zuhören und somit auch das Verständnis, da diese nicht durch ein permanentes Mitschreiben abgelenkt werden",Pending...,https://campus.tum.de/tumonline/ee/ui/ca2/app/desktop/#/slc.tm.cp/student/courses/950841781
+Additive Fertigung im Bauwesen 1,2025 W,"--- LERNERGEBNISSE ---
+Nach Abschluss des Moduls sind die Studierenden in der Lage:
+
+⦁ Theoretisches Wissen zur Entwicklung eines praktischen 3D-Druck-Workflows anzuwenden.
+⦁ Strukturierte Experimente mit AMC-Materialien und -Mischungen zu planen und durchzuführen.
+⦁ Die Auswirkungen der Rezeptur auf rheologische Eigenschaften und Druckergebnisse zu bewerten.
+⦁ Zu beurteilen, wie Material- und Druckparameter die Druckqualität, Schichtbindung, und strukturelle Eigenschaften beeinflussen.
+⦁ Zu verstehen, wie die Randbedingungen des 3D Drucks den Entwurfsraum für Geometrien beeinflussen.
+⦁ Grundlegende Pfadplanung für 3D-Druckprozesse zu verstehen.
+⦁ Kurvengeometrien in Roboterbewegungssequenzen zu übersetzen.
+⦁ Versuchsergebnisse technisch zu dokumentieren und kritisch zu reflektieren.
+
+--- INHALT ---
+Dieses Modul konzentriert sich auf praktische Experimente und die anwendungsbezogene Umsetzung der im begleitenden Vorlesungsmodul „Additive Fertigung im Bauwesen 1 - Vorlesung“ vermittelten Inhalte. Die Studierenden untersuchen das Zusammenspiel von Materialien, Entwurfsstrategien und Prozessparametern in der additiven Fertigung im Bauwesen durch strukturierte Übungen. Der Kurs ist in aufeinander aufbauende Sitzungen gegliedert, beginnend mit Grundlagen zu Materialien und endend bei robotergestützten 3D-Druck-Workflows. Alle Sitzungen sind praxisorientiert und fördern iteratives Testen, Beobachten und prozessgesteuertes Entwurfsdenken.
+
+Themenschwerpunkte sind:
+
+⦁ Materialentwicklung, -untersuchung und -prüfung: Verständnis von Verarbeitbarkeit, Fließverhalten und Baubarkeit durch Mischen und Testen zement- und lehmhaltiger Materialien.
+⦁ Design-to-Fabrication-Workflows: Gestaltung druckbarer Geometrien und Entwicklung von Slicing-Strategien, sowohl planar als auch nicht-planar.
+⦁ Robotersimulation: Umsetzung von Kurvengeometrien in Roboterbahnen und Beurteilung ihrer Machbarkeit mittels Simulationswerkzeugen.
+⦁ 3D-Druckversuche: Praktische Umsetzung mit Variation von Druckparametern und Werkzeugbahnen zur Untersuchung von Druckstrategien und geometrischen Möglichkeiten.
+⦁ Material-Prozess-Interaktion: Untersuchung des Zusammenspiels von Materialeigenschaften, Prozessparametern und Druckergebnis. Bewertung von Schichtbindung, Schrumpfung und strukturellem Verhalten.
+
+--- LERNMETHODE ---
+Das Modul basiert auf praktischen Tutorials, Experimenten und Übungen im Labor. Die Studierenden arbeiten in Kleingruppen an der Vorbereitung, dem Testen, dem Druck und der Bewertung von Materialien und Designs. Tutor*innen begleiten die Experimente, die Werkzeugverwendung und die Workflow-Entwicklung.",Pending...,https://campus.tum.de/tumonline/ee/ui/ca2/app/desktop/#/slc.tm.cp/student/courses/950876621
+Additive Fertigung in der Gießereitechnik,2025 W,"--- LERNERGEBNISSE ---
+Nach der Teilnahme am Modul sind die Studierenden in der Lage, ein Verfahren für die Erstellung von metallischen Bauteilen mit Additiven Verfahren anhand verschiedener Zielstellungen auszuwählen. Durch den erhaltenen Überblick über die mehrstufigen Technologien sind sie in der Lage die Vor- und Nachteile für die Qualitätsmerkmale von Bauteilen zu bewerten. Nach dem Praktikum können sie Datensätze für 3D-Druck erstellen und fertigungsgerecht manipulieren. Auf die Gießereitechnik bezogen verstehen sie die Funktion und Wirkung von Anschnitt und Gießsystem. Sie können dabei neben der Anwendung von Ent-wurfsregeln ebenso die Wirksamkeit der Konstruktion mit der Simulation überprüfen. Speziell für hoch-komplexe Formgebung können die Studierenden den Binder-Jetting-Prozess auf die Fragestellung über-tragen und dafür notwenigen Formkonstruktionen kreieren.
+
+--- INHALT ---
+Folgende Inhalte werden im Modul behandelt:
+- Additive Fertigungstechnologien
+- Komplexität von Produkten
+- Formkonstruktion im Gießereiwesen
+- Modellabformung von FDM Bauteilen
+- Händisches Erzeugen von Gießsystemen
+- Zusammenstellung von Gussformen
+- Binderjetting-Verfahren
+- Spezielle Formteilungen
+- Reinigung von Binder-Jetting Formen und Kernen
+- Montage von Gussformen
+- Gießen
+- Nachbereitung der gegossenen Rohteile
+Die Inhalte werden anhand folgenden Vorgehensweisen vermittelt
+- Erstellung eines Demonstrators entlang der Gießprozesskette im Sandguss mittels oben genannter additiver Fertigungstechnologien unter Berücksichtigung rechnergestützten Methoden (CAD, Si-mulation)
+- Abgerundet wird das Praktikum mit einer Führung durch das Fraunhofer IGCV Gießereitechnikum, um den Studierenden einen Einblick in die praxisbezogene bzw. industrielle Gießereiforschung zu geben
+- Die Inhalte werden in Form von Gruppenarbeiten erarbeitet (Die Teilnehmerzahl ist auf 10 Perso-nen begrenzt)
+
+--- LERNMETHODE ---
+Das Modul besteht aus Präsentationen in denen den Studierenden die theoretischen Grundlagen vermittelt werden und jeweils praktischen Versuchen am Rechner und in der Versuchshalle bei denen die Anwen-dung der Kompetenzen vertieft und veranschaulicht wird. Die praktischen Versuche finden als Teamarbeit statt, wobei gemeinsam die Aspekte der einzelnen Prozessschritte diskutiert werden. Die Studierenden sollen zum Studium der fachspezifischen Literatur angeregt werden und sich mit den einzelnen Verfahren und Methoden auseinandersetzen. Damit sollen sie beispielsweise lernen, spezifische additive Fertigungs-technologien in der Gießereitechnik zu verstehen und zu charakterisieren sowie moderne Gießprozesskette mit der konventionellen Gießprozesskette im Sandguss zu unterscheiden und Methoden zur Herstellung von additiv gefertigten Gussteilen anzuwenden. Das Praktikum endet mit einer Führung durch das Gieße-reitechnikum, um den Studierenden einen Einblick in die industrielle bzw. praxisbezogene Gießereifor-schung zu geben und aktuelle Themen zu veranschaulichen.",Pending...,https://campus.tum.de/tumonline/ee/ui/ca2/app/desktop/#/slc.tm.cp/student/courses/950840481
+Advanced Algorithms,2025 W,"--- LERNERGEBNISSE ---
+After completing the module, the students are able to analyze and to assess the runtime and the memory requirements of algorithms. Furthermore, they have a good understanding of numerous fundamental algorithms and data structures. This understanding enables them to design algorithms and data structures for new algorithmic problems.
+
+--- INHALT ---
+The module begins with a brief review of algorithm design and analysis techniques and computational complexity. The module then mainly focuses on techniques for dealing with intractability and decentralized computation systems, such as approximation algorithms, parameterized algorithms, randomized algorithms, exact super-polynomial algorithms, online-algorithms and linear programming. Students also learn about associated complexity classes that allow them to show that no (significantly) faster algorithms can exist.
+
+In addition, the module covers selected topics of advanced efficient algorithms and data structures that require a deeper level of understanding of algorithmic concepts.
+
+--- LERNMETHODE ---
+The module consists of lectures and exercises. The content of the lectures is conveyed by presentations of the scientific material. By solving homework assignments, the students are encouraged to work on topics that build on each other. The lecturer can offer that the homework solutions produced by the students are corrected such that the students receive individual feedback. Solutions of the homework assignments are discussed in the tutorials.",Pending...,https://campus.tum.de/tumonline/ee/ui/ca2/app/desktop/#/slc.tm.cp/student/courses/950841487
+Advanced Analysis of Variance Procedures,2025 W,"--- LERNERGEBNISSE ---
+Die Studierenden erwerben vertiefte Kenntnisse über Forschungsmethoden der empirischen Bildungsforschung und sind in der Lage, dieses Wissen für verschiedene Themen der Lehr- und Lernwissenschaften anzuwenden: Sie wissen, welche statistischen Methoden im Hinblick auf Varianzanalysen für bestimmte Forschungsfragen geeignet sind, sie verstehen, wie man die statistischen Verfahren mit R oder Python durchführt, sie sind in der Lage, Techniken zur Datenanalyse mit statistischer Software selbständig anzuwenden. Die Studierenden können das in den Kursen erworbene Wissen in den Bereichen des Schreibens für ihre eigenen Studienzwecke nutzen. Sie sollen lernen, wissenschaftliche Arbeiten zu lesen, um die Qualität veröffentlichter wissenschaftlicher Arbeiten zu beurteilen. Darüber hinaus werden ihnen Elemente des wissenschaftlichen Schreibens vermittelt, die sie in die Lage versetzen, wissenschaftliche Arbeiten nach den Richtlinien der Scientific Community (z. B. APA) zu verfassen.
+
+--- INHALT ---
+Dieser Kurs bietet eine eingehende Untersuchung der Varianzanalyse (ANOVA), einer statistischen Methode zur Analyse von Unterschieden zwischen Gruppenmittelwerten in einer Stichprobe. Dieser Kurs ist speziell auf Experimente mit KI-generierten Datenergebnissen in der Bildungsforschung zugeschnitten. Mit dem Schwerpunkt auf den einzigartigen Herausforderungen und Möglichkeiten, die KI-generierte Daten bieten, werden die Teilnehmer ein solides Verständnis dafür entwickeln, wie ANOVA geschickt eingesetzt werden kann, um statistisch relevante Unterschiede zwischen verschiedenen Interventionen zu identifizieren. Durch die Beschäftigung mit realen Beispielen und Daten werden die Studierenden nicht nur die theoretischen Grundlagen der ANOVA verstehen, sondern auch ihre praktische Relevanz in der Bildungsforschung. Im weiteren Verlauf des Lehrplans werden die Studierenden mit den verschiedenen Arten der ANOVA vertraut gemacht, einschließlich der einseitigen, zweiseitigen und der komplexeren ANOVA mit wiederholten Messungen. Der Schwerpunkt wird auf den Annahmen liegen, die der ANOVA zugrunde liegen. Die Studierenden werden in die Lage versetzt, die Angemessenheit dieser Annahmen für verschiedene Datensätze kritisch zu bewerten, um die Gültigkeit ihrer Analysen zu gewährleisten. In praktischen Übungen werden die Studierenden mit führender Statistiksoftware (R und Python) vertraut gemacht, so dass sie ANOVA-Tests sicher durchführen und sinnvolle Interpretationen aus den Ergebnissen ableiten können. Darüber hinaus wird der Kurs Post-Hoc-Tests untersuchen und den Studierenden die Werkzeuge an die Hand geben, um spezifische Gruppenunterschiede zu identifizieren, wenn die ANOVA signifikante Varianzen anzeigt.
+
+--- LERNMETHODE ---
+Variation der verschiedenen Lehr- und Lernmethoden. Dazu gehören: kurze theoretische Inputs; praktische Aufgaben, angeleitete praktische Übungen; Gruppendiskussionen; Demonstrationen; Schreibübungen; Lesen wissenschaftlicher Literatur",Pending...,https://campus.tum.de/tumonline/ee/ui/ca2/app/desktop/#/slc.tm.cp/student/courses/950875407
+Advanced Concepts of Programming Languages,2025 W,"--- LERNERGEBNISSE ---
+After successful completion of this module, students are familiar with an assortment of programming language constructs from popular programming languages. They understand the semantics of these constructs as well as the implementation consequences, that they inflict on the implementation as well as the runtime behavior of compiler and runtime system. They are able to analyze and compare different language based approaches, to discuss their relative merits and potential workarounds in case certain language features are missing. By means of this knowledge, they are able to extend existing compilers to handle the aforementioned constructs as well as able to re-encode concepts from one language by means of another language.
+
+--- INHALT ---
+This is not a beginners programming course – Instead, this lecture focusses on the semantics of various programming language concepts, and their implementation from the point of view of a compiler engineer. Topics may include, among others:
+- Relaxed Memory Models
+- Wait-/Lock-free Programming
+- Locks, Monitors & Condition Variables
+- Transactional Memory
+- Gotos, Co-Routines and Continuations
+- Single/Multi-Dispatching
+- (Multiple-) Inheritance
+- Delegation and Prototype Based Programming
+- Aspect Oriented Programming
+- Meta programming
+
+--- LERNMETHODE ---
+By means of pre-recorded lesson videos of around 15 minutes each, students can prepare the lecture content at their own pace. In the classroom, students can open discussion on unclear parts of the lesson videos. Additionally, illustrating examples and live programming enhance and deepen the student’s insights into the topics. Selected problems that are then solved by the joined effort of the audience and the lecturer further illustrate the lessons with hands-on experiences.
+In the additionally offered exercise course (2h), accompanying assignments for individual study deepen the understanding of the concepts explained in the lecture, train students to apply the learnt concepts in implementations and develop the skill to to simulate the effect of missing language features by others.",Pending...,https://campus.tum.de/tumonline/ee/ui/ca2/app/desktop/#/slc.tm.cp/student/courses/950841795
+Advanced Control - Lecture -,2025 W,"--- LERNERGEBNISSE ---
+Upon successful completion of the module the students are able to
+- represent real-world dynamical systems in state space form, determine their equilibria and to obtain linear state space models by linearization,
+- compute the solutions of linear state differential equations and analyze the dynamical system for stability, observability and controllability.
+- understand the purpose and advantage of a two-degrees-of-freedom controller structure,
+- design feedforward controllers that guarantee zero output error in nominal steady state,
+- design state-feedback controllers using the pole placement method and as a Linear Quadratic Regulator (LQR),
+- design a Luenberger state-observer to reconstruct non-measurable states of the system,
+- further modify the closed loop system by adding measures to cope with different disturbances,
+- have a basic knowledge about the prerequisites and the application of nonlinear control by input-output linearization.
+
+--- INHALT ---
+1. State space models of linear time-invariant (LTI) dynamical systems
+- Mathematical modeling of lumped dynamical systems from physical laws
+- Control tasks and controller structures
+- Equilibria and stability
+- Linearization
+- Stability criteria for linear systems
+
+2. Design of linear state feedback controllers in a two-degrees-of-freedom structure
+- Eigenvalue placement
+- Controllability and controller canonical form
+- Ackermann's formula and parametric state feedback
+- LQR optimal control
+
+3. Design of linear state observers
+- Observability and observer canonical form
+- Duality between controller and observer design
+- Separation principle
+- Decoupling control and effect of zeros
+
+4. Methods for disturbance rejection
+- Disturbance model and disturbance observer
+- Constant disturbance feedback
+- Disturbance decoupling
+- Effect of integral action
+
+5. Extended controller structures
+- Extensions of the 2 DOF controller structure, e.g. by dynamic feedforward control
+
+6. Input-output linearization for SISO systems
+- Relative degree
+- Lie derivative
+- Internal dynamics and stability
+
+--- LERNMETHODE ---
+The teaching follows a classical scheme of weekly lecture (90 min.) + exercise (45 min.), complemented by additional offers, which help the student to catch up quickly with the syllabus in the case of difficulties.
+To achieve the study goals, the students are expected to prepare the lectures by a first reading of the announced sections in the lecture notes. They are supposed to try themselves to solve the problems posed in the exercises, before the solutions are presented in class and are made available online.
+A set of additional problems is offered for homework. The solutions are also made available online and are presented in the weekly tutorial. This optional offer gives the opportunity to discuss problems and open questions related to the exercises.
+The optional revision courses are additional opportunities to clarify open questions concerning the content of the lecture. Moreover, they allow to discuss topics and advanced questions that go beyond the scope of the course.
+At the begin of the module, two recapitulation lessons are offered to review the required preliminaries on linear systems' theory.",Pending...,https://campus.tum.de/tumonline/ee/ui/ca2/app/desktop/#/slc.tm.cp/student/courses/950837364

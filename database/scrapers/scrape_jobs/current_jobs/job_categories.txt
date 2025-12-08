@@ -1,0 +1,77 @@
+Account Executive
+Account Manager
+Accountant
+Administrator
+Aerospace Engineer
+Android Developer
+Backend Engineer
+Biologist
+Biomedical Engineer
+Bookkeeper
+Brand Manager
+Business Analyst
+Chemical Engineer
+Chemist
+Chief of Staff
+Civil Engineer
+Cloud Engineer
+Compliance Officer
+Content Editor
+Copywriter
+Customer Service Representative
+Data Analyst
+Data Engineer
+Data Scientist
+Database Administrator
+DevOps Engineer
+Dietitian
+Economist
+Electrical Engineer
+Engineering Manager
+Event Planner
+Executive Assistant
+Financial Analyst
+Fitness Instructor
+Flight Attendant
+Frontend Engineer
+Full Stack Engineer
+Graphic Designer
+HR Manager
+Hardware Engineer
+IOS Developer
+IT Manager
+IT Support Specialist
+Industrial Engineer
+Journalist
+Legal Counsel
+Machine Learning Engineer
+Marketing Manager
+Mechanical Engineer
+Medical Assistant
+Nurse
+Nutritionist
+Office Manager
+Pharmacist
+Photographer
+Physical Therapist
+Product Designer
+Product Manager
+Project Manager
+Psychologist
+QA Engineer
+Receptionist
+Research Scientist
+Sales Manager
+Sales Representative
+Security Engineer
+Social Worker
+Software Architect
+Software Engineer
+Solutions Architect
+Staff Engineer
+Systems Administrator
+Teacher
+Technical Writer
+UI/UX Designer
+Veterinarian
+Web Developer
