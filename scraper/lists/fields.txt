@@ -1,4 +1,4 @@
-# IT
+
 IT Support; IT Technician; IT Support Specialist; Help Desk Technician; Desktop Support
 Network Engineering; Network Engineer; Network Administrator; Network Architect
 Cybersecurity; Security Analyst; SOC Analyst; Penetration Tester; Pentester; Information Security Analyst; Ethical Hacker; Security Engineer
@@ -10,14 +10,14 @@ Data Scientist
 Data engineering; Database Administration; DBA; Database Administrator; Database Engineer; Data Warehouse Engineer
 Artificial Intelligence; AI Engineer; Machine Learning Engineer; ML Engineer; Deep Learning Engineer; NLP Engineer; MLOps Engineer
 
-# Management  
+
 Executive Leadership; CEO; Chief Executive Officer; President; Managing Director; MD; Executive Director; C-Suite Executive
 Operations Management; Operations Manager; Operations Supervisor; Ops Manager; General Manager; GM; Head of Operations
 Project Manager; Program Manager; PM; Technical Project Manager; Project Coordinator
 Product Manager; PM; Product Owner; PO; Senior Product Manager; Group Product Manager
 Consultant
 
-# Marketing and Sales
+
 Marketing; Marketing Manager; Marketing Specialist; Marketing Coordinator; Marketing Associate
 Digital Marketing; Digital Marketing Manager; Performance Marketer; Growth Marketer; Paid Media Specialist; PPC Specialist; SEO Specialist; SEM Specialist
 Content Marketing; Content Marketer; Content Strategist; Content Writer
@@ -30,7 +30,7 @@ Account Management; Account Manager; Account Executive; AE; Senior Account Manag
 Business Development; BD; BDR; SDR; Sales Development Representative; Business Development Manager
 Real Estate Sales; Real Estate Agent; Realtor; Real Estate Broker
 
-# HR
+
 Customer Support; Customer Service Representative; CSR; Support Agent; Call Center Agent; Help Desk Agent
 Administrative Support; Administrative Assistant; Admin Assistant; Office Assistant; Secretary
 Executive Support; Executive Assistant; EA; Personal Assistant
@@ -40,7 +40,7 @@ Talent Acquisition; Recruiter; Technical Recruiter; Talent Acquisition Specialis
 Compensation & Benefits; Compensation Specialist; Benefits Specialist; C&B Analyst
 Learning & Development; L&D Specialist; Training Specialist; Training Coordinator
 
-# Fiance
+
 Finance; Finance Analyst; FP&A Analyst; Financial Planner; Finance Manager
 Accounting; Accountant; CPA; Auditor; Bookkeeper; Staff Accountant
 Tax; Tax Preparer; Tax Specialist; Tax Advisor
@@ -48,26 +48,26 @@ Credit & Lending; Loan Officer; Credit Analyst; Underwriter
 Risk & Compliance; Risk Analyst; Fraud Analyst; Compliance Specialist
 Insurance Services; Insurance Sales Agent; Insurance Broker; Claims Adjuster; Claims Examiner; Appraiser
 
-# Desing
+
 Design; Graphic Designer; UI Designer; Visual Designer
 UX; UX Designer; UX Researcher; User Researcher
 Architecture; Architect; Architectural Designer; CAD Designer
 
-# Enegnerring 
+
 Civil Engineering; Civil Engineer; Structural Engineer
 Mechanical Engineering; Mechanical Engineer
 Electrical Engineering; Electrical Engineer; Electronics Engineer
 Chemical Engineering; Chemical Engineer; Process Engineer
 Industrial Engineering; Industrial Engineer; Process Improvement Engineer
 Environmental Science; Environmental Scientist; Environmental Technician
+Biomedical Engineer
 
-# Sience
 Research Science; Research Scientist; Lab Scientist; Laboratory Technician
 Mathematics & Statistics; Mathematician; Statistician; Actuary; Operations Research Analyst
 Life Sciences; Biologist; Microbiologist; Biochemist; Epidemiologist; Geneticist
 Physical Sciences; Chemist; Physicist; Astronomer; Geoscientist; Hydrologist
 
-# Legal + Government
+
 Legal; Lawyer; Attorney; Paralegal; Legal Assistant
 Judiciary & Dispute Resolution; Judge; Magistrate; Arbitrator; Mediator; Hearing Officer
 Government & Public Administration; Legislator; City Manager; Urban Planner; Regional Planner; Compliance Officer; Inspector
@@ -75,7 +75,7 @@ Religious Services; Clergy; Pastor; Priest; Rabbi; Imam; Director of Religious A
 Travel & Tourism; Travel Agent; Tour Guide; Travel Coordinator
 Postal & Courier; Postal Worker; Mail Carrier; Mail Sorter; Courier; Messenger
 
-# Medicine
+
 Nursing; Nurse; RN; LPN; Nurse Practitioner; NP
 Doctor; MD; Surgeon; Specialist
 llied Health; Medical Assistant; Medical Technician; Medical Technologist; Lab Technician; Sonographer; Radiology Tech
@@ -85,28 +85,28 @@ Dental; Dentist; Dental Hygienist; Orthodontist
 Mental Health; Counselor; Therapist; Psychologist; Social Worker
 Hospitality; Hotel Front Desk; Concierge; Guest Services Agent
 
-# Logistic 
+
 Quality Control; QC Inspector; Quality Analyst
 Logistics; Logistics Coordinator; Transportation Coordinator; Warehouse Coordinator
 Supply Chain; Supply Chain Analyst; Supply Chain Manager; Inventory Analyst
 
-# Arts
+
 Performing Arts; Actor; Musician; Singer; Dancer; Choreographer; Director; Producer
 Broadcast & Media; Journalist; Reporter; News Analyst; Radio Host; Announcer; DJ
 Audio & Video Production; Video Editor; Audio Engineer; Sound Technician; Camera Operator; A/V Technician
 Fashion & Interior Design; Fashion Designer; Interior Designer; Floral Designer; Set Designer; Merchandiser
 
-# Education
+
 Education; Teacher; Instructor; Educator; Professor; Lecturer
 Early Childhood Education; Preschool Teacher; Kindergarten Teacher
 Sports & Recreation; Athlete; Coach; Scout; Umpire; Referee; Fitness Trainer; Personal Trainer; Yoga Instructor
 
-# Nature 
+
 Agriculture & Farming; Farmer; Rancher; Agricultural Manager; Farm Worker; Agronomist; Crop Manager
 Animal Care & Veterinary; Veterinarian; Vet; Veterinary Technician; Vet Tech; Animal Trainer; Groomer; Zoologist
 Forestry & Conservation; Forester; Conservation Scientist; Park Ranger; Conservation Worker; Logger
 
-# Mix
+
 Food Service; Cook; Chef; Line Cook; Server; Bartender; Barista
 Construction; Construction Worker; Laborer; Foreman; Site Supervisor
 Skilled Trades; Electrician; Plumber; Carpenter; HVAC Technician; Welder
