@@ -4,11 +4,10 @@ from sentence_transformers import SentenceTransformer, util
 from tqdm import tqdm
 
 
-def extract_skill(df, skill_path):
+def extract_from_description(df, skill_path):
     """
     Extract skills from job description with regex and adds them as in list in Skills colums
     """
-
     df["Skills"] = pd.Series([None] * len(df), dtype=object)
 
     # Load skills.txt file and save knwon skills 
@@ -33,7 +32,7 @@ def extract_skill(df, skill_path):
     return df
 
 
-def extract_field(df, field_path, treshold=0.50, model_name= "intfloat/multilingual-e5-large"):
+def extract_from_title(df, field_path, treshold=0.50, model_name= "intfloat/multilingual-e5-large"):
     """
     Extract level and field form a job title and adds it to the dataframe
     Level extraction with regex
