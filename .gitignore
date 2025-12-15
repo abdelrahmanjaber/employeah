@@ -7,3 +7,5 @@ __pycache__
 # .gitignore
 *.csv
 !job_titles.csv  # (Optional: If you have small CSVs you WANT to keep, add exceptions like this)
+database/scrapers/scrape_jobs/current_jobs/.env
+scraper/server/.gitkeep
