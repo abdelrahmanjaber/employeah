@@ -48,5 +48,138 @@ export const JOBS_DEMO = [
   { id: 25, title: 'Data Engineer', location: 'Paris', company: 'DataHub', skills: ['Python', 'Spark', 'Kafka', 'SQL'], date_posted: '2023-11-10', salary: 68000 },
   { id: 26, title: 'Backend Developer', location: 'Remote', company: 'ScaleUp', skills: ['Go', 'PostgreSQL', 'Docker', 'REST APIs'], date_posted: '2023-10-05', salary: 72000 },
   { id: 27, title: 'Data Scientist', location: 'London', company: 'InsightLabs', skills: ['Python', 'Scikit-learn', 'SQL', 'Jupyter'], date_posted: '2023-09-01', salary: 66000 },
-  { id: 28, title: 'DevOps Engineer', location: 'Berlin', company: 'AutoDeploy', skills: ['Jenkins', 'Terraform', 'AWS', 'Bash'], date_posted: '2023-08-10', salary: 78000 }
+  { id: 28, title: 'DevOps Engineer', location: 'Berlin', company: 'AutoDeploy', skills: ['Jenkins', 'Terraform', 'AWS', 'Bash'], date_posted: '2023-08-10', salary: 78000 },
+  { id: 999, title: 'Data Scientist',  location: 'Remote', company: 'Test Corp',  skills: ['SQL', 'R', 'Excel'], date_posted: '2023-08-10', salary: 78000 }, // No Python here! date_posted: '2025-12-01', salary: 60000 
+  
+];
+
+/**
+ * TUM Courses Dataset
+ * Source: TUM Campus Online 2025W
+ */
+/**
+ * TUM Courses Dataset
+ * Source: TUM Campus Online 2025W (Strictly from user provided list)
+ */
+export const TUM_COURSES = [
+  {
+    title: "Dodo Alive! - Resurrecting the Dodo with Robotics and AI",
+    semester: "2025 W",
+    skills: ["Robotics", "Artificial Intelligence", "Control Systems", "Mechatronics", "Rapid Prototyping", "Locomotion"],
+    url: "https://campus.tum.de/tumonline/ee/ui/ca2/app/desktop/#/slc.tm.cp/student/courses/950840402"
+  },
+  {
+    title: "Biochemie reaktiver Sauerstoffspezies und freier Radikale",
+    semester: "2025 W",
+    skills: ["Biochemistry", "Lab Analysis", "Pharmacology", "Molecular Biology", "In-vitro Models"],
+    url: "https://campus.tum.de/tumonline/ee/ui/ca2/app/desktop/#/slc.tm.cp/student/courses/950877556"
+  },
+  {
+    title: "Instationäre hygrothermische Berechnungsverfahren",
+    semester: "2025 W",
+    skills: ["Building Physics", "Thermal Simulation", "Energy Efficiency", "Hygrothermal Analysis", "Construction Materials"],
+    url: "https://campus.tum.de/tumonline/ee/ui/ca2/app/desktop/#/slc.tm.cp/student/courses/950841592"
+  },
+  {
+    title: "A Google-Earth Perspective on Nutrition, Health and Sustainability",
+    semester: "2025 W",
+    skills: ["Nutrition Science", "Sustainability", "Genomics", "Artificial Intelligence", "Digital Health", "Data Analysis"],
+    url: "https://campus.tum.de/tumonline/ee/ui/ca2/app/desktop/#/slc.tm.cp/student/courses/950873589"
+  },
+  {
+    title: "A MOOC-supported compact introduction to the Economics of the Agro-food Value Chains",
+    semester: "2025 W",
+    skills: ["Supply Chain Management", "Market Research", "Economics", "Consumer Behavior", "Innovation Management"],
+    url: "https://campus.tum.de/tumonline/ee/ui/ca2/app/desktop/#/slc.tm.cp/student/courses/950841675"
+  },
+  {
+    title: "A Practical Course in Numerical Methods for Engineers",
+    semester: "2025 W",
+    skills: ["MATLAB", "Numerical Methods", "Finite Element Method", "Linear Algebra", "Algorithm Implementation"],
+    url: "https://campus.tum.de/tumonline/ee/ui/ca2/app/desktop/#/slc.tm.cp/student/courses/950839572"
+  },
+  {
+    title: "Abwehrender Brandschutz",
+    semester: "2025 W",
+    skills: ["Fire Safety Engineering", "Risk Management", "Crisis Management", "Civil Engineering", "Physics of Fire"],
+    url: "https://campus.tum.de/tumonline/ee/ui/ca2/app/desktop/#/slc.tm.cp/student/courses/950877506"
+  },
+  {
+    title: "Academic Skills",
+    semester: "2025 W",
+    skills: ["Academic Writing", "Qualitative Research", "Science and Technology Studies", "Literature Search", "Critical Thinking"],
+    url: "https://campus.tum.de/tumonline/ee/ui/ca2/app/desktop/#/slc.tm.cp/student/courses/950838232"
+  },
+  {
+    title: "Accounting - Lecture",
+    semester: "2025 W",
+    skills: ["Financial Accounting", "Controlling", "Balance Sheet Analysis", "Corporate Finance", "Auditing"],
+    url: "https://campus.tum.de/tumonline/ee/ui/ca2/app/desktop/#/slc.tm.cp/student/courses/950841524"
+  },
+  {
+    title: "Accounting and Value-Based Management",
+    semester: "2025 W",
+    skills: ["IFRS", "Cost Accounting", "Value-Based Management", "Sustainability Reporting", "Business Ethics"],
+    url: "https://campus.tum.de/tumonline/ee/ui/ca2/app/desktop/#/slc.tm.cp/student/courses/950876378"
+  },
+  {
+    title: "Active Distribution Grids",
+    semester: "2025 W",
+    skills: ["Power Systems", "Smart Grids", "MATLAB", "Microgrids", "Control Engineering", "Power Electronics"],
+    url: "https://campus.tum.de/tumonline/ee/ui/ca2/app/desktop/#/slc.tm.cp/student/courses/950838188"
+  },
+  {
+    title: "Active Learning",
+    semester: "2025 W",
+    skills: ["Cognitive Science", "Educational Psychology", "Experimental Design", "Research Methodology", "Data Analysis"],
+    url: "https://campus.tum.de/tumonline/ee/ui/ca2/app/desktop/#/slc.tm.cp/student/courses/950838175"
+  },
+  {
+    title: "Actuarial Risk Theory",
+    semester: "2025 W",
+    skills: ["Actuarial Science", "R Programming", "Stochastic Processes", "Risk Theory", "Probability Statistics"],
+    url: "https://campus.tum.de/tumonline/ee/ui/ca2/app/desktop/#/slc.tm.cp/student/courses/950876863"
+  },
+  {
+    title: "Additive Fertigung im Bauwesen - Materialien und Prozesse",
+    semester: "2025 W",
+    skills: ["3D Concrete Printing", "Material Science", "Additive Manufacturing", "Rheology", "Construction Technology"],
+    url: "https://campus.tum.de/tumonline/ee/ui/ca2/app/desktop/#/slc.tm.cp/student/courses/950841781"
+  },
+  {
+    title: "Additive Fertigung im Bauwesen 1",
+    semester: "2025 W",
+    skills: ["Robotics", "Path Planning", "3D Printing", "Digital Fabrication", "Experimental Testing"],
+    url: "https://campus.tum.de/tumonline/ee/ui/ca2/app/desktop/#/slc.tm.cp/student/courses/950876621"
+  },
+  {
+    title: "Additive Fertigung in der Gießereitechnik",
+    semester: "2025 W",
+    skills: ["Metal Casting", "CAD", "Additive Manufacturing", "Simulation", "Production Engineering"],
+    url: "https://campus.tum.de/tumonline/ee/ui/ca2/app/desktop/#/slc.tm.cp/student/courses/950840481"
+  },
+  {
+    title: "Advanced Algorithms",
+    semester: "2025 W",
+    skills: ["Algorithm Design", "Computational Complexity", "Optimization", "Linear Programming", "Data Structures"],
+    url: "https://campus.tum.de/tumonline/ee/ui/ca2/app/desktop/#/slc.tm.cp/student/courses/950841487"
+  },
+  {
+    title: "Advanced Analysis of Variance Procedures",
+    semester: "2025 W",
+    skills: ["R Programming", "Python", "ANOVA", "Statistical Analysis", "Data Science"],
+    url: "https://campus.tum.de/tumonline/ee/ui/ca2/app/desktop/#/slc.tm.cp/student/courses/950875407"
+  },
+  {
+    title: "Advanced Concepts of Programming Languages",
+    semester: "2025 W",
+    skills: ["Compiler Construction", "Concurrent Programming", "Software Engineering", "Meta-programming", "System Architecture"],
+    url: "https://campus.tum.de/tumonline/ee/ui/ca2/app/desktop/#/slc.tm.cp/student/courses/950841795"
+  },
+  {
+    title: "Advanced Control - Lecture",
+    semester: "2025 W",
+    skills: ["Control Theory", "Linear Systems", "LQR Control", "State Space Models", "MATLAB"],
+    url: "https://campus.tum.de/tumonline/ee/ui/ca2/app/desktop/#/slc.tm.cp/student/courses/950837364"
+  }
 ];

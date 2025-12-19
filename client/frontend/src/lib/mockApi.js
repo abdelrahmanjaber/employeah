@@ -15,7 +15,7 @@
  * ============================================================================
  */
 
-import { JOBS_DEMO } from './mock_database.js';
+import { JOBS_DEMO, TUM_COURSES } from './mock_database.js';
 
 /**
  * Simulate network delay to make responses feel realistic
@@ -216,4 +216,117 @@ export async function getHistoricalStats({ job, location } = {}) {
   };
 }
 
-export default { searchByJob, searchBySkills, getHistoricalStats };
+
+
+
+
+/**
+ * Helper to get the ISO week number (YYYY-Www)
+ */
+function getWeekNumber(d) {
+  const date = new Date(Date.UTC(d.getFullYear(), d.getMonth(), d.getDate()));
+  date.setUTCDate(date.getUTCDate() + 4 - (date.getUTCDay() || 7));
+  const yearStart = new Date(Date.UTC(date.getUTCFullYear(), 0, 1));
+  const weekNo = Math.ceil((((date - yearStart) / 86400000) + 1) / 7);
+  return `${date.getUTCFullYear()}-W${String(weekNo).padStart(2, '0')}`;
+}
+/**
+ * Get monthly trend coordinates (X = MM.YYYY, Y = Percentage)
+ */
+export async function getSkillTrendData(skillName, jobField = "") {
+  await delay(300);
+  if (!skillName) return [];
+
+  const monthlyStats = {};
+
+  JOBS_DEMO.forEach(job => {
+    // 1. Filter by Job Field first. 
+    // If jobField is set, 'totalJobs' will represent ONLY that specific job type.
+    if (jobField && job.title.toLowerCase() !== jobField.toLowerCase()) return;
+
+    const date = new Date(job.date_posted);
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const key = `${year}-${month}`; // Sorting key (YYYY-MM)
+    
+    if (!monthlyStats[key]) {
+      monthlyStats[key] = { totalJobs: 0, skillMatches: 0 };
+    }
+
+    monthlyStats[key].totalJobs += 1;
+    
+    // 2. Check if this job has the specific skill
+    const hasSkill = job.skills.some(s => s.toLowerCase() === skillName.toLowerCase());
+    if (hasSkill) {
+      monthlyStats[key].skillMatches += 1;
+    }
+  });
+
+  // 3. Convert to array and format X label as MM.YYYY
+  return Object.entries(monthlyStats)
+    .sort((a, b) => a[0].localeCompare(b[0])) // Sort chronologically
+    .map(([key, stats]) => {
+      const [year, month] = key.split('-');
+      return {
+        x: `${month}.${year}`, // User requested format: 01.2023
+        y: Number(((stats.skillMatches / stats.totalJobs) * 100).toFixed(1))
+      };
+    });
+}
+
+
+export async function getJobFieldsBySkill(skillName) {
+  const stats = {};
+
+  // 1. Scan all jobs to count totals per title
+  JOBS_DEMO.forEach(job => {
+    const title = job.title;
+    
+    if (!stats[title]) {
+      stats[title] = { totalPostings: 0, withSkill: 0 };
+    }
+    
+    // Count every job of this title (e.g. every "Data Scientist" found)
+    stats[title].totalPostings += 1;
+    
+    // Check if this specific job listing has the skill
+    const hasSkill = job.skills.some(s => s.toLowerCase() === skillName.toLowerCase());
+    if (hasSkill) {
+      stats[title].withSkill += 1;
+    }
+  });
+
+  // 2. Calculate percentage within each job title
+  return Object.entries(stats)
+    // Only keep job titles that actually use the skill at least once
+    .filter(([_, data]) => data.withSkill > 0)
+    .map(([title, data]) => ({
+      title,
+      // Formula: (Jobs with Skill / Total Jobs in that Field) * 100
+      percentage: Number(((data.withSkill / data.totalPostings) * 100).toFixed(1))
+    }))
+    // Sort by highest percentage (most dependent on this skill)
+    .sort((a, b) => b.percentage - a.percentage)
+    .slice(0, 5);
+}
+
+export async function getTUMCoursesBySkill(skillName) {
+  if (!skillName) return [];
+  
+  return TUM_COURSES.filter(course => 
+    course.skills.some(s => s.toLowerCase().includes(skillName.toLowerCase()))
+  ).slice(0, 5);
+}
+
+// Dummy exports to keep existing code working if referenced elsewhere
+
+
+
+export default { 
+  getSkillTrendData, 
+  getJobFieldsBySkill, 
+  getTUMCoursesBySkill,
+  searchByJob,
+  searchBySkills,
+  getHistoricalStats
+};
