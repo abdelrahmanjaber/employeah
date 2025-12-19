@@ -76,11 +76,17 @@ function HistoricalStats() {
     triggerAnalysis(skillInput, job);
   };
 
-  // Helper to format date for tooltips (08.2023 -> August 2023)
+  // Helper to format date for tooltips
   const formatTooltipDate = (dateStr) => {
     const [month, year] = dateStr.split('.');
     const date = new Date(parseInt(year), parseInt(month) - 1);
     return date.toLocaleString('en-US', { month: 'long', year: 'numeric' });
+  };
+
+  // --- NEW HELPER: Capitalize First Letter ---
+  const capitalize = (str) => {
+    if (!str) return "";
+    return str.charAt(0).toUpperCase() + str.slice(1);
   };
 
   // --- CHART RENDERING LOGIC ---
@@ -90,7 +96,6 @@ function HistoricalStats() {
 
   const getLinePath = () => {
     if (chartData.length < 2) return "";
-    
     return chartData.map((point, i) => {
       const x = (i / (chartData.length - 1)) * CHART_WIDTH;
       const y = CHART_HEIGHT - (point.y / MAX_VAL) * CHART_HEIGHT;
@@ -102,41 +107,61 @@ function HistoricalStats() {
     position: "absolute", top: "100%", left: 0, right: 0,
     background: "#fff", border: "2px solid #000", borderTop: "none",
     listStyle: "none", padding: 0, margin: 0, zIndex: 10,
-    maxHeight: "200px", overflowY: "auto"
+    maxHeight: "200px", overflowY: "auto", borderRadius: "0 0 8px 8px"
+  };
+
+  const sectionHeaderStyle = {
+    fontSize: "1.4rem", 
+    marginBottom: "25px",
+    color: "#1f2937",
+    fontWeight: "bold"
   };
 
   return (
-    <main style={{ padding: "2rem", maxWidth: "1100px", margin: "0 auto", fontFamily: 'sans-serif' }}>
+    <main style={{ padding: "2rem", maxWidth: "1200px", margin: "0 auto", fontFamily: 'sans-serif' }}>
+      
+      {/* HEADER */}
       <button 
         onClick={() => navigate(-1)} 
         style={{ 
           cursor: "pointer", marginBottom: "1rem", background: "#f3e5f5", 
-          border: "1px solid #000", padding: "5px 15px", borderRadius: "4px" 
+          border: "1px solid #000", padding: "5px 15px", borderRadius: "4px", color: "#4a148c"
         }}
       >
         ← Back
       </button>
 
-      <header style={{ textAlign: "center", marginBottom: "3rem" }}>
-        <h1 style={{ fontSize: "2.4rem", margin: 0 }}>Skill Analysis</h1>
-        <p style={{ color: "#555" }}>Discover the story behind your skill & how to grow it</p>
+      <header style={{ textAlign: "center", marginBottom: "4rem" }}>
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '15px' }}>
+          <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="#1f2937" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+            <polyline points="23 6 13.5 15.5 8.5 10.5 1 18"></polyline>
+            <polyline points="17 6 23 6 23 12"></polyline>
+          </svg>
+          <h1 style={{ fontSize: "2.5rem", margin: 0, color: "#1f2937" }}>Skill Analysis</h1>
+        </div>
+        <p style={{ color: "#666", fontSize: "1.1rem", marginTop: "0.5rem" }}>
+          Discover the story behind your skill & how to grow it
+        </p>
       </header>
 
-      <div style={{ display: "flex", gap: "15px", justifyContent: "center", marginBottom: "3rem" }}>
+      {/* SEARCH BAR */}
+      <div style={{ display: "flex", gap: "20px", justifyContent: "center", alignItems: "end", marginBottom: "5rem" }}>
+        
         {/* Skill Input */}
-        <div style={{ position: "relative" }}>
+        <div style={{ position: "relative", width: "300px" }}>
+          <label style={{ display: "block", marginBottom: "5px", fontWeight: "bold", fontSize: "1.2rem" }}>Skill</label>
           <input 
             placeholder="Enter a skill (e.g. Py...)" 
             value={skillInput}
             onChange={(e) => { setSkillInput(e.target.value); setShowSkillSugg(true); }}
             onFocus={() => { setShowSkillSugg(true); setShowJobSugg(false); }}
-            style={{ padding: "12px", width: "250px", border: "2px solid #000" }}
+            style={{ padding: "15px", width: "100%", border: "2px solid #000", fontSize: "1rem", borderRadius: "8px" }}
           />
           {showSkillSugg && filteredSkillSuggestions.length > 0 && (
             <ul style={suggestionListStyle}>
               {filteredSkillSuggestions.map((s) => (
                 <li key={s} onClick={() => handleSelectSkill(s)} 
-                    style={{ padding: "10px", cursor: "pointer", borderBottom: "1px solid #eee" }}
+                    style={{ padding: "12px", cursor: "pointer", borderBottom: "1px solid #eee" }}
                     onMouseEnter={(e) => e.target.style.background = "#f3e5f5"}
                     onMouseLeave={(e) => e.target.style.background = "#fff"}>
                   {s}
@@ -147,19 +172,20 @@ function HistoricalStats() {
         </div>
 
         {/* Job Input */}
-        <div style={{ position: "relative" }}>
+        <div style={{ position: "relative", width: "300px" }}>
+          <label style={{ display: "block", marginBottom: "5px", fontWeight: "bold", fontSize: "1.2rem" }}>Job Field <span style={{fontWeight:'normal', fontSize:'0.9rem', color:'#666'}}>(Optional)</span></label>
           <input 
             placeholder="Job Field (Optional)" 
             value={jobInput}
             onChange={(e) => { setJobInput(e.target.value); setShowJobSugg(true); }}
             onFocus={() => { setShowJobSugg(true); setShowSkillSugg(false); }}
-            style={{ padding: "12px", width: "250px", border: "2px solid #000" }}
+            style={{ padding: "15px", width: "100%", border: "2px solid #000", fontSize: "1rem", borderRadius: "8px" }}
           />
           {showJobSugg && filteredJobSuggestions.length > 0 && (
             <ul style={suggestionListStyle}>
               {filteredJobSuggestions.map((j) => (
                 <li key={j} onClick={() => handleSelectJob(j)}
-                    style={{ padding: "10px", cursor: "pointer", borderBottom: "1px solid #eee" }}
+                    style={{ padding: "12px", cursor: "pointer", borderBottom: "1px solid #eee" }}
                     onMouseEnter={(e) => e.target.style.background = "#f3e5f5"}
                     onMouseLeave={(e) => e.target.style.background = "#fff"}>
                   {j}
@@ -169,29 +195,34 @@ function HistoricalStats() {
           )}
         </div>
 
+        {/* Search Button */}
         <button 
           onClick={() => triggerAnalysis()} 
           style={{ 
-            padding: "10px 25px", background: "#d1c4e9", color: "#000", 
-            border: "2px solid #000", cursor: "pointer", fontWeight: "bold", borderRadius: "4px"
+            padding: "15px 30px", background: "#d1c4e9", color: "#000", 
+            border: "2px solid #000", cursor: "pointer", fontWeight: "bold", fontSize: "1.1rem", borderRadius: "8px",
+            marginBottom: "1px"
           }}
         >
           {loading ? "Analyzing..." : "Search"}
         </button>
       </div>
 
-      <div style={{ display: "grid", gridTemplateColumns: "1.3fr 1fr", gap: "40px" }}>
+      {/* Increased Grid Gap for better spacing */}
+      <div style={{ display: "grid", gridTemplateColumns: "1.3fr 1fr", gap: "80px" }}>
+        
         {/* Left Column: Chart */}
         <section>
-          {/* Dynamic Header */}
-          <div style={{ background: "#f3e5f5", padding: "8px 20px", borderRadius: "20px", display: "inline-block", marginBottom: "50px" }}>
-            <strong>
-              Historical demand for {skillInput ? skillInput.toLowerCase() : "skill"} 
-              {jobInput ? ` as a ${jobInput.toLowerCase()}` : ""}
-            </strong>
+          {/* Header with Capitalized Skill */}
+          <div style={{ ...sectionHeaderStyle, marginBottom: "80px" }}>
+            Historical demand for {skillInput ? 
+              <span style={{ color: "#7e57c2" }}>{capitalize(skillInput)}</span> : 
+              "skill"
+            }
+            {jobInput ? ` as a ${jobInput.toLowerCase()}` : ""}
           </div>
           
-          <div style={{ height: "200px", borderLeft: "2px solid #000", borderBottom: "2px solid #000", position: "relative", marginLeft: "40px" }}>
+          <div style={{ height: "250px", borderLeft: "2px solid #000", borderBottom: "2px solid #000", position: "relative", marginLeft: "40px" }}>
             
             {/* Horizontal Y-Axis Label */}
             <span style={{ 
@@ -203,7 +234,7 @@ function HistoricalStats() {
               fontWeight: "600",
               whiteSpace: "nowrap"
             }}>
-              % of {jobInput ? jobInput : 'all'} jobs requiring {skillInput ? skillInput.toLowerCase() : '...'}
+              % of {jobInput ? jobInput : 'all'} jobs requiring {skillInput ? capitalize(skillInput) : '...'}
             </span>
 
             {/* Y-Axis Ticks */}
@@ -221,7 +252,7 @@ function HistoricalStats() {
                   const cy = CHART_HEIGHT - (point.y / MAX_VAL) * CHART_HEIGHT;
                   
                   const dateText = formatTooltipDate(point.x);
-                  const skillText = skillInput ? skillInput.toLowerCase() : "skill";
+                  const skillText = skillInput ? capitalize(skillInput) : "skill";
                   const jobText = jobInput ? `${jobInput.toLowerCase()} jobs` : "jobs";
                   const tooltipText = `In ${dateText} ${point.y}% of ${jobText} required ${skillText}`;
 
@@ -241,7 +272,7 @@ function HistoricalStats() {
                   );
                 })}
               </svg>
-            ) : <p style={{ textAlign: "center", paddingTop: "80px", color: "#888" }}>Search to see trends</p>}
+            ) : <p style={{ textAlign: "center", paddingTop: "100px", color: "#888" }}>Search to see trends</p>}
             
             {/* X-Axis Labels */}
             <div style={{ display: "flex", justifyContent: "space-between", marginTop: "10px", fontSize: "0.8rem", fontWeight: "bold" }}>
@@ -256,50 +287,58 @@ function HistoricalStats() {
         </section>
 
         {/* Right Column: Tables */}
-        <section style={{ display: "flex", flexDirection: "column", gap: "40px" }}>
+        <section style={{ display: "flex", flexDirection: "column", gap: "60px" }}>
+          
+          {/* Job Fields Table */}
           <div>
-            {/* Dynamic Table Header */}
-            <div style={{ background: "#f3e5f5", padding: "5px 15px", borderRadius: "20px", display: "inline-block", marginBottom: "10px" }}>
-              <strong>Job Fields that require {skillInput ? skillInput.toLowerCase() : "it"} the most</strong>
+            <div style={sectionHeaderStyle}>
+              Job Fields that require {skillInput ? 
+                <span style={{ color: "#7e57c2" }}>{capitalize(skillInput)}</span> : 
+                "it"
+              } the most
             </div>
             <table style={{ width: "100%", border: "1px solid #000", borderCollapse: "collapse" }}>
               <thead>
                 <tr style={{ borderBottom: "1px solid #000", textAlign: "left", background: "#fafafa" }}>
-                  <th style={{ padding: "8px" }}>Job Field</th>
-                  <th style={{ padding: "8px", textAlign: "right" }}>Demand</th>
+                  <th style={{ padding: "12px" }}>Job Field</th>
+                  <th style={{ padding: "12px", textAlign: "right" }}>Demand</th>
                 </tr>
               </thead>
               <tbody>
                 {jobFields.length > 0 ? jobFields.map((field, i) => (
                   <tr 
                     key={i} 
-                    onClick={() => handleSelectJob(field.title)} // Make row clickable
-                    style={{ borderBottom: "1px solid #000", cursor: "pointer" }} // Change cursor to pointer
-                    onMouseEnter={(e) => e.currentTarget.style.background = "#f5f5f5"} // Light grey on hover
+                    onClick={() => handleSelectJob(field.title)} 
+                    style={{ borderBottom: "1px solid #000", cursor: "pointer" }} 
+                    onMouseEnter={(e) => e.currentTarget.style.background = "#f5f5f5"} 
                     onMouseLeave={(e) => e.currentTarget.style.background = "transparent"}
                   >
-                    <td style={{ padding: "8px" }}>{field.title}</td>
+                    <td style={{ padding: "12px" }}>{field.title}</td>
                     <td 
-                      style={{ padding: "8px", textAlign: "right", fontWeight: "600" }}
+                      style={{ padding: "12px", textAlign: "right", fontWeight: "600" }}
                       title={`${field.percentage}% of ${field.title} jobs require ${skillInput || 'this skill'}`}
                     >
                       {field.percentage}%
                     </td>
                   </tr>
-                )) : <tr><td colSpan="2" style={{ padding: "8px", color: "#999", textAlign: "center" }}>No data yet</td></tr>}
+                )) : <tr><td colSpan="2" style={{ padding: "12px", color: "#999", textAlign: "center" }}>No data yet</td></tr>}
               </tbody>
             </table>
           </div>
           
+          {/* TUM Courses Table */}
           <div>
-            <div style={{ background: "#f3e5f5", padding: "5px 15px", borderRadius: "20px", display: "inline-block", marginBottom: "10px" }}>
-              <strong>Top TUM courses teaching {skillInput ? skillInput.toLowerCase() : "it"}</strong>
+            <div style={sectionHeaderStyle}>
+              Top TUM courses teaching {skillInput ? 
+                <span style={{ color: "#7e57c2" }}>{capitalize(skillInput)}</span> : 
+                "it"
+              }
             </div>
             <table style={{ width: "100%", border: "1px solid #000", borderCollapse: "collapse" }}>
               <tbody>
                 {relevantCourses.length > 0 ? relevantCourses.map((course, i) => (
                   <tr key={i} style={{ borderBottom: "1px solid #000" }}>
-                    <td style={{ padding: "8px", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                    <td style={{ padding: "12px", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
                       <a href={course.url} target="_blank" rel="noopener noreferrer" style={{ color: "#000", textDecoration: "none", fontWeight: "500" }} 
                          onMouseEnter={(e) => e.target.style.textDecoration = "underline"}
                          onMouseLeave={(e) => e.target.style.textDecoration = "none"}>
@@ -310,7 +349,7 @@ function HistoricalStats() {
                       </span>
                     </td>
                   </tr>
-                )) : <tr><td style={{ padding: "8px", color: "#999", textAlign: "center" }}>No relevant courses found</td></tr>}
+                )) : <tr><td style={{ padding: "12px", color: "#999", textAlign: "center" }}>No relevant courses found</td></tr>}
               </tbody>
             </table>
           </div>

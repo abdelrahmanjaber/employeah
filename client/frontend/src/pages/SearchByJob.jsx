@@ -1,6 +1,5 @@
 import { useState, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
-// Direct import for autocomplete lists
 import { JOBS_DEMO } from "../lib/mock_database"; 
 import { getSkillDistributionForJob, getSkillTrendData, getTUMCoursesBySkill } from "../lib/mockApi";
 
@@ -63,13 +62,12 @@ function InteractivePieChart({ data, onSelectSkill, selectedSkill, jobTitle, loc
           const isSelected = selectedSkill === slice.name;
           const tooltipText = getTooltipText(slice.name, slice.percent);
 
-          // Label Positioning
           const midAngle = 2 * Math.PI * (startPercent + percentage / 2);
           const labelRadius = 0.85; 
           const textX = labelRadius * Math.cos(midAngle);
           const textY = labelRadius * Math.sin(midAngle);
           const textRotation = `rotate(90, ${textX}, ${textY})`;
-          const showLabel = slice.percent > 5; // Only show text if slice > 5%
+          const showLabel = slice.percent > 5;
 
           return (
             <g key={slice.name}>
@@ -150,7 +148,6 @@ function InteractivePieChart({ data, onSelectSkill, selectedSkill, jobTitle, loc
 function SearchByJob() {
   const navigate = useNavigate();
   
-  // --- STATE ---
   const [jobInput, setJobInput] = useState("");
   const [locationInput, setLocationInput] = useState("");
   
@@ -164,7 +161,6 @@ function SearchByJob() {
   const [showJobSugg, setShowJobSugg] = useState(false);
   const [showLocSugg, setShowLocSugg] = useState(false);
 
-  // --- DERIVED LISTS FROM DATABASE ---
   const availableJobs = useMemo(() => {
     const jobs = new Set(JOBS_DEMO.map(j => j.title));
     return Array.from(jobs).sort();
@@ -183,8 +179,6 @@ function SearchByJob() {
     l.toLowerCase().includes(locationInput.toLowerCase()) && locationInput.length > 0
   );
 
-  // --- HANDLERS ---
-
   const handleSearch = async () => {
     if (!jobInput) return;
     setLoading(true);
@@ -199,7 +193,6 @@ function SearchByJob() {
       const result = await getSkillDistributionForJob({ job: jobInput, location: locationInput });
       
       if (result.success && result.skills) {
-        // Includes ALL skills, sorted by percentage
         const formattedSkills = Object.entries(result.skills)
           .map(([name, stats]) => ({ name, percent: stats.percentage }))
           .sort((a, b) => b.percent - a.percent);
@@ -257,6 +250,42 @@ function SearchByJob() {
     listStyle: "none", padding: 0, margin: 0, zIndex: 10,
     maxHeight: "200px", overflowY: "auto", borderRadius: "0 0 8px 8px"
   };
+  // --- NEW: CHART TIME SCALING LOGIC ---
+  const parseDate = (dateStr) => {
+    const [month, year] = dateStr.split('.');
+    return new Date(parseInt(year), parseInt(month) - 1);
+  };
+
+  const formatAxisDate = (dateObj) => {
+    const month = String(dateObj.getMonth() + 1).padStart(2, '0');
+    const year = dateObj.getFullYear();
+    return `${month}.${year}`;
+  };
+
+  // Calculate X position based on Time (Timestamp) instead of Index
+  const getX = (dateStr, minTime, maxTime) => {
+    const time = parseDate(dateStr).getTime();
+    if (maxTime === minTime) return CHART_WIDTH / 2; // Center if only 1 point
+    return ((time - minTime) / (maxTime - minTime)) * CHART_WIDTH;
+  };
+
+  // Generate exactly 5 evenly spaced dates for the labels
+  const getAxisTicks = () => {
+    if (!trendData.length) return [];
+    
+    const times = trendData.map(d => parseDate(d.x).getTime());
+    const minTime = Math.min(...times);
+    const maxTime = Math.max(...times);
+
+    if (minTime === maxTime) return [parseDate(trendData[0].x)];
+
+    const ticks = [];
+    const step = (maxTime - minTime) / 4; // 4 intervals = 5 ticks
+    for (let i = 0; i <= 4; i++) {
+      ticks.push(new Date(minTime + step * i));
+    }
+    return ticks;
+  };
 
   return (
     <main style={{ padding: "2rem", maxWidth: "1200px", margin: "0 auto", fontFamily: 'sans-serif' }}>
@@ -273,8 +302,15 @@ function SearchByJob() {
       </button>
 
       <header style={{ textAlign: "center", marginBottom: "3rem" }}>
-        <h1 style={{ fontSize: "2.5rem", margin: 0, color: "#1f2937" }}>Find Skills for your Dream Job</h1>
-        <p style={{ color: "#666", fontSize: "1.1rem" }}>
+        {/* ADDED ICON HERE */}
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '15px' }}>
+          <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="#1f2937" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+            <rect x="2" y="7" width="20" height="14" rx="2" ry="2"></rect>
+            <path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"></path>
+          </svg>
+          <h1 style={{ fontSize: "2.5rem", margin: 0, color: "#1f2937" }}>Find Skills for your Dream Job</h1>
+        </div>
+        <p style={{ color: "#666", fontSize: "1.1rem", marginTop: "0.5rem" }}>
           Enter a job field and a location to get tailored insights.
         </p>
       </header>
@@ -391,26 +427,64 @@ function SearchByJob() {
                 <span style={{ position: "absolute", left: "-15px", bottom: "-5px", fontSize: "0.8rem" }}>0</span>
 
                 {trendData.length > 0 ? (
-                  <svg width="100%" height="100%" viewBox={`0 0 ${CHART_WIDTH} ${CHART_HEIGHT}`} style={{ overflow: 'visible' }}>
-                    <path d={getLinePath()} fill="none" stroke="#059669" strokeWidth="3" />
-                    {trendData.map((point, i) => {
-                      const dateText = formatTooltipDate(point.x);
-                      const locSuffix = locationInput ? ` in ${locationInput}` : "";
-                      const tooltipText = `In ${dateText}, ${point.y}% of ${jobInput} jobs${locSuffix} required ${selectedSkill}`;
+                    <>
+                        <svg width="100%" height="100%" viewBox={`0 0 ${CHART_WIDTH} ${CHART_HEIGHT}`} style={{ overflow: 'visible' }}>
+                        <path d={(() => {
+                            // Calculate Line Path using Time Scale
+                            const times = trendData.map(d => parseDate(d.x).getTime());
+                            const minTime = Math.min(...times);
+                            const maxTime = Math.max(...times);
+                            
+                            return trendData.map((point, i) => {
+                            const x = getX(point.x, minTime, maxTime);
+                            const y = CHART_HEIGHT - (point.y / MAX_VAL) * CHART_HEIGHT;
+                            return `${i === 0 ? 'M' : 'L'} ${x} ${y}`;
+                            }).join(" ");
+                        })()} fill="none" stroke="#059669" strokeWidth="3" />
 
-                      return (
-                        <circle key={i} cx={(i / (trendData.length - 1)) * CHART_WIDTH} cy={CHART_HEIGHT - (point.y / MAX_VAL) * CHART_HEIGHT} r={4} fill="#fff" stroke="#059669" strokeWidth="2">
-                          <title>{tooltipText}</title>
-                        </circle>
-                      );
-                    })}
-                  </svg>
-                ) : <div style={{ height: "100%", display: "flex", alignItems: "center", justifyContent: "center", color: "#999" }}>Select a skill to see history</div>}
-                
-                <div style={{ display: "flex", justifyContent: "space-between", marginTop: "5px", fontSize: "0.8rem", fontWeight: "bold" }}>
-                  <span>{trendData[0]?.x}</span>
-                  <span>{trendData[trendData.length - 1]?.x}</span>
-                </div>
+                        {/* Render Dots using Time Scale */}
+                        {trendData.map((point, i) => {
+                            const times = trendData.map(d => parseDate(d.x).getTime());
+                            const minTime = Math.min(...times);
+                            const maxTime = Math.max(...times);
+                            const cx = getX(point.x, minTime, maxTime);
+                            const cy = CHART_HEIGHT - (point.y / MAX_VAL) * CHART_HEIGHT;
+                            const dateText = formatTooltipDate(point.x);
+                            const locSuffix = locationInput ? ` in ${locationInput}` : "";
+                            const tooltipText = `In ${dateText}, ${point.y}% of ${jobInput} jobs${locSuffix} required ${selectedSkill}`;
+
+                            return (
+                            <circle key={i} cx={cx} cy={cy} r={4} fill="#fff" stroke="#059669" strokeWidth="2">
+                                <title>{tooltipText}</title>
+                            </circle>
+                            );
+                        })}
+                        </svg>
+
+                        {/* NEW: Time-Scaled X-Axis Labels (Absolute Positioning) */}
+                        <div style={{ position: "absolute", top: "210px", width: "100%", height: "20px" }}>
+                        {getAxisTicks().map((date, i) => (
+                            <span 
+                            key={i} 
+                            style={{ 
+                                position: 'absolute', 
+                                // Percentage left position ensures even spacing regardless of container width
+                                left: `${(i / 4) * 100}%`, 
+                                transform: 'translateX(-50%)',
+                                fontSize: "0.8rem", 
+                                fontWeight: "bold" 
+                            }}
+                            >
+                            {formatAxisDate(date)}
+                            </span>
+                        ))}
+                        </div>
+                    </>
+                    ) : (
+                    <div style={{ height: "100%", display: "flex", alignItems: "center", justifyContent: "center", color: "#999" }}>
+                        Select a skill to see history
+                    </div>
+                    )}
               </div>
             </div>
 
