@@ -1,0 +1,9 @@
+services:
+  frontend:
+    container_name: employeah_frontend
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile.prod
+    ports:
+      - "8080:80"
+    restart: unless-stopped

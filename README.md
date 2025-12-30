@@ -12,3 +12,17 @@ The project is divided into three main distinct applications:
 1. **`client/`**: The Frontend. Built with **React**.
 2. **`server/`**: The "online" Backend. Built with **Node.js and Prisma**.
 3. **`data-pipeline/`**: The "offline" Backend: the Scraper & Processor. Built with **Python**.
+
+
+<!-- Clean workflow commands (memorize these)
+Dev
+docker compose -f docker-compose.dev.yml up --build
+docker compose -f docker-compose.dev.yml down
+
+Prod
+docker compose -f docker-compose.prod.yml up --build -d
+docker compose -f docker-compose.prod.yml down
+
+Cleanup
+docker compose -f docker-compose.dev.yml down --rmi local
+docker compose -f docker-compose.prod.yml down --rmi local -->
