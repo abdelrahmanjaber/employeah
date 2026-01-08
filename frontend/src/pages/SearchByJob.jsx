@@ -190,7 +190,7 @@ function SearchByJob() {
     j.toLowerCase().includes(jobInput.toLowerCase()) && jobInput.length > 0
   );
   
-  const filteredLocSuggestions = availableLocations.filter(l => 
+  const filteredLocSuggestions = availableLocationsMemo.filter(l => 
     l.toLowerCase().includes(locationInput.toLowerCase()) && locationInput.length > 0
   );
 
