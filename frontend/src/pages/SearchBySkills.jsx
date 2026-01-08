@@ -140,9 +140,28 @@ function SearchBySkills() {
 
   // ========== FILTERED SUGGESTIONS ==========
 
-  const filteredSkillSuggestions = AVAILABLE_SKILLS.filter(s => 
-    s.toLowerCase().includes(skillInput.toLowerCase()) && 
-    !selectedSkills.includes(s)
+  useEffect(() => {
+    getLocations()
+      .then((locs) => setAvailableLocations(locs || []))
+      .catch((err) => console.error("Failed to load locations:", err));
+  }, []);
+
+  useEffect(() => {
+    if (!skillInput) {
+      setSkillSuggestions([]);
+      return;
+    }
+    const t = setTimeout(() => {
+      getSkills({ q: skillInput, limit: 20 })
+        .then((skills) => setSkillSuggestions((skills || []).filter((s) => !selectedSkills.includes(s))))
+        .catch((err) => console.error("Failed to load skills:", err));
+    }, 200);
+    return () => clearTimeout(t);
+  }, [skillInput, selectedSkills]);
+
+  const filteredSkillSuggestions = useMemo(
+    () => (skillSuggestions || []).filter((s) => s.toLowerCase().includes(skillInput.toLowerCase())),
+    [skillSuggestions, skillInput]
   );
 
   const filteredLocationSuggestions = AVAILABLE_LOCATIONS.filter(l => 
