@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { getLocations, getSkills, reportJobTitleDetails, reportJobsBySkills } from "../lib/apiClient";
 
 // ============================================================================
-// CONFIGURATION & MOCK DATA
+// CONFIGURATION
 // ============================================================================
 
 const PIE_COLORS = [
