@@ -183,10 +183,8 @@ function SearchByJob() {
     };
   }, []);
 
-  const availableLocations = useMemo(() => {
-    const locs = new Set(JOBS_DEMO.map(j => j.location));
-    return Array.from(locs).sort();
-  }, []);
+  const availableJobsMemo = useMemo(() => availableJobs.slice().sort(), [availableJobs]);
+  const availableLocationsMemo = useMemo(() => availableLocations.slice().sort(), [availableLocations]);
 
   const filteredJobSuggestions = availableJobs.filter(j => 
     j.toLowerCase().includes(jobInput.toLowerCase()) && jobInput.length > 0
