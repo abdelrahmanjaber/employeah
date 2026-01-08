@@ -1,7 +1,12 @@
-import { useState, useMemo } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { JOBS_DEMO } from "../lib/mock_database"; 
-import { getSkillDistributionForJob, getSkillTrendData, getTUMCoursesBySkill } from "../lib/mockApi";
+import {
+  getCoursesForSkill,
+  getJobSkillDistribution,
+  getJobTitles,
+  getLocations,
+  getSkillTrend,
+} from "../lib/apiClient";
 
 // ============================================================================
 // CONFIGURATION
