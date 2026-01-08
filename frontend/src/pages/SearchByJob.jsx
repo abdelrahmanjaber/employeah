@@ -205,7 +205,7 @@ function SearchByJob() {
     setShowLocSugg(false);
 
     try {
-      const result = await getSkillDistributionForJob({ job: jobInput, location: locationInput });
+      const result = await getJobSkillDistribution({ jobTitle: jobInput, location: locationInput });
       
       if (result.success && result.skills) {
         const formattedSkills = Object.entries(result.skills)
