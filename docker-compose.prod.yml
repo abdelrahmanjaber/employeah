@@ -6,4 +6,17 @@ services:
       dockerfile: Dockerfile.prod
     ports:
       - "8080:80"
+    depends_on:
+      - backend
+    restart: unless-stopped
+
+  db:
+    container_name: employeah_db
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_DB: employeah
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
     restart: unless-stopped
