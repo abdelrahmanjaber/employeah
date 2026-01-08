@@ -166,9 +166,21 @@ function SearchByJob() {
   const [showJobSugg, setShowJobSugg] = useState(false);
   const [showLocSugg, setShowLocSugg] = useState(false);
 
-  const availableJobs = useMemo(() => {
-    const jobs = new Set(JOBS_DEMO.map(j => j.title));
-    return Array.from(jobs).sort();
+  const [availableJobs, setAvailableJobs] = useState([]);
+  const [availableLocations, setAvailableLocations] = useState([]);
+
+  useEffect(() => {
+    let cancelled = false;
+    Promise.all([getJobTitles(), getLocations()])
+      .then(([jobs, locs]) => {
+        if (cancelled) return;
+        setAvailableJobs(jobs || []);
+        setAvailableLocations(locs || []);
+      })
+      .catch((err) => console.error("Failed to load meta:", err));
+    return () => {
+      cancelled = true;
+    };
   }, []);
 
   const availableLocations = useMemo(() => {
