@@ -248,6 +248,7 @@ function SearchBySkills() {
 
   const handleBackToResults = () => {
     setSelectedField(null);
+    setFieldDetails(null);
   };
 
   // ========== RENDER HELPERS ==========
