@@ -20,3 +20,39 @@ services:
     volumes:
       - postgres_data:/var/lib/postgresql/data
     restart: unless-stopped
+
+  backend:
+    container_name: employeah_backend
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    environment:
+      DATABASE_URL: postgresql+psycopg2://postgres:postgres@db:5432/employeah
+      CORS_ORIGINS: http://localhost:8080,http://127.0.0.1:8080
+      ENVIRONMENT: prod
+    depends_on:
+      - db
+    ports:
+      - "8000:8000"
+    command: ["sh", "-c", "python -m app.wait_for_db && alembic -c /app/alembic.ini upgrade head && uvicorn app.main:app --host 0.0.0.0 --port 8000"]
+    restart: unless-stopped
+
+  pgadmin:
+    container_name: employeah_pgadmin
+    image: dpage/pgadmin4:8
+    environment:
+      PGADMIN_DEFAULT_EMAIL: admin@employeah.com
+      PGADMIN_DEFAULT_PASSWORD: admin
+      PGADMIN_CONFIG_ENHANCED_COOKIE_PROTECTION: "True"
+      PGADMIN_CONFIG_LOGIN_BANNER: "\"Employeah Prod pgAdmin\""
+    depends_on:
+      - db
+    ports:
+      - "5051:80"
+    volumes:
+      - pgadmin_data:/var/lib/pgadmin
+    restart: unless-stopped
+
+volumes:
+  postgres_data:
+  pgadmin_data:
