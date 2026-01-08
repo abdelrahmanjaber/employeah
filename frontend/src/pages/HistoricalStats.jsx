@@ -20,6 +20,27 @@ function HistoricalStats() {
   const [chartData, setChartData] = useState([]);
   const [jobFields, setJobFields] = useState([]);
   const [relevantCourses, setRelevantCourses] = useState([]);
+  const [availableJobs, setAvailableJobs] = useState(AVAILABLE_JOBS);
+  const [skillSuggestions, setSkillSuggestions] = useState(AVAILABLE_SKILLS);
+
+  useEffect(() => {
+    getJobTitles()
+      .then((jobs) => setAvailableJobs(jobs || []))
+      .catch((err) => console.error("Failed to load job titles:", err));
+  }, []);
+
+  useEffect(() => {
+    if (!skillInput) {
+      setSkillSuggestions([]);
+      return;
+    }
+    const t = setTimeout(() => {
+      getSkills({ q: skillInput, limit: 20 })
+        .then((skills) => setSkillSuggestions(skills || []))
+        .catch((err) => console.error("Failed to load skills:", err));
+    }, 200);
+    return () => clearTimeout(t);
+  }, [skillInput]);
 
   // Filtering logic
   const filteredSkillSuggestions = AVAILABLE_SKILLS.filter((s) =>
