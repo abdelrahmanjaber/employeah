@@ -126,7 +126,7 @@ function SearchBySkills() {
   const [showLocationSugg, setShowLocationSugg] = useState(false);
 
   // Other Form State
-  const [timeLimit, setTimeLimit] = useState("1m");
+  const [timeLimit, setTimeLimit] = useState("3m");
   
   // UI State
   const [hasSearched, setHasSearched] = useState(false);
