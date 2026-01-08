@@ -71,9 +71,9 @@ function HistoricalStats() {
     
     try {
       const [trend, fields, courses] = await Promise.all([
-        getSkillTrendData(finalSkill, finalJob),
-        getJobFieldsBySkill(finalSkill),
-        getTUMCoursesBySkill(finalSkill)
+        getSkillTrend({ skill: finalSkill, jobTitle: finalJob || undefined }),
+        getSkillTopJobTitles({ skill: finalSkill, limit: 5 }),
+        getCoursesForSkill(finalSkill)
       ]);
       setChartData(trend);
       setJobFields(fields);
