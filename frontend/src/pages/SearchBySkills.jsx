@@ -222,8 +222,28 @@ function SearchBySkills() {
     }
   };
 
-  const handleFieldClick = (fieldName) => {
+  const handleFieldClick = async (fieldName) => {
     setSelectedField(fieldName);
+    setLoading(true);
+    try {
+      const details = await reportJobTitleDetails({
+        jobTitle: fieldName,
+        skills: selectedSkills,
+        location: locationInput || null,
+        timeWindow: timeLimit,
+      });
+
+      setFieldDetails({
+        topSkills: details?.top_skills || [],
+        topCompanies: details?.top_companies || [],
+        lastAnnouncements: details?.last_announcements || [],
+      });
+    } catch (err) {
+      console.error(err);
+      setFieldDetails({ topSkills: [], topCompanies: [], lastAnnouncements: [] });
+    } finally {
+      setLoading(false);
+    }
   };
 
   const handleBackToResults = () => {
