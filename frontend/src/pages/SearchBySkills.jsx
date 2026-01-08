@@ -202,11 +202,24 @@ function SearchBySkills() {
     setSelectedField(null);
     setFieldDetails(null);
 
-    // Simulate API call
-    setTimeout(() => {
-      setResults(MOCK_RESULTS_DATA);
+    try {
+      const resp = await reportJobsBySkills({
+        skills: selectedSkills,
+        location: locationInput || null,
+        timeWindow: timeLimit,
+      });
+
+      setResults({
+        jobFields: (resp?.job_titles || []).map((j) => ({ name: j.name, percent: j.percent, count: j.count })),
+        topField: resp?.top_job_title || null,
+        lastAnnouncements: resp?.last_announcements || [],
+      });
+    } catch (err) {
+      console.error(err);
+      setResults({ jobFields: [], topField: null, lastAnnouncements: [] });
+    } finally {
       setLoading(false);
-    }, 800);
+    }
   };
 
   const handleFieldClick = (fieldName) => {
