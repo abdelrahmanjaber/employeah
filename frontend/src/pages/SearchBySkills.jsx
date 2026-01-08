@@ -525,7 +525,7 @@ function SearchBySkills() {
   };
 
   const renderDetailView = () => {
-    const details = MOCK_FIELD_DETAILS[selectedField] || MOCK_FIELD_DETAILS["default"];
+    const details = fieldDetails || { topSkills: [], topCompanies: [], lastAnnouncements: [] };
 
     return (
       <div>
