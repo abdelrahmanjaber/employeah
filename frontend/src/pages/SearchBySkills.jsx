@@ -133,6 +133,10 @@ function SearchBySkills() {
   const [loading, setLoading] = useState(false);
   const [results, setResults] = useState(null);
   const [selectedField, setSelectedField] = useState(null);
+  const [fieldDetails, setFieldDetails] = useState(null);
+
+  const [availableLocations, setAvailableLocations] = useState([]);
+  const [skillSuggestions, setSkillSuggestions] = useState([]);
 
   // ========== FILTERED SUGGESTIONS ==========
 
