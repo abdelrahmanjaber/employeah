@@ -43,12 +43,20 @@ function HistoricalStats() {
   }, [skillInput]);
 
   // Filtering logic
-  const filteredSkillSuggestions = AVAILABLE_SKILLS.filter((s) =>
-    s.toLowerCase().includes(skillInput.toLowerCase()) && skillInput.length > 0
+  const filteredSkillSuggestions = useMemo(
+    () =>
+      (skillSuggestions || []).filter(
+        (s) => s.toLowerCase().includes(skillInput.toLowerCase()) && skillInput.length > 0
+      ),
+    [skillSuggestions, skillInput]
   );
 
-  const filteredJobSuggestions = AVAILABLE_JOBS.filter((j) =>
-    j.toLowerCase().includes(jobInput.toLowerCase()) && jobInput.length > 0
+  const filteredJobSuggestions = useMemo(
+    () =>
+      (availableJobs || []).filter(
+        (j) => j.toLowerCase().includes(jobInput.toLowerCase()) && jobInput.length > 0
+      ),
+    [availableJobs, jobInput]
   );
 
   const triggerAnalysis = async (skillOverride, jobOverride) => {
