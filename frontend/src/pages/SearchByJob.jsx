@@ -232,7 +232,7 @@ function SearchByJob() {
         getSkillTrend({ skill, jobTitle: jobInput, location: locationInput }), 
         getCoursesForSkill(skill)
       ]);
-      setTrendData(trend);
+      setTrendData(trend?.points || []);
       setCoursesData(courses);
     } catch (err) {
       console.error(err);
