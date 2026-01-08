@@ -329,15 +329,15 @@ function HistoricalStats() {
                 {jobFields.length > 0 ? jobFields.map((field, i) => (
                   <tr 
                     key={i} 
-                    onClick={() => handleSelectJob(field.title)} 
+                    onClick={() => handleSelectJob(field.job_title)} 
                     style={{ borderBottom: "1px solid #000", cursor: "pointer" }} 
                     onMouseEnter={(e) => e.currentTarget.style.background = "#f5f5f5"} 
                     onMouseLeave={(e) => e.currentTarget.style.background = "transparent"}
                   >
-                    <td style={{ padding: "12px" }}>{field.title}</td>
+                    <td style={{ padding: "12px" }}>{field.job_title}</td>
                     <td 
                       style={{ padding: "12px", textAlign: "right", fontWeight: "600" }}
-                      title={`${field.percentage}% of ${field.title} jobs require ${skillInput || 'this skill'}`}
+                      title={`${field.percentage}% of ${field.job_title} jobs require ${skillInput || 'this skill'}`}
                     >
                       {field.percentage}%
                     </td>
