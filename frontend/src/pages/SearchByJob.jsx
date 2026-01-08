@@ -186,7 +186,7 @@ function SearchByJob() {
   const availableJobsMemo = useMemo(() => availableJobs.slice().sort(), [availableJobs]);
   const availableLocationsMemo = useMemo(() => availableLocations.slice().sort(), [availableLocations]);
 
-  const filteredJobSuggestions = availableJobs.filter(j => 
+  const filteredJobSuggestions = availableJobsMemo.filter(j => 
     j.toLowerCase().includes(jobInput.toLowerCase()) && jobInput.length > 0
   );
   
