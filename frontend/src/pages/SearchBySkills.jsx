@@ -200,6 +200,7 @@ function SearchBySkills() {
     setLoading(true);
     setHasSearched(true);
     setSelectedField(null);
+    setFieldDetails(null);
 
     // Simulate API call
     setTimeout(() => {
