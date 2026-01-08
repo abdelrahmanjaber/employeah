@@ -1,6 +1,6 @@
 import pandas as pd
 import os
-from datetime import datetime
+from datetime import datetime, timedelta
 
 from scrapers.scrape_jobs.current_jobs.scrape_arbeitnow_jobs import scrape_arbeitnow
 from scrapers.scrape_jobs.current_jobs.scrape_adzuna import scrape_adzuna
@@ -8,7 +8,7 @@ from extraction.extraction import extract_from_description
 from extraction.extraction import extract_from_title
 
 
-def scheduler(dataset_path, max_pages=3, max_old_date=None):
+def scheduler(dataset_path, max_pages=2, max_old_date=None):
     """
     Launch all scraper and extrac skills and field and append result to dataset
     """
@@ -16,7 +16,7 @@ def scheduler(dataset_path, max_pages=3, max_old_date=None):
     ## SCRAIPING
     #######################################
     if max_old_date is None:
-        max_old_date = datetime.now().strftime('%Y-%m-%d')
+        max_old_date = (datetime.now() - timedelta(days=5)).strftime('%Y-%m-%d')
     
     print(f"------ STARTING SCRAPING ------")
     # Define DataFrame structure

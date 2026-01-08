@@ -15,7 +15,7 @@ APP_KEY = os.getenv("ADZUNA_APP_KEY")
 # Load job categories
 current_folder = os.path.dirname(os.path.abspath(__file__))
 job_file_path = os.path.join(current_folder, "job_categories.txt")
-with open(job_file_path, 'r') as f:
+with open(job_file_path, "r") as f:
     JOB_TYPES = [line.strip() for line in f if line.strip()]
 
 # SCRAPER (modified to accept existing DataFrame)
@@ -27,6 +27,11 @@ def scrape_adzuna(df, stop_date, max_pages=2):
 
     temp = len(df)
     stop_scraping = False
+
+    headers = {
+        "Accept": "application/json",
+        "User-Agent": "Mozilla/5.0"
+    }
 
     for country_code in locations.TARGET_COUNTRIES:
         if stop_scraping:
@@ -45,30 +50,60 @@ def scrape_adzuna(df, stop_date, max_pages=2):
                 "app_id": APP_ID,
                 "app_key": APP_KEY,
                 "what": job_query,
-                "results_per_page": locations.RESULTS_PER_PAGE,
-                "max_days_old": 30,
-                "content-type": "application/json"
+                "results_per_page": min(locations.RESULTS_PER_PAGE, 50),
+                "max_days_old": 5  # <- aligns with stop_date
             }
 
-            r = requests.get(base_url, params=params)
+            # ----- REQUEST WITH TIMEOUT HANDLING -----
+            try:
+                r = requests.get(
+                    base_url,
+                    params=params,
+                    headers=headers,
+                    timeout=10
+                )
+            except requests.exceptions.ReadTimeout:
+                print(f"WARNING: timeout | country={country_code} | query='{job_query}'")
+                continue
+
             if r.status_code != 200:
-                print(f"WARNING: adzuna scraping failed with status code: {r.status_code}")
-                break
+                print(
+                    f"WARNING: adzuna scraping failed | "
+                    f"country={country_code} | query='{job_query}' | "
+                    f"status={r.status_code}"
+                )
+                print(r.text[:300])
+                continue
 
             data = r.json()
             total = data.get("count", 0)
             if total == 0:
                 continue
 
-            pages = min(math.ceil(total / locations.RESULTS_PER_PAGE), max_pages)
+            pages = min(math.ceil(total / params["results_per_page"]), max_pages)
 
             for page in range(1, pages + 1):
                 if page > 1:
                     page_url = f"https://api.adzuna.com/v1/api/jobs/{country_code}/search/{page}"
-                    r = requests.get(page_url, params=params)
-                    if r.status_code != 200:
-                        print(f"WARNING: adzuna scraping failed with status code: {r.status_code}")
+                    try:
+                        r = requests.get(
+                            page_url,
+                            params=params,
+                            headers=headers,
+                            timeout=10
+                        )
+                    except requests.exceptions.ReadTimeout:
+                        print(f"WARNING: timeout | country={country_code} | page={page}")
                         break
+
+                    if r.status_code != 200:
+                        print(
+                            f"WARNING: adzuna page failed | "
+                            f"country={country_code} | page={page} | "
+                            f"status={r.status_code}"
+                        )
+                        break
+
                     results = r.json().get("results", [])
                 else:
                     results = data.get("results", [])
@@ -78,8 +113,7 @@ def scrape_adzuna(df, stop_date, max_pages=2):
                     job_date = raw_date.split("T")[0]
 
                     if job_date < stop_date:
-                        stop_scraping = True
-                        break
+                        break  # <- only stops current page, not entire scraper
 
                     location_area = item.get("location", {}).get("area", [])
                     city = "Unknown"
@@ -88,7 +122,6 @@ def scrape_adzuna(df, stop_date, max_pages=2):
                             city = loc
                             break
 
-                    # Append row directly to existing DataFrame
                     df.loc[len(df)] = {
                         "Job Title": item.get("title"),
                         "Continent": continent,
@@ -102,10 +135,7 @@ def scrape_adzuna(df, stop_date, max_pages=2):
                         "Website": "adzuna"
                     }
 
-                if stop_scraping:
-                    break
+                time.sleep(1.5)  # keep polite pause
 
-                time.sleep(1.5)
-
-    print(f"✅ Adzuna collected {len(df)-temp} total jobs")
+    print(f"✅ Adzuna collected {len(df) - temp} total jobs")
     return df
