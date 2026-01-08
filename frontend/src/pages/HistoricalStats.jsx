@@ -75,8 +75,8 @@ function HistoricalStats() {
         getSkillTopJobTitles({ skill: finalSkill, limit: 5 }),
         getCoursesForSkill(finalSkill)
       ]);
-      setChartData(trend);
-      setJobFields(fields);
+      setChartData(trend?.points || []);
+      setJobFields(fields || []);
       setRelevantCourses(courses);
     } catch (err) {
       console.error("Analysis Error:", err);
