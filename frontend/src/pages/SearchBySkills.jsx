@@ -604,7 +604,7 @@ function SearchBySkills() {
                 {details.lastAnnouncements.map((job) => (
                   <a 
                     key={job.id} 
-                    href={job.url} 
+                    href={job.url || "#"} 
                     target="_blank" 
                     rel="noopener noreferrer"
                     style={{ 
