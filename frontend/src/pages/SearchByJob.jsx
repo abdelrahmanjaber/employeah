@@ -229,8 +229,8 @@ function SearchByJob() {
     setSelectedSkill(skill);
     try {
       const [trend, courses] = await Promise.all([
-        getSkillTrendData(skill, jobInput, locationInput), 
-        getTUMCoursesBySkill(skill)
+        getSkillTrend({ skill, jobTitle: jobInput, location: locationInput }), 
+        getCoursesForSkill(skill)
       ]);
       setTrendData(trend);
       setCoursesData(courses);
