@@ -2,17 +2,9 @@ import { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { getCoursesForSkill, getSkillTopJobTitles, getSkillTrend, getSkills, getJobTitles } from "../lib/apiClient";
 
-// Predefined lists for autocomplete
-const AVAILABLE_SKILLS = [
-  "Python", "PyTorch", "JavaScript", "React", "Node.js", 
-  "TypeScript", "SQL", "Docker", "Kubernetes", "AWS", 
-  "Java", "C++", "TensorFlow", "Pandas"
-];
-
-const AVAILABLE_JOBS = [
-  "Data Scientist", "Backend Developer", "Frontend Developer", 
-  "Data Engineer", "DevOps Engineer", "ML Engineer"
-];
+// Predefined lists for autocomplete (loaded from backend)
+const AVAILABLE_SKILLS = [];
+const AVAILABLE_JOBS = [];
 
 function HistoricalStats() {
   const navigate = useNavigate();
