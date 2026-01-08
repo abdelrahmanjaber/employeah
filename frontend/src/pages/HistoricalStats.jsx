@@ -1,6 +1,6 @@
-import { useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { getSkillTrendData, getJobFieldsBySkill, getTUMCoursesBySkill } from "../lib/mockApi";
+import { getCoursesForSkill, getSkillTopJobTitles, getSkillTrend, getSkills, getJobTitles } from "../lib/apiClient";
 
 // Predefined lists for autocomplete
 const AVAILABLE_SKILLS = [
