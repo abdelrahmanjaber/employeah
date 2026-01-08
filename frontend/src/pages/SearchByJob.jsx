@@ -207,9 +207,9 @@ function SearchByJob() {
     try {
       const result = await getJobSkillDistribution({ jobTitle: jobInput, location: locationInput });
       
-      if (result.success && result.skills) {
-        const formattedSkills = Object.entries(result.skills)
-          .map(([name, stats]) => ({ name, percent: stats.percentage }))
+      if (result && Array.isArray(result.skills)) {
+        const formattedSkills = result.skills
+          .map((s) => ({ name: s.name, percent: s.percentage }))
           .sort((a, b) => b.percent - a.percent);
 
         setSkillsData(formattedSkills);
