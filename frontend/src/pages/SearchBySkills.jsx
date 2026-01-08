@@ -164,8 +164,9 @@ function SearchBySkills() {
     [skillSuggestions, skillInput]
   );
 
-  const filteredLocationSuggestions = AVAILABLE_LOCATIONS.filter(l => 
-    l.toLowerCase().includes(locationInput.toLowerCase())
+  const filteredLocationSuggestions = useMemo(
+    () => (availableLocations || []).filter((l) => l.toLowerCase().includes(locationInput.toLowerCase())),
+    [availableLocations, locationInput]
   );
 
   // ========== HANDLERS ==========
