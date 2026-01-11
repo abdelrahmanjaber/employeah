@@ -1,5 +1,6 @@
 import { useNavigate } from "react-router-dom";
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { getStats } from "../lib/apiClient";
 
 // --- CSS Keyframes for Animations ---
 const globalStyles = `
@@ -19,6 +20,13 @@ function HomePage() {
   const navigate = useNavigate();
   const [hoveredIndex, setHoveredIndex] = useState(null);
   const [titleHover, setTitleHover] = useState(false);
+  const [totalAnnouncements, setTotalAnnouncements] = useState(null);
+
+  useEffect(() => {
+    getStats()
+      .then((d) => setTotalAnnouncements(d?.total_announcements ?? '-'))
+      .catch(() => {});
+  }, []);
 
   // Configuration for the three main actions with ICONS
   const actions = [
@@ -120,6 +128,10 @@ function HomePage() {
         }}>
           Explore job market trends, find positions matching your skills, and discover how skill demand evolves over time.
         </p>
+        <div style={{ marginTop: 20, textAlign: 'center' }}>
+          <div style={{ color: '#64748b', fontSize: 13 }}>Total announcements in DB</div>
+          <div style={{ fontSize: 22, fontWeight: 700, color: '#0f172a' }}>{totalAnnouncements ?? '-'}</div>
+        </div>
       </div>
 
       {/* Navigation Cards */}

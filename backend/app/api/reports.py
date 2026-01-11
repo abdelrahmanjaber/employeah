@@ -8,7 +8,7 @@ from sqlalchemy import func, select
 from sqlalchemy.orm import Session
 
 from app.db import get_db
-from app.models import Company, Job, Location, Skill
+from app.models import Company, Job, Location, Skill, DataSource
 
 
 router = APIRouter(prefix="/reports")
@@ -182,8 +182,15 @@ def report_jobs_by_skills(
         pct = float(count) / float(total_jobs) * 100.0
         job_titles.append({"name": title, "count": int(count), "percent": round(pct, 1)})
 
+    # include first available data_source.link for each job (if any)
     last_stmt = (
-        select(Job.id, Job.title, Company.name, Job.date)
+        select(
+            Job.id,
+            Job.title,
+            Company.name,
+            Job.date,
+            select(DataSource.link).where(DataSource.job_id == Job.id).limit(1).scalar_subquery().label("link"),
+        )
         .select_from(universe)
         .join(Job, Job.id == universe.c.id)
         .outerjoin(Company, Company.id == Job.company_id)
@@ -197,7 +204,7 @@ def report_jobs_by_skills(
             "title": r[1],
             "company": r[2],
             "date": r[3].date().isoformat() if r[3] else None,
-            "url": None,
+            "url": r[4].strip() if len(r) > 4 and r[4] else None,
         }
         for r in last_rows
     ]
@@ -263,8 +270,15 @@ def report_job_title_details(
     comp_rows = db.execute(comp_stmt).all()
     top_companies = [{"name": r[0], "count": int(r[1])} for r in comp_rows if r[0]]
 
+    # include first available data_source.link for each job (if any)
     last_stmt = (
-        select(Job.id, Job.title, Company.name, Job.date)
+        select(
+            Job.id,
+            Job.title,
+            Company.name,
+            Job.date,
+            select(DataSource.link).where(DataSource.job_id == Job.id).limit(1).scalar_subquery().label("link"),
+        )
         .select_from(universe)
         .join(Job, Job.id == universe.c.id)
         .outerjoin(Company, Company.id == Job.company_id)
@@ -278,9 +292,9 @@ def report_job_title_details(
             "title": r[1],
             "company": r[2],
             "date": r[3].date().isoformat() if r[3] else None,
-            "url": None,
+            "url": r[4].strip() if len(r) > 4 and r[4] else None,
         }
         for r in last_rows
     ]
 
-    return {"top_skills": top_skills, "top_companies": top_companies, "last_announcements": last_announcements}
+    return {"top_skills": top_skills, "top_companies": top_companies, "last_announcements": last_announcements, "total_jobs": total_jobs}

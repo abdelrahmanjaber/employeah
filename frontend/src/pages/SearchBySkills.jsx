@@ -20,13 +20,77 @@ const TIME_LIMITS = [
 ];
 
 // ============================================================================
-// SUB-COMPONENT: PIE CHART (Used in Detail View)
+// SUB-COMPONENT: DISTRIBUTION LIST
+// Renders a vertical list of name + percentage (+ optional count).
+// Accepts either pre-aggregated items [{name, count, percent}] or raw offers
+// and will compute the distribution by a provided key.
 // ============================================================================
-function InteractivePieChart({ data, onSelectSlice, selectedSliceName, title }) {
+function DistributionList({
+  title,
+  aggregatedItems, // optional: [{ name, count, percent }]
+  rawOffers, // optional: array of offers to group
+  groupBy = "title", // key to group raw offers by
+  showCount = true,
+}) {
+  const items = useMemo(() => {
+    if (aggregatedItems && Array.isArray(aggregatedItems)) {
+      // Clone to avoid mutation and sort
+      return [...aggregatedItems]
+        .map((it) => ({ name: it.name, count: Number(it.count || 0), percent: Number(it.percent || 0) }))
+        .sort((a, b) => b.percent - a.percent);
+    }
+
+    if (!rawOffers || !Array.isArray(rawOffers) || rawOffers.length === 0) {
+      return [];
+    }
+
+    // Compute distribution by grouping key
+    const map = new Map();
+    for (const o of rawOffers) {
+      const key = (o[groupBy] || o.jobTitle || o.title || o.role || "Unknown").toString();
+      map.set(key, (map.get(key) || 0) + 1);
+    }
+    const total = rawOffers.length;
+    const arr = Array.from(map.entries()).map(([name, count]) => ({
+      name,
+      count,
+      percent: Math.round((count / total) * 100),
+    }));
+    arr.sort((a, b) => b.percent - a.percent);
+    return arr;
+  }, [aggregatedItems, rawOffers, groupBy]);
+
+  if (!items || items.length === 0) {
+    return (
+      <div style={{ height: 200, display: "flex", alignItems: "center", justifyContent: "center", color: "#999" }}>
+        No results
+      </div>
+    );
+  }
+
+  return (
+    <div style={{ backgroundColor: "white", padding: "20px", borderRadius: "12px", boxShadow: "0 2px 8px rgba(0,0,0,0.05)" }}>
+      {title && <h3 style={{ marginTop: 0, marginBottom: "12px", color: "#333" }}>{title}</h3>}
+      <ul style={{ listStyle: "none", margin: 0, padding: 0 }}>
+        {items.map((it) => (
+          <li key={it.name} style={{ display: "flex", justifyContent: "space-between", padding: "10px 0", borderBottom: "1px solid #f1f5f9" }}>
+            <span style={{ color: "#0f172a", fontWeight: 600 }}>{it.name}</span>
+            <span style={{ color: "#2563eb", fontWeight: 700 }}>{`${it.percent}%`}{showCount ? ` (${it.count})` : ""}</span>
+          </li>
+        ))}
+      </ul>
+    </div>
+  );
+}
+
+// ============================================================================
+// SUB-COMPONENT: PIE CHART (copied from SearchByJob implementation)
+// ============================================================================
+function InteractivePieChart({ data, onSelectSkill, selectedSkill, title, location, contextLabel }) {
   if (!data || data.length === 0) {
     return (
-      <div style={{height: 350, display:'flex', alignItems:'center', justifyContent:'center', color:'#999'}}>
-        No data available
+      <div style={{height: 250, display:'flex', alignItems:'center', justifyContent:'center', color:'#999'}}>
+        No data
       </div>
     );
   }
@@ -39,12 +103,18 @@ function InteractivePieChart({ data, onSelectSlice, selectedSliceName, title }) 
     return [x, y];
   };
 
+  const getTooltipText = (name, percent) => {
+    const locText = location ? ` in ${location}` : "";
+    const ctx = contextLabel ? ` ${contextLabel}` : "";
+    return `${name} represents ${percent}%${ctx}${locText}`;
+  };
+
   return (
     <div style={{ display: "flex", flexDirection: "column", alignItems: "center", width: "100%" }}>
-      <h3 style={{ marginBottom: "20px", color: "#333" }}>{title}</h3>
-      <svg viewBox="-1.4 -1.4 2.8 2.8" style={{ height: "350px", transform: "rotate(-90deg)", marginBottom: "30px" }}>
+      {title && <h3 style={{ marginTop: 0, marginBottom: 12, color: '#333' }}>{title}</h3>}
+      <svg viewBox="-1.4 -1.4 2.8 2.8" style={{ height: "250px", transform: "rotate(-90deg)", marginBottom: "18px" }}>
         {data.map((slice, index) => {
-          const percentage = slice.percent / 100;
+          const percentage = (slice.percent || 0) / 100;
           const startPercent = cumulativePercent;
           cumulativePercent += percentage;
           const endPercent = cumulativePercent;
@@ -59,15 +129,15 @@ function InteractivePieChart({ data, onSelectSlice, selectedSliceName, title }) 
             ? `M 1 0 A 1 1 0 1 1 -1 0 A 1 1 0 1 1 1 0`
             : `M 0 0 L ${startX} ${startY} A 1 1 0 ${largeArcFlag} 1 ${endX} ${endY} L 0 0`;
 
-          const isSelected = selectedSliceName === slice.name;
-          
-          // Label positioning
+          const isSelected = selectedSkill === slice.name;
+          const tooltipText = getTooltipText(slice.name, slice.percent);
+
           const midAngle = 2 * Math.PI * (startPercent + percentage / 2);
-          const labelRadius = 0.85; 
+          const labelRadius = 0.75;
           const textX = labelRadius * Math.cos(midAngle);
           const textY = labelRadius * Math.sin(midAngle);
           const textRotation = `rotate(90, ${textX}, ${textY})`;
-          const showLabel = slice.percent > 5;
+          const showLabel = (slice.percent || 0) > 6;
 
           return (
             <g key={slice.name}>
@@ -77,12 +147,11 @@ function InteractivePieChart({ data, onSelectSlice, selectedSliceName, title }) 
                 stroke={isSelected ? "#000" : "#fff"}
                 strokeWidth={isSelected ? "0.03" : "0.01"}
                 style={{ cursor: "pointer", transition: "opacity 0.2s" }}
-                onClick={() => onSelectSlice && onSelectSlice(slice.name)}
-                opacity={isSelected ? 1 : 0.85}
+                onClick={() => onSelectSkill && onSelectSkill(slice.name)}
+                opacity={isSelected ? 1 : 0.9}
               >
-                <title>{`${slice.name}: ${slice.percent}% (${slice.count} jobs)`}</title>
+                <title>{tooltipText}</title>
               </path>
-              
               {showLabel && (
                 <text
                   x={textX}
@@ -90,11 +159,10 @@ function InteractivePieChart({ data, onSelectSlice, selectedSliceName, title }) 
                   transform={textRotation}
                   textAnchor="middle"
                   dominantBaseline="middle"
-                  fontSize="0.12" 
+                  fontSize="0.10"
                   fill="#000"
                   fontWeight="600"
                   pointerEvents="none"
-                  style={{ textShadow: "0px 0px 2px rgba(255,255,255,0.8)" }}
                 >
                   {slice.name}
                 </text>
@@ -103,10 +171,72 @@ function InteractivePieChart({ data, onSelectSlice, selectedSliceName, title }) 
           );
         })}
       </svg>
+
+      <div style={{ width: "100%", textAlign: "left" }}>
+        <div style={{ display: "flex", flexWrap: "wrap", gap: 8 }}>
+          {data.map((slice, index) => (
+            <button
+              key={slice.name}
+              onClick={() => onSelectSkill && onSelectSkill(slice.name)}
+              title={getTooltipText(slice.name, slice.percent)}
+              style={{
+                display: "flex", alignItems: "center", gap: 8,
+                padding: "6px 10px", borderRadius: 20, border: "1px solid #e5e7eb",
+                background: selectedSkill === slice.name ? "#f3f4f6" : "#fff",
+                cursor: "pointer", fontSize: "0.9rem", fontWeight: selectedSkill === slice.name ? "700" : "500"
+              }}
+            >
+              <span style={{ width: 10, height: 10, borderRadius: 6, background: PIE_COLORS[index % PIE_COLORS.length] }}></span>
+              {slice.name} <span style={{ color: "#6b7280", marginLeft: 6 }}>{slice.percent}%</span>
+            </button>
+          ))}
+        </div>
+      </div>
     </div>
   );
 }
 
+// ============================================================================
+// SUB-COMPONENT: BAR CHART (for non-exclusive skills)
+// ============================================================================
+function BarChart({ data, threshold = 2, title, onSelectSkill, selectedSkill }) {
+  const items = (data || []).filter((d) => Number(d.percent || 0) > Number(threshold));
+
+  if (!items || items.length === 0) {
+    return (
+      <div style={{ height: 220, display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#999' }}>
+        No data
+      </div>
+    );
+  }
+
+  const maxPercent = Math.max(...items.map((i) => Number(i.percent || 0), 0), 1);
+
+  return (
+    <div style={{ width: '100%' }}>
+      {title && <h3 style={{ marginTop: 0, marginBottom: 12, color: '#333' }}>{title}</h3>}
+      <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+        {items.map((it, idx) => (
+          <div key={it.name} style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+              <button
+                onClick={() => onSelectSkill && onSelectSkill(it.name)}
+                style={{ border: 'none', background: 'none', padding: 0, textAlign: 'left', cursor: 'pointer', fontWeight: selectedSkill === it.name ? 700 : 600 }}
+              >
+                {it.name}
+              </button>
+              <div style={{ color: '#64748b', fontSize: '13px' }}>{it.count} ({it.percent}%)</div>
+            </div>
+
+            <div style={{ width: '100%', height: 12, backgroundColor: '#f1f5f9', borderRadius: 6, overflow: 'hidden' }}>
+              <div style={{ width: `${(Number(it.percent) / Number(maxPercent)) * 100}%`, height: '100%', backgroundColor: PIE_COLORS[idx % PIE_COLORS.length] }} />
+            </div>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
 // ============================================================================
 // MAIN COMPONENT
 // ============================================================================
@@ -128,6 +258,9 @@ function SearchBySkills() {
   // Other Form State
   const [timeLimit, setTimeLimit] = useState("3m");
   
+  // Cached datasets for session
+  const [allSkills, setAllSkills] = useState([]);
+  
   // UI State
   const [hasSearched, setHasSearched] = useState(false);
   const [loading, setLoading] = useState(false);
@@ -137,13 +270,49 @@ function SearchBySkills() {
 
   const [availableLocations, setAvailableLocations] = useState([]);
   const [skillSuggestions, setSkillSuggestions] = useState([]);
+  const [selectedSkillDetail, setSelectedSkillDetail] = useState(null);
+
+  // Resolve possible URL fields from API result objects
+  const getJobUrl = (job) => {
+    if (!job) return "#";
+    if (job.url) return job.url;
+    if (job.link) return job.link;
+    if (job.job_link) return job.job_link;
+    if (job.data_source) {
+      if (typeof job.data_source === 'string') return job.data_source;
+      if (job.data_source.link) return job.data_source.link;
+    }
+    if (job.data_sources && Array.isArray(job.data_sources) && job.data_sources.length > 0) {
+      const ds = job.data_sources[0];
+      return ds && ds.link ? ds.link : (ds && ds.name ? ds.name : "#");
+    }
+    return "#";
+  };
 
   // ========== FILTERED SUGGESTIONS ==========
 
   useEffect(() => {
-    getLocations()
-      .then((locs) => setAvailableLocations(locs || []))
-      .catch((err) => console.error("Failed to load locations:", err));
+    // Try session cache first
+    const cachedLoc = sessionStorage.getItem("locations_cache");
+    if (cachedLoc) {
+      try {
+        setAvailableLocations(JSON.parse(cachedLoc));
+      } catch (e) {
+        sessionStorage.removeItem("locations_cache");
+      }
+    }
+
+    // Fetch and cache locations if not present
+    if (!cachedLoc) {
+      getLocations()
+        .then((locs) => {
+          const arr = locs || [];
+          setAvailableLocations(arr);
+          try { sessionStorage.setItem("locations_cache", JSON.stringify(arr)); } catch (e) {}
+        })
+        .catch((err) => console.error("Failed to load locations:", err));
+    }
+    // (site-wide stats removed from this page)
   }, []);
 
   useEffect(() => {
@@ -151,13 +320,45 @@ function SearchBySkills() {
       setSkillSuggestions([]);
       return;
     }
+
     const t = setTimeout(() => {
+      // If we have a cached full skills list, filter client-side (avoid API per keystroke)
+      if (allSkills && allSkills.length > 0) {
+        const filtered = allSkills.filter((s) => s.toLowerCase().includes(skillInput.toLowerCase()));
+        setSkillSuggestions(filtered.filter((s) => !selectedSkills.includes(s)).slice(0, 20));
+        return;
+      }
+
+      // Fallback to server search
       getSkills({ q: skillInput, limit: 20 })
         .then((skills) => setSkillSuggestions((skills || []).filter((s) => !selectedSkills.includes(s))))
         .catch((err) => console.error("Failed to load skills:", err));
     }, 200);
     return () => clearTimeout(t);
   }, [skillInput, selectedSkills]);
+
+  // Prefetch full skills list on mount and store in session cache for the session
+  useEffect(() => {
+    const cached = sessionStorage.getItem("skills_cache");
+    if (cached) {
+      try {
+        setAllSkills(JSON.parse(cached));
+      } catch (e) {
+        sessionStorage.removeItem("skills_cache");
+      }
+    }
+
+    if (!cached) {
+      // attempt to fetch a large list once
+      getSkills({ q: "", limit: 1000 })
+        .then((skills) => {
+          const arr = skills || [];
+          setAllSkills(arr);
+          try { sessionStorage.setItem("skills_cache", JSON.stringify(arr)); } catch (e) {}
+        })
+        .catch((err) => console.error("Failed to prefetch skills:", err));
+    }
+  }, []);
 
   const filteredSkillSuggestions = useMemo(
     () => (skillSuggestions || []).filter((s) => s.toLowerCase().includes(skillInput.toLowerCase())),
@@ -196,7 +397,8 @@ function SearchBySkills() {
       alert("Please select at least one skill.");
       return;
     }
-    
+    // Clear previous results immediately (do not merge)
+    setResults(null);
     setLoading(true);
     setHasSearched(true);
     setSelectedField(null);
@@ -237,6 +439,7 @@ function SearchBySkills() {
         topSkills: details?.top_skills || [],
         topCompanies: details?.top_companies || [],
         lastAnnouncements: details?.last_announcements || [],
+        totalJobs: details?.total_jobs || 0,
       });
     } catch (err) {
       console.error(err);
@@ -335,7 +538,7 @@ function SearchBySkills() {
           </label>
           <input
             type="text"
-            placeholder="e.g. London"
+            placeholder="e.g. Munich"
             value={locationInput}
             onChange={(e) => {
               setLocationInput(e.target.value);
@@ -495,7 +698,7 @@ function SearchBySkills() {
               {results.lastAnnouncements.map((job) => (
                 <a 
                   key={job.id} 
-                  href={job.url} 
+                  href={getJobUrl(job)} 
                   target="_blank" 
                   rel="noopener noreferrer"
                   style={{ 
@@ -527,100 +730,84 @@ function SearchBySkills() {
   const renderDetailView = () => {
     const details = fieldDetails || { topSkills: [], topCompanies: [], lastAnnouncements: [] };
 
+    // Use backend-provided percent (fraction of announcements of that job that contain the skill).
+    // Do not normalize to sum=100 because skills are not mutually exclusive.
+    const normalizedTopSkills = (details.topSkills || []).map((s) => ({
+      name: s.name,
+      count: Number(s.count || 0),
+      percent: Number((s.percent ?? 0)),
+    }));
+
     return (
       <div>
-        <button 
-          onClick={handleBackToResults}
-          style={{ 
-            marginBottom: "20px", 
-            padding: "8px 16px", 
-            backgroundColor: "#fff", 
-            border: "1px solid #cbd5e1", 
-            borderRadius: "6px", 
-            cursor: "pointer",
-            color: "#475569",
-            display: "flex",
-            alignItems: "center",
-            gap: "8px",
-            fontWeight: "500",
-            boxShadow: "0 1px 2px rgba(0,0,0,0.05)"
-          }}
-          onMouseOver={(e) => e.currentTarget.style.backgroundColor = "#f8fafc"}
-          onMouseOut={(e) => e.currentTarget.style.backgroundColor = "#fff"}
-        >
-          ← Back to Results
-        </button>
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 20, marginBottom: 30 }}>
+          <div>
+            <h2 style={{ margin: 0, color: '#1e293b', fontSize: '20px' }}>
+              Job field: <span style={{ color: '#2563eb' }}>{selectedField}</span>
+            </h2>
+            <div style={{ marginTop: 6, color: '#64748b', fontSize: 14 }}>
+              {fieldDetails?.totalJobs ? (
+                <strong style={{ fontSize: 18, color: '#0f172a' }}>{fieldDetails.totalJobs}</strong>
+              ) : (
+                <span>-</span>
+              )} announcements for this field
+            </div>
+          </div>
+        </div>
 
-        <h2 style={{ marginBottom: "30px", color: "#1e293b" }}>
-          Job field selected: <span style={{ color: "#2563eb" }}>{selectedField}</span>
-        </h2>
-
-        <div style={{ display: "flex", flexWrap: "wrap", gap: "40px" }}>
-          {/* LEFT SIDE: Top Skills Pie Chart */}
-          <div style={{ flex: 1, minWidth: "300px", backgroundColor: "white", padding: "20px", borderRadius: "12px", boxShadow: "0 2px 8px rgba(0,0,0,0.05)" }}>
-            <InteractivePieChart 
-              title="Top Skills Required"
-              data={details.topSkills}
-              onSelectSlice={() => {}} // No action on click for this chart
-            />
-            <div style={{ marginTop: "20px" }}>
-              <h4 style={{ marginBottom: "10px", color: "#333" }}>Skill Breakdown</h4>
-              <ul style={{ listStyle: "none", padding: 0, margin: 0 }}>
-                {details.topSkills.map((skill, idx) => (
-                  <li key={idx} style={{ display: "flex", justifyContent: "space-between", padding: "8px 0", borderBottom: "1px solid #f1f5f9" }}>
-                    <span style={{ display: "flex", alignItems: "center", gap: "8px" }}>
-                      <span style={{ width: "10px", height: "10px", borderRadius: "50%", backgroundColor: PIE_COLORS[idx % PIE_COLORS.length] }}></span>
-                      {skill.name}
-                    </span>
-                    <span style={{ color: "#64748b" }}>{skill.count} jobs ({skill.percent}%)</span>
+        <div style={{ display: 'flex', flexWrap: 'wrap', gap: '40px' }}>
+          {/* LEFT SIDE: Top Skills List (count + percentage) */}
+          <div style={{ flex: 1, minWidth: '300px', backgroundColor: 'white', padding: '20px', borderRadius: '12px', boxShadow: '0 2px 8px rgba(0,0,0,0.05)' }}>
+            <h3 style={{ marginTop: 0, marginBottom: 12, color: '#333' }}>Top Skills Required</h3>
+            <div style={{ marginTop: '6px' }}>
+              <ul style={{ listStyle: 'none', padding: 0, margin: 0 }}>
+                {(normalizedTopSkills || []).map((skill, idx) => (
+                  <li key={idx} style={{ display: 'flex', justifyContent: 'space-between', padding: '10px 0', borderBottom: '1px solid #f1f5f9' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                      <span style={{ width: 10, height: 10, borderRadius: 6, background: PIE_COLORS[idx % PIE_COLORS.length] }}></span>
+                      <span style={{ color: '#0f172a', fontWeight: 600 }}>{skill.name}</span>
+                    </div>
+                    <div style={{ color: '#64748b' }}>{skill.count} announcements • {skill.percent}%</div>
                   </li>
                 ))}
+                {(!normalizedTopSkills || normalizedTopSkills.length === 0) && (
+                  <li style={{ padding: '12px', color: '#94a3b8' }}>No skills data available.</li>
+                )}
               </ul>
             </div>
           </div>
 
           {/* RIGHT SIDE: Top Companies & Announcements */}
-          <div style={{ flex: 1, minWidth: "300px", display: "flex", flexDirection: "column", gap: "20px" }}>
-            
+          <div style={{ flex: 1, minWidth: '300px', display: 'flex', flexDirection: 'column', gap: '20px' }}>
             {/* Top 3 Companies */}
-            <div style={{ backgroundColor: "white", padding: "20px", borderRadius: "12px", boxShadow: "0 2px 8px rgba(0,0,0,0.05)" }}>
-              <h3 style={{ marginTop: 0, color: "#333" }}>Top 3 Companies</h3>
-              <div style={{ display: "flex", flexDirection: "column", gap: "10px" }}>
+            <div style={{ backgroundColor: 'white', padding: '20px', borderRadius: '12px', boxShadow: '0 2px 8px rgba(0,0,0,0.05)' }}>
+              <h3 style={{ marginTop: 0, color: '#333' }}>Top 3 Companies</h3>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
                 {details.topCompanies.map((comp, idx) => (
-                  <div key={idx} style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "10px", backgroundColor: "#f8fafc", borderRadius: "8px" }}>
-                    <span style={{ fontWeight: "600", color: "#334155" }}>{idx + 1}. {comp.name}</span>
-                    <span style={{ backgroundColor: "#dbeafe", color: "#1e40af", padding: "2px 8px", borderRadius: "12px", fontSize: "12px", fontWeight: "bold" }}>
-                      {comp.count} jobs
-                    </span>
+                  <div key={idx} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '10px', backgroundColor: '#f8fafc', borderRadius: '8px' }}>
+                    <span style={{ fontWeight: '600', color: '#334155' }}>{idx + 1}. {comp.name}</span>
+                    <span style={{ backgroundColor: '#dbeafe', color: '#1e40af', padding: '2px 8px', borderRadius: '12px', fontSize: '12px', fontWeight: 'bold' }}>{comp.count} jobs</span>
                   </div>
                 ))}
               </div>
             </div>
 
             {/* Last 5 Announcements for this field */}
-            <div style={{ backgroundColor: "white", padding: "20px", borderRadius: "12px", boxShadow: "0 2px 8px rgba(0,0,0,0.05)", flex: 1 }}>
-              <h3 style={{ marginTop: 0, color: "#333" }}>Last 5 Announcements</h3>
-              <div style={{ display: "flex", flexDirection: "column", gap: "10px" }}>
+            <div style={{ backgroundColor: 'white', padding: '20px', borderRadius: '12px', boxShadow: '0 2px 8px rgba(0,0,0,0.05)', flex: 1 }}>
+              <h3 style={{ marginTop: 0, color: '#333' }}>Last 5 Announcements</h3>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
                 {details.lastAnnouncements.map((job) => (
-                  <a 
-                    key={job.id} 
-                    href={job.url || "#"} 
-                    target="_blank" 
+                  <a
+                    key={job.id}
+                    href={getJobUrl(job)}
+                    target="_blank"
                     rel="noopener noreferrer"
-                    style={{ 
-                      display: "block", 
-                      padding: "12px", 
-                      borderRadius: "8px", 
-                      backgroundColor: "#f8fafc", 
-                      textDecoration: "none",
-                      border: "1px solid #e2e8f0",
-                      transition: "transform 0.1s"
-                    }}
-                    onMouseOver={(e) => e.currentTarget.style.transform = "translateX(5px)"}
-                    onMouseOut={(e) => e.currentTarget.style.transform = "translateX(0)"}
+                    style={{ display: 'block', padding: '12px', borderRadius: '8px', backgroundColor: '#f8fafc', textDecoration: 'none', border: '1px solid #e2e8f0', transition: 'transform 0.1s' }}
+                    onMouseOver={(e) => e.currentTarget.style.transform = 'translateX(5px)'}
+                    onMouseOut={(e) => e.currentTarget.style.transform = 'translateX(0)'}
                   >
-                    <div style={{ fontWeight: "600", color: "#0f172a" }}>{job.title}</div>
-                    <div style={{ fontSize: "14px", color: "#64748b", display: "flex", justifyContent: "space-between", marginTop: "4px" }}>
+                    <div style={{ fontWeight: '600', color: '#0f172a' }}>{job.title}</div>
+                    <div style={{ fontSize: '14px', color: '#64748b', display: 'flex', justifyContent: 'space-between', marginTop: '4px' }}>
                       <span>{job.company}</span>
                       <span>{job.date}</span>
                     </div>
@@ -628,29 +815,7 @@ function SearchBySkills() {
                 ))}
               </div>
             </div>
-
           </div>
-        </div>
-
-        {/* Bottom Back Button */}
-        <div style={{ marginTop: "40px", display: "flex", justifyContent: "center" }}>
-          <button 
-            onClick={handleBackToResults}
-            style={{ 
-              padding: "10px 25px", 
-              backgroundColor: "#f1f5f9", 
-              border: "1px solid #cbd5e1", 
-              borderRadius: "6px", 
-              cursor: "pointer",
-              color: "#475569",
-              fontWeight: "600",
-              fontSize: "15px"
-            }}
-            onMouseOver={(e) => e.currentTarget.style.backgroundColor = "#e2e8f0"}
-            onMouseOut={(e) => e.currentTarget.style.backgroundColor = "#f1f5f9"}
-          >
-            ← Back to Results
-          </button>
         </div>
       </div>
     );

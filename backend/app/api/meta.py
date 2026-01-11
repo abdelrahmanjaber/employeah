@@ -35,3 +35,10 @@ def list_skills(
     stmt = stmt.limit(limit)
     rows = db.execute(stmt).all()
     return [r[0] for r in rows if r[0]]
+
+
+@router.get("/stats")
+def stats(db: Session = Depends(get_db)):
+    """Return lightweight site stats such as total announcements."""
+    total = db.execute(select(func.count()).select_from(Job)).scalar_one()
+    return {"total_announcements": int(total)}

@@ -76,6 +76,10 @@ export async function reportJobTitleDetails({ jobTitle, skills, location, timeWi
   });
 }
 
+export async function getStats() {
+  return await apiFetch("/api/v1/stats");
+}
+
 export default {
   getJobTitles,
   getLocations,
@@ -86,4 +90,5 @@ export default {
   getSkillTopJobTitles,
   reportJobsBySkills,
   reportJobTitleDetails,
+  getStats,
 };
