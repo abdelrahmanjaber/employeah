@@ -3,9 +3,10 @@ from pathlib import Path
 import re
 from tqdm import tqdm
 import numpy as np
+import time
 parent_dir = Path(__file__).parent
 
-p = parent_dir.parent / "database" / "data" / "job_data" / "ALL_JOB_DATA.csv.gz"
+p = parent_dir.parent / "data_pipeline" / "data" / "job_data" / "ALL_JOBS.csv.gz"
 full_data_df = pd.read_csv(p, compression="gzip", engine="c", low_memory=False)
 file_path = parent_dir / "skills.txt"
 
@@ -25,11 +26,17 @@ def add_skills_column(df, skills_list):
 
     print(f"Database columns: {df.columns.tolist()}")
     list_of_skills = []
+    # Start timing the regex extraction
+    start_time = time.time()
     # iterate with a progress bar
     for idx, description in enumerate(tqdm(df["Description"], desc="Extracting skills", unit="row", total=len(df))):
         matches = pattern.findall(str(description))
         unique_skills = sorted({m.title() for m in matches})
         list_of_skills.append(unique_skills)
+    # End timing
+    end_time = time.time()
+    extraction_time = end_time - start_time
+    print(f"\n⏱️ Regex extraction took {extraction_time:.2f} seconds")
     
     # Add skills column to dataframe
     df['Skills'] = list_of_skills
@@ -40,7 +47,7 @@ def add_skills_column(df, skills_list):
     sample_df.to_csv("sample_extracted_skills.txt", index=False, header=False)
     
     # Save to CSV
-    p = parent_dir.parent / "database" / "data" / "job_data"
+    p = parent_dir.parent / "data_pipeline" / "data" / "job_data" 
     df.to_parquet(p /"ALL_JOB_DATA.snappy.parquet", compression="snappy", index=False)
 
     print(f"\n✅ Processed {len(df)} rows")
@@ -51,3 +58,4 @@ if __name__ == "__main__":
     
 
     add_skills_column(full_data_df, skills_list)
+    

@@ -2,6 +2,7 @@ import re
 import pandas as pd
 from sentence_transformers import SentenceTransformer, util
 from tqdm import tqdm
+from data_processing.llm_with_chunking import search_for_skills
 
 
 def extract_from_description(df, skill_path):
@@ -10,13 +11,24 @@ def extract_from_description(df, skill_path):
     """
     df["Skills"] = pd.Series([None] * len(df), dtype=object)
 
-    # Load skills.txt file and save knwon skills 
     known_skills = []
+    categories = []
+    skills = []
+
     with open(skill_path, "r", encoding="utf-8") as f:
         for line in f:
             clean_line = line.strip()
             if clean_line:
-                known_skills.append(clean_line)
+                if clean_line.endswith(':'):
+                    # It's a category (remove the colon)
+                    categories.append(clean_line[:-1])
+                elif clean_line.startswith('-'):
+                    # It's a skill (remove the dash)
+                    skills.append(clean_line[1:].strip())
+                else:
+                    # Some other text, add as is
+                    skills.append(clean_line)
+    known_skills = skills + categories
 
     sorted_skills = sorted(known_skills, key=len, reverse=True)
     regex = r"\b(?:" + "|".join(re.escape(s) for s in sorted_skills) + r")\b"
@@ -28,7 +40,9 @@ def extract_from_description(df, skill_path):
         unique_skills = sorted({m.title() for m in matches})
         df.at[idx, "Skills"] = unique_skills  
 
-    print("SKILLS EXTRACTED SUCCESFULLY \n")
+    print("SKILLS WITH REGEX EXTRACTED SUCCESFULLY \n")
+    df["embedded_skills"] = search_for_skills(df, known_skills)
+    df["Skills"] = df.apply(lambda row: sorted(list(set(row["Skills"]) | set(row["embedded_skills"]))), axis=1)
     return df
 
 
