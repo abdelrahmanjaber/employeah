@@ -78,21 +78,21 @@ function Sidebar({ open, onClose }) {
           style={buttonStyle} 
           onClick={() => { navigate("/search/skills"); onClose(); }}
         >
-          See where your skills can take you
+          Search by Skills
         </button>
         
         <button 
           style={buttonStyle} 
           onClick={() => { navigate("/search/job"); onClose(); }}
         >
-          Find Skills for your Dream Job
+          Search by Job
         </button>
         
         <button 
           style={buttonStyle} 
           onClick={() => { navigate("/historical"); onClose(); }}
         >
-          Discover the story behind your skill & how to grow it
+          Skill analysis and historical trends
         </button>
         
       </nav>

@@ -12,6 +12,7 @@ import './App.css';
 import HomePage from "./pages/HomePage.jsx";
 import SearchBySkills from "./pages/SearchBySkills.jsx";
 import SearchByJob from "./pages/SearchByJob.jsx";
+import FieldAnalysis from "./pages/FieldAnalysis.jsx";
 import HistoricalStats from "./pages/HistoricalStats.jsx";
 import Sidebar from "./components/Sidebar.jsx";
 import { useState } from "react";
@@ -52,6 +53,7 @@ function App() {
         <Route path="/" element={<HomePage />} />
         <Route path="/search/skills" element={<SearchBySkills />} />
         <Route path="/search/job" element={<SearchByJob />} />
+        <Route path="/field-analysis" element={<FieldAnalysis />} />
         <Route path="/historical" element={<HistoricalStats />} />
       </Routes>
     </Router>

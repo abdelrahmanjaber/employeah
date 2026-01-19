@@ -516,6 +516,607 @@
       "date_posted": "2023-08-10",
       "salary": 78000
     }
+    ,
+    {
+      "id": 1000,
+      "title": "Data Analyst",
+      "location": "Remote",
+      "company": "MockCompanyA",
+      "skills": ["Python","SQL","Excel"],
+      "date_posted": "2025-12-01",
+      "salary": 52000,
+      "url": "https://en.wikipedia.org/wiki/Work"
+    },
+    {
+      "id": 1001,
+      "title": "Machine Learning Engineer",
+      "location": "London",
+      "company": "MockCompanyB",
+      "skills": ["Python","TensorFlow","SQL"],
+      "date_posted": "2025-11-21",
+      "salary": 90000,
+      "url": "https://en.wikipedia.org/wiki/Work"
+    },
+    {
+      "id": 1002,
+      "title": "Software Engineer",
+      "location": "Berlin",
+      "company": "MockCompanyC",
+      "skills": ["Go","Docker","Kubernetes"],
+      "date_posted": "2025-10-10",
+      "salary": 73000,
+      "url": "https://en.wikipedia.org/wiki/Work"
+    },
+    {
+      "id": 1003,
+      "title": "Frontend Engineer",
+      "location": "Milan",
+      "company": "MockCompanyD",
+      "skills": ["React","TypeScript","CSS"],
+      "date_posted": "2025-09-30",
+      "salary": 60000,
+      "url": "https://en.wikipedia.org/wiki/Work"
+    },
+    {
+      "id": 1004,
+      "title": "Backend Developer",
+      "location": "Paris",
+      "company": "MockCompanyE",
+      "skills": ["Python","FastAPI","PostgreSQL"],
+      "date_posted": "2025-09-15",
+      "salary": 74000,
+      "url": "https://en.wikipedia.org/wiki/Work"
+    },
+    {
+      "id": 1005,
+      "title": "Data Engineer",
+      "location": "Amsterdam",
+      "company": "MockCompanyF",
+      "skills": ["Python","Airflow","Spark"],
+      "date_posted": "2025-08-05",
+      "salary": 70000,
+      "url": "https://en.wikipedia.org/wiki/Work"
+    },
+    {
+      "id": 1006,
+      "title": "DevOps Engineer",
+      "location": "London",
+      "company": "MockCompanyG",
+      "skills": ["Kubernetes","Docker","AWS"],
+      "date_posted": "2025-07-20",
+      "salary": 80000,
+      "url": "https://en.wikipedia.org/wiki/Work"
+    },
+    {
+      "id": 1007,
+      "title": "Fullstack Developer",
+      "location": "Remote",
+      "company": "MockCompanyH",
+      "skills": ["React","Node.js","PostgreSQL"],
+      "date_posted": "2025-07-01",
+      "salary": 65000,
+      "url": "https://en.wikipedia.org/wiki/Work"
+    },
+    {
+      "id": 1008,
+      "title": "QA Engineer",
+      "location": "Berlin",
+      "company": "MockCompanyI",
+      "skills": ["Selenium","Python","CI/CD"],
+      "date_posted": "2025-06-15",
+      "salary": 54000,
+      "url": "https://en.wikipedia.org/wiki/Work"
+    },
+    {
+      "id": 1009,
+      "title": "Research Engineer",
+      "location": "Milan",
+      "company": "MockCompanyJ",
+      "skills": ["Machine Learning","PyTorch","Python"],
+      "date_posted": "2025-05-30",
+      "salary": 88000,
+      "url": "https://en.wikipedia.org/wiki/Work"
+    },
+    {
+      "id": 1010,
+      "title": "Product Data Analyst",
+      "location": "Remote",
+      "company": "MockCompanyK",
+      "skills": ["SQL","Tableau","Python"],
+      "date_posted": "2025-05-10",
+      "salary": 56000,
+      "url": "https://en.wikipedia.org/wiki/Work"
+    },
+    {
+      "id": 1011,
+      "title": "NLP Engineer",
+      "location": "London",
+      "company": "MockCompanyL",
+      "skills": ["Python","NLP","Transformers"],
+      "date_posted": "2025-04-22",
+      "salary": 92000,
+      "url": "https://en.wikipedia.org/wiki/Work"
+    },
+    {
+      "id": 1012,
+      "title": "Systems Analyst",
+      "location": "Paris",
+      "company": "MockCompanyM",
+      "skills": ["Linux","Bash","Monitoring"],
+      "date_posted": "2025-04-01",
+      "salary": 61000,
+      "url": "https://en.wikipedia.org/wiki/Work"
+    },
+    {
+      "id": 1013,
+      "title": "Cloud Engineer",
+      "location": "Amsterdam",
+      "company": "MockCompanyN",
+      "skills": ["AWS","Terraform","Docker"],
+      "date_posted": "2025-03-12",
+      "salary": 78000,
+      "url": "https://en.wikipedia.org/wiki/Work"
+    },
+    {
+      "id": 1014,
+      "title": "Site Reliability Engineer",
+      "location": "Berlin",
+      "company": "MockCompanyO",
+      "skills": ["Prometheus","Kubernetes","Go"],
+      "date_posted": "2025-02-25",
+      "salary": 81000,
+      "url": "https://en.wikipedia.org/wiki/Work"
+    },
+    {
+      "id": 1015,
+      "title": "Business Intelligence Developer",
+      "location": "London",
+      "company": "MockCompanyP",
+      "skills": ["SQL","Power BI","ETL"],
+      "date_posted": "2025-02-10",
+      "salary": 64000,
+      "url": "https://en.wikipedia.org/wiki/Work"
+    },
+    {
+      "id": 1016,
+      "title": "Computer Vision Engineer",
+      "location": "Remote",
+      "company": "MockCompanyQ",
+      "skills": ["Python","OpenCV","Deep Learning"],
+      "date_posted": "2025-01-20",
+      "salary": 90000,
+      "url": "https://en.wikipedia.org/wiki/Work"
+    },
+    {
+      "id": 1017,
+      "title": "Mobile Developer",
+      "location": "Milan",
+      "company": "MockCompanyR",
+      "skills": ["Kotlin","Android","REST APIs"],
+      "date_posted": "2024-12-15",
+      "salary": 59000,
+      "url": "https://en.wikipedia.org/wiki/Work"
+    },
+    {
+      "id": 1018,
+      "title": "Security Engineer",
+      "location": "Paris",
+      "company": "MockCompanyS",
+      "skills": ["Security","Linux","Networking"],
+      "date_posted": "2024-11-30",
+      "salary": 86000,
+      "url": "https://en.wikipedia.org/wiki/Work"
+    },
+    {
+      "id": 1019,
+      "title": "Embedded Software Engineer",
+      "location": "Berlin",
+      "company": "MockCompanyT",
+      "skills": ["C","Embedded Systems","RTOS"],
+      "date_posted": "2024-10-05",
+      "salary": 70000,
+      "url": "https://en.wikipedia.org/wiki/Work"
+    },
+    {
+      "id": 1020,
+      "title": "Data Architect",
+      "location": "London",
+      "company": "MockCompanyU",
+      "skills": ["SQL","Data Modeling","ETL"],
+      "date_posted": "2024-09-01",
+      "salary": 95000,
+      "url": "https://en.wikipedia.org/wiki/Work"
+    },
+    {
+      "id": 1021,
+      "title": "AI Researcher",
+      "location": "Remote",
+      "company": "MockCompanyV",
+      "skills": ["Machine Learning","Python","Research"],
+      "date_posted": "2024-08-15",
+      "salary": 98000,
+      "url": "https://en.wikipedia.org/wiki/Work"
+    },
+    {
+      "id": 1022,
+      "title": "Site Reliability Engineer",
+      "location": "Amsterdam",
+      "company": "MockCompanyW",
+      "skills": ["Kubernetes","CI/CD","Monitoring"],
+      "date_posted": "2024-07-10",
+      "salary": 79000,
+      "url": "https://en.wikipedia.org/wiki/Work"
+    },
+    {
+      "id": 1023,
+      "title": "Platform Engineer",
+      "location": "Paris",
+      "company": "MockCompanyX",
+      "skills": ["Terraform","AWS","Docker"],
+      "date_posted": "2024-06-01",
+      "salary": 82000,
+      "url": "https://en.wikipedia.org/wiki/Work"
+    },
+    {
+      "id": 1024,
+      "title": "Research Scientist",
+      "location": "Berlin",
+      "company": "MockCompanyY",
+      "skills": ["Python","Statistics","Experiment Design"],
+      "date_posted": "2024-05-15",
+      "salary": 90000,
+      "url": "https://en.wikipedia.org/wiki/Work"
+    },
+    {
+      "id": 1025,
+      "title": "Performance Engineer",
+      "location": "London",
+      "company": "MockCompanyZ",
+      "skills": ["Profiling","Java","Load Testing"],
+      "date_posted": "2024-04-10",
+      "salary": 76000,
+      "url": "https://en.wikipedia.org/wiki/Work"
+    },
+    {
+      "id": 1026,
+      "title": "Analytics Engineer",
+      "location": "Remote",
+      "company": "MockCompanyAA",
+      "skills": ["SQL","dbt","Python"],
+      "date_posted": "2024-03-01",
+      "salary": 68000,
+      "url": "https://en.wikipedia.org/wiki/Work"
+    },
+    {
+      "id": 1027,
+      "title": "Data Platform Engineer",
+      "location": "Milan",
+      "company": "MockCompanyBB",
+      "skills": ["Spark","Kafka","Scala"],
+      "date_posted": "2024-02-05",
+      "salary": 83000,
+      "url": "https://en.wikipedia.org/wiki/Work"
+    },
+    {
+      "id": 1028,
+      "title": "ML Ops Engineer",
+      "location": "Amsterdam",
+      "company": "MockCompanyCC",
+      "skills": ["Docker","Kubernetes","MLflow"],
+      "date_posted": "2024-01-15",
+      "salary": 87000,
+      "url": "https://en.wikipedia.org/wiki/Work"
+    },
+    {
+      "id": 1029,
+      "title": "QA Automation Engineer",
+      "location": "Berlin",
+      "company": "MockCompanyDD",
+      "skills": ["Selenium","Python","CI/CD"],
+      "date_posted": "2023-12-01",
+      "salary": 56000,
+      "url": "https://en.wikipedia.org/wiki/Work"
+    },
+    {
+      "id": 1030,
+      "title": "Cloud Native Engineer",
+      "location": "London",
+      "company": "MockCompanyEE",
+      "skills": ["Kubernetes","Go","Cloud"],
+      "date_posted": "2023-11-10",
+      "salary": 84000,
+      "url": "https://en.wikipedia.org/wiki/Work"
+    },
+    {
+      "id": 1031,
+      "title": "Data Scientist",
+      "location": "Remote",
+      "company": "MockCompanyFF",
+      "skills": ["Python","Pandas","Machine Learning"],
+      "date_posted": "2023-10-05",
+      "salary": 67000,
+      "url": "https://en.wikipedia.org/wiki/Work"
+    },
+    {
+      "id": 1032,
+      "title": "Backend Engineer",
+      "location": "Milan",
+      "company": "MockCompanyGG",
+      "skills": ["Node.js","PostgreSQL","Docker"],
+      "date_posted": "2023-09-01",
+      "salary": 71000,
+      "url": "https://en.wikipedia.org/wiki/Work"
+    },
+    {
+      "id": 1033,
+      "title": "Frontend Developer",
+      "location": "Paris",
+      "company": "MockCompanyHH",
+      "skills": ["Vue.js","JavaScript","CSS"],
+      "date_posted": "2023-08-15",
+      "salary": 53000,
+      "url": "https://en.wikipedia.org/wiki/Work"
+    },
+    {
+      "id": 1034,
+      "title": "Machine Learning Engineer",
+      "location": "Berlin",
+      "company": "MockCompanyII",
+      "skills": ["Python","Scikit-learn","SQL"],
+      "date_posted": "2023-07-01",
+      "salary": 88000,
+      "url": "https://en.wikipedia.org/wiki/Work"
+    },
+    {
+      "id": 1035,
+      "title": "Embedded Systems Developer",
+      "location": "London",
+      "company": "MockCompanyJJ",
+      "skills": ["C++","Embedded","Microcontrollers"],
+      "date_posted": "2023-06-10",
+      "salary": 69000,
+      "url": "https://en.wikipedia.org/wiki/Work"
+    },
+    {
+      "id": 1036,
+      "title": "Data Engineer",
+      "location": "Remote",
+      "company": "MockCompanyKK",
+      "skills": ["Python","Kafka","Spark"],
+      "date_posted": "2023-05-05",
+      "salary": 72000,
+      "url": "https://en.wikipedia.org/wiki/Work"
+    },
+    {
+      "id": 1037,
+      "title": "Research Engineer",
+      "location": "Milan",
+      "company": "MockCompanyLL",
+      "skills": ["Python","Research","Statistics"],
+      "date_posted": "2023-04-01",
+      "salary": 85000,
+      "url": "https://en.wikipedia.org/wiki/Work"
+    },
+    {
+      "id": 1038,
+      "title": "Solutions Architect",
+      "location": "Amsterdam",
+      "company": "MockCompanyMM",
+      "skills": ["AWS","Architectures","Terraform"],
+      "date_posted": "2023-03-10",
+      "salary": 98000,
+      "url": "https://en.wikipedia.org/wiki/Work"
+    },
+    {
+      "id": 1039,
+      "title": "ML Researcher",
+      "location": "Berlin",
+      "company": "MockCompanyNN",
+      "skills": ["Deep Learning","Python","Research"],
+      "date_posted": "2023-02-01",
+      "salary": 99000,
+      "url": "https://en.wikipedia.org/wiki/Work"
+    },
+    {
+      "id": 1040,
+      "title": "Platform Developer",
+      "location": "Paris",
+      "company": "MockCompanyOO",
+      "skills": ["Docker","Kubernetes","Go"],
+      "date_posted": "2023-01-10",
+      "salary": 76000,
+      "url": "https://en.wikipedia.org/wiki/Work"
+    },
+    {
+      "id": 1041,
+      "title": "Data Analyst",
+      "location": "London",
+      "company": "MockCompanyPP",
+      "skills": ["SQL","R","Excel"],
+      "date_posted": "2022-12-01",
+      "salary": 50000,
+      "url": "https://en.wikipedia.org/wiki/Work"
+    },
+    {
+      "id": 1042,
+      "title": "Web Developer",
+      "location": "Remote",
+      "company": "MockCompanyQQ",
+      "skills": ["HTML","CSS","JavaScript"],
+      "date_posted": "2022-11-15",
+      "salary": 48000,
+      "url": "https://en.wikipedia.org/wiki/Work"
+    },
+    {
+      "id": 1043,
+      "title": "Infrastructure Engineer",
+      "location": "Milan",
+      "company": "MockCompanyRR",
+      "skills": ["Linux","Networking","Ansible"],
+      "date_posted": "2022-10-10",
+      "salary": 72000,
+      "url": "https://en.wikipedia.org/wiki/Work"
+    },
+    {
+      "id": 1044,
+      "title": "Data Scientist",
+      "location": "Amsterdam",
+      "company": "MockCompanySS",
+      "skills": ["Python","Pandas","Machine Learning"],
+      "date_posted": "2022-09-01",
+      "salary": 66000,
+      "url": "https://en.wikipedia.org/wiki/Work"
+    },
+    {
+      "id": 1045,
+      "title": "Backend Developer",
+      "location": "Berlin",
+      "company": "MockCompanyTT",
+      "skills": ["Java","Spring","SQL"],
+      "date_posted": "2022-08-10",
+      "salary": 71000,
+      "url": "https://en.wikipedia.org/wiki/Work"
+    },
+    {
+      "id": 1046,
+      "title": "Data Engineer",
+      "location": "Paris",
+      "company": "MockCompanyUU",
+      "skills": ["Python","ETL","SQL"],
+      "date_posted": "2022-07-01",
+      "salary": 69000,
+      "url": "https://en.wikipedia.org/wiki/Work"
+    },
+    {
+      "id": 1047,
+      "title": "Research Engineer",
+      "location": "London",
+      "company": "MockCompanyVV",
+      "skills": ["Algorithms","Python","C++"],
+      "date_posted": "2022-06-10",
+      "salary": 88000,
+      "url": "https://en.wikipedia.org/wiki/Work"
+    },
+    {
+      "id": 1048,
+      "title": "Embedded Engineer",
+      "location": "Remote",
+      "company": "MockCompanyWW",
+      "skills": ["C","Embedded","RTOS"],
+      "date_posted": "2022-05-05",
+      "salary": 68000,
+      "url": "https://en.wikipedia.org/wiki/Work"
+    },
+    {
+      "id": 1049,
+      "title": "AI Engineer",
+      "location": "Berlin",
+      "company": "MockCompanyXX",
+      "skills": ["Deep Learning","PyTorch","Python"],
+      "date_posted": "2022-04-01",
+      "salary": 94000,
+      "url": "https://en.wikipedia.org/wiki/Work"
+    },
+    {
+      "id": 1050,
+      "title": "Site Reliability Engineer",
+      "location": "Milan",
+      "company": "MockCompanyYY",
+      "skills": ["Monitoring","Kubernetes","AWS"],
+      "date_posted": "2022-03-10",
+      "salary": 80000,
+      "url": "https://en.wikipedia.org/wiki/Work"
+    },
+    {
+      "id": 1051,
+      "title": "ML Platform Engineer",
+      "location": "Amsterdam",
+      "company": "MockCompanyZZ",
+      "skills": ["MLflow","Kubernetes","Docker"],
+      "date_posted": "2022-02-01",
+      "salary": 87000,
+      "url": "https://en.wikipedia.org/wiki/Work"
+    },
+    {
+      "id": 1052,
+      "title": "Data Analyst",
+      "location": "Paris",
+      "company": "MockCompanyAAA",
+      "skills": ["SQL","Excel","Python"],
+      "date_posted": "2022-01-10",
+      "salary": 52000,
+      "url": "https://en.wikipedia.org/wiki/Work"
+    },
+    {
+      "id": 1053,
+      "title": "Backend Developer",
+      "location": "London",
+      "company": "MockCompanyBBB",
+      "skills": ["Node.js","Express","MongoDB"],
+      "date_posted": "2021-12-01",
+      "salary": 70000,
+      "url": "https://en.wikipedia.org/wiki/Work"
+    },
+    {
+      "id": 1054,
+      "title": "Frontend Engineer",
+      "location": "Remote",
+      "company": "MockCompanyCCC",
+      "skills": ["React","Redux","TypeScript"],
+      "date_posted": "2021-11-10",
+      "salary": 59000,
+      "url": "https://en.wikipedia.org/wiki/Work"
+    },
+    {
+      "id": 1055,
+      "title": "Data Engineer",
+      "location": "Berlin",
+      "company": "MockCompanyDDD",
+      "skills": ["Spark","Scala","Kafka"],
+      "date_posted": "2021-10-01",
+      "salary": 82000,
+      "url": "https://en.wikipedia.org/wiki/Work"
+    },
+    {
+      "id": 1056,
+      "title": "Cloud Engineer",
+      "location": "Paris",
+      "company": "MockCompanyEEE",
+      "skills": ["AWS","Python","Terraform"],
+      "date_posted": "2021-09-05",
+      "salary": 78000,
+      "url": "https://en.wikipedia.org/wiki/Work"
+    },
+    {
+      "id": 1057,
+      "title": "AI Researcher",
+      "location": "Milan",
+      "company": "MockCompanyFFF",
+      "skills": ["Research","Machine Learning","Python"],
+      "date_posted": "2021-08-01",
+      "salary": 100000,
+      "url": "https://en.wikipedia.org/wiki/Work"
+    },
+    {
+      "id": 1058,
+      "title": "Fullstack Developer",
+      "location": "Amsterdam",
+      "company": "MockCompanyGGG",
+      "skills": ["React","Node.js","PostgreSQL"],
+      "date_posted": "2021-07-10",
+      "salary": 66000,
+      "url": "https://en.wikipedia.org/wiki/Work"
+    },
+    {
+      "id": 1059,
+      "title": "Data Scientist",
+      "location": "Remote",
+      "company": "MockCompanyHHH",
+      "skills": ["Python","Machine Learning","SQL"],
+      "date_posted": "2021-06-01",
+      "salary": 72000,
+      "url": "https://en.wikipedia.org/wiki/Work"
+    }
   ],
   "courses": [
     {
