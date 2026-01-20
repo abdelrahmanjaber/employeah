@@ -11,3 +11,5 @@ database/scrapers/scrape_jobs/current_jobs/.env
 scraper/server/.gitkeep
 
 .vscode/
+**/node_modules/
+*.mp4

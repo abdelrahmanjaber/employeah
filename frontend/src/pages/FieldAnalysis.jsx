@@ -1,6 +1,10 @@
 import { useEffect, useState, useMemo } from "react";
 import { useSearchParams, useNavigate } from "react-router-dom";
-import { reportJobTitleDetails } from "../lib/apiClient";
+//UNCOMMENT WHEN DONE!!
+
+//import { reportJobTitleDetails } from "../lib/apiClient";
+//REMOVE WHEN DONE
+import { JOBS_DEMO } from "../lib/mock_database";
 
 const PIE_COLORS = [
   "#86efac", "#fde047", "#93c5fd", "#fca5a5", 
@@ -28,7 +32,60 @@ function FieldAnalysis() {
 
     const fetchData = async () => {
       setLoading(true);
+      //REMOVE WHEN DONE a
       try {
+        // 1. Filter jobs based on title and location
+        const filteredJobs = JOBS_DEMO.filter(j => {
+          const matchTitle = j.title.toLowerCase() === jobTitle.toLowerCase();
+          const matchLoc = location ? j.location.toLowerCase().includes(location.toLowerCase()) : true;
+          return matchTitle && matchLoc;
+        });
+
+        // 2. Calculate Top Skills
+        const skillsCount = {};
+        filteredJobs.forEach(j => {
+          j.skills.forEach(s => {
+            skillsCount[s] = (skillsCount[s] || 0) + 1;
+          });
+        });
+
+        const topSkills = Object.entries(skillsCount)
+          .map(([name, count]) => ({
+            name,
+            count,
+            percent: Number(((count / filteredJobs.length) * 100).toFixed(1))
+          }))
+          .sort((a, b) => b.count - a.count);
+
+        // 3. Calculate Top Companies
+        const companiesCount = {};
+        filteredJobs.forEach(j => {
+          companiesCount[j.company] = (companiesCount[j.company] || 0) + 1;
+        });
+
+        const topCompanies = Object.entries(companiesCount)
+          .map(([name, count]) => ({ name, count }))
+          .sort((a, b) => b.count - a.count)
+          .slice(0, 3);
+
+        // 4. Set the details state to match the UI expectation
+        setDetails({
+          total_jobs: filteredJobs.length,
+          top_skills: topSkills,
+          top_companies: topCompanies,
+          last_announcements: filteredJobs
+            .sort((a, b) => new Date(b.date_posted) - new Date(a.date_posted))
+            .slice(0, 5)
+            .map(j => ({ ...j, date: j.date_posted })) // match UI key 'date'
+        });
+
+      } catch (err) {
+        console.error("Failed to fetch field details", err);
+      } finally {
+        setLoading(false);
+      }
+      //UNCOMMENT WHEN DONE!!
+      /*try {
         const data = await reportJobTitleDetails({
           jobTitle,
           skills: selectedSkills,
@@ -40,7 +97,7 @@ function FieldAnalysis() {
         console.error("Failed to fetch field details", err);
       } finally {
         setLoading(false);
-      }
+      }*/
     };
 
     fetchData();

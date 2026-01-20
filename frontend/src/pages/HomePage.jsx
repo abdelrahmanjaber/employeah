@@ -1,7 +1,10 @@
 import { useNavigate } from "react-router-dom";
 import { useState, useEffect } from "react";
-import { getStats } from "../lib/apiClient";
+//UNCOMMENT WHEN DONE!!
+//import { getStats } from "../lib/apiClient";
 
+//REMOVE WHEN DONE
+import { JOBS_DEMO } from "../lib/mock_database";
 // --- CSS Keyframes for Animations ---
 const globalStyles = `
   @keyframes fadeInUp {
@@ -21,12 +24,18 @@ function HomePage() {
   const [hoveredIndex, setHoveredIndex] = useState(null);
   const [titleHover, setTitleHover] = useState(false);
   const [totalAnnouncements, setTotalAnnouncements] = useState(null);
-
+  //UNCOMMENT WHEN DONE!!
+  /*
   useEffect(() => {
     getStats()
       .then((d) => setTotalAnnouncements(d?.total_announcements ?? '-'))
       .catch(() => {});
-  }, []);
+  }, []);*/
+  //REMOVE WHEN DONE a
+  useEffect(() => {
+    // Simply use the length of your mock array
+    setTotalAnnouncements(JOBS_DEMO.length);
+  }, []);//b
 
   // Configuration for the three main actions with ICONS
   const actions = [

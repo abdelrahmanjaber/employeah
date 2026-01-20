@@ -1,146 +1,95 @@
 import { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import {
-  getCoursesForSkill,
-  getJobSkillDistribution,
-  getJobTitles,
-  getLocations,
-  getSkillTrend,
-} from "../lib/apiClient";
+import mockApi from "../lib/mockApi";
+import { JOBS_DEMO } from "../lib/mock_database";
 
 // ============================================================================
 // CONFIGURATION
 // ============================================================================
-
 const PIE_COLORS = [
   "#86efac", "#fde047", "#93c5fd", "#fca5a5", 
   "#d8b4fe", "#fdba74", "#cbd5e1", "#6ee7b7", 
   "#f9a8d4", "#c4b5fd", "#94a3b8", "#a7f3d0"
 ];
 
+const TIME_LIMITS = [
+  { value: "all", label: "All Data" },
+  { value: "1w", label: "Last week" },
+  { value: "2w", label: "Last 2 weeks" },
+  { value: "1m", label: "Last month" },
+  { value: "3m", label: "Last 3 months" }
+];
+
+const CHART_WIDTH = 500;
+const CHART_HEIGHT = 180;
+const MAX_VAL = 100;
+
 // ============================================================================
-// SUB-COMPONENT: PIE CHART & LIST
+// SUB-COMPONENT: SKILL BAR CHART
 // ============================================================================
-function InteractivePieChart({ data, onSelectSkill, selectedSkill, jobTitle, location }) {
-  if (!data || data.length === 0) {
-    return (
-      <div style={{height: 350, display:'flex', alignItems:'center', justifyContent:'center', color:'#999'}}>
-        No data available
-      </div>
-    );
-  }
+function SkillBarChart({ data, onSelectSkill, selectedSkill, limit, onLimitChange, maxPercent, jobTitle, location, timeLimit }) {
+  const [trends, setTrends] = useState({});
 
-  let cumulativePercent = 0;
+  useEffect(() => {
+    if (!data || data.length === 0) return;
+    
+    const fetchAllTrends = async () => {
+      const trendResults = {};
+      try {
+        await Promise.all(data.map(async (skill) => {
+          const history = await mockApi.getSkillTrendData(skill.name, jobTitle, location, timeLimit);
+          if (history && history.length >= 2) {
+            const first = history[0].y;
+            const last = history[history.length - 1].y;
+            trendResults[skill.name] = last - first;
+          }
+        }));
+        setTrends(trendResults);
+      } catch (err) {
+        console.error("Trend fetch error:", err);
+      }
+    };
 
-  const getCoordinatesForPercent = (percent) => {
-    const x = Math.cos(2 * Math.PI * percent);
-    const y = Math.sin(2 * Math.PI * percent);
-    return [x, y];
-  };
+    fetchAllTrends();
+  }, [data, jobTitle, location, timeLimit]);
 
-  const getTooltipText = (skillName, percent) => {
-    const locText = location ? ` in ${location}` : "";
-    return `${skillName} represents ${percent}% out of all skills required as a ${jobTitle}${locText}`;
-  };
+  if (!data || data.length === 0) return null;
 
   return (
-    <div style={{ display: "flex", flexDirection: "column", alignItems: "center", width: "100%" }}>
-      
-      {/* 1. SVG PIE CHART */}
-      <svg viewBox="-1.4 -1.4 2.8 2.8" style={{ height: "350px", transform: "rotate(-90deg)", marginBottom: "30px" }}>
-        {data.map((slice, index) => {
-          const percentage = slice.percent / 100;
-          const startPercent = cumulativePercent;
-          cumulativePercent += percentage;
-          const endPercent = cumulativePercent;
-
-          const [startX, startY] = getCoordinatesForPercent(startPercent);
-          const [endX, endY] = getCoordinatesForPercent(endPercent);
-
-          const isFullCircle = percentage >= 0.99;
-          const largeArcFlag = percentage > 0.5 ? 1 : 0;
-
-          const pathData = isFullCircle
-            ? `M 1 0 A 1 1 0 1 1 -1 0 A 1 1 0 1 1 1 0`
-            : `M 0 0 L ${startX} ${startY} A 1 1 0 ${largeArcFlag} 1 ${endX} ${endY} L 0 0`;
-
-          const isSelected = selectedSkill === slice.name;
-          const tooltipText = getTooltipText(slice.name, slice.percent);
-
-          const midAngle = 2 * Math.PI * (startPercent + percentage / 2);
-          const labelRadius = 0.85; 
-          const textX = labelRadius * Math.cos(midAngle);
-          const textY = labelRadius * Math.sin(midAngle);
-          const textRotation = `rotate(90, ${textX}, ${textY})`;
-          const showLabel = slice.percent > 5;
+    <div style={{ backgroundColor: "white", padding: "20px", borderRadius: "12px", boxShadow: "0 2px 8px rgba(0,0,0,0.05)" }}>
+      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 20 }}>
+        <h3 style={{ margin: 0, color: '#333', fontSize: '1.1rem' }}>Required Skills</h3>
+        <select value={limit} onChange={(e) => onLimitChange(e.target.value)} style={{ padding: "5px 10px", borderRadius: "6px", border: "1px solid #cbd5e1", fontSize: "14px", cursor: 'pointer' }}>
+          <option value={5}>Top 5</option>
+          <option value={10}>Top 10</option>
+          <option value={20}>Top 20</option>
+          <option value="All">All</option>
+        </select>
+      </div>
+      <div style={{ display: "flex", flexDirection: "column", gap: "12px" }}>
+        {data.map((skill, idx) => {
+          const isSelected = selectedSkill === skill.name;
+          const barColor = PIE_COLORS[idx % PIE_COLORS.length];
+          const trendDiff = trends[skill.name] || 0;
 
           return (
-            <g key={slice.name}>
-              <path
-                d={pathData}
-                fill={PIE_COLORS[index % PIE_COLORS.length]}
-                stroke={isSelected ? "#000" : "#fff"}
-                strokeWidth={isSelected ? "0.03" : "0.01"}
-                style={{ cursor: "pointer", transition: "opacity 0.2s" }}
-                onClick={() => onSelectSkill(slice.name)}
-                opacity={isSelected ? 1 : 0.85}
-              >
-                <title>{tooltipText}</title>
-              </path>
-              
-              {showLabel && (
-                <text
-                  x={textX}
-                  y={textY}
-                  transform={textRotation}
-                  textAnchor="middle"
-                  dominantBaseline="middle"
-                  fontSize="0.12" 
-                  fill="#000"
-                  fontWeight="600"
-                  pointerEvents="none"
-                  style={{ textShadow: "0px 0px 2px rgba(255,255,255,0.8)" }}
-                >
-                  {slice.name}
-                </text>
-              )}
-            </g>
+            <div key={skill.name} style={{ width: "100%" }}>
+              <div style={{ display: "flex", justifyContent: "space-between", marginBottom: "4px", fontSize: "14px", fontWeight: "600", color: "#1e293b" }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                  <button onClick={() => onSelectSkill(skill.name)} style={{ border: 'none', background: 'none', padding: 0, cursor: 'pointer', fontWeight: isSelected ? '800' : '600', color: isSelected ? barColor : 'inherit' }}>
+                    {skill.name} {isSelected && "•"}
+                  </button>
+                  {trendDiff > 0 && <span style={{ color: '#16a34a', fontSize: '10px' }}>▲</span>}
+                  {trendDiff < 0 && <span style={{ color: '#dc2626', fontSize: '10px' }}>▼</span>}
+                </div>
+                <span style={{ fontSize: "12px", color: "#64748b" }}>{skill.count} jobs ({skill.percent}%)</span>
+              </div>
+              <div onClick={() => onSelectSkill(skill.name)} style={{ width: "100%", backgroundColor: "#f1f5f9", borderRadius: "6px", height: "20px", cursor: "pointer", overflow: "hidden" }}>
+                <div style={{ width: `${(skill.percent / (maxPercent || 1)) * 100}%`, height: "100%", backgroundColor: barColor, transition: "width 0.5s ease", opacity: isSelected ? 1 : 0.7 }} />
+              </div>
+            </div>
           );
         })}
-      </svg>
-
-      {/* 2. CLICKABLE SKILL LIST */}
-      <div style={{ width: "100%", textAlign: "left" }}>
-        <h3 style={{ fontSize: "1rem", marginBottom: "15px", color: "#374151" }}>Prevalent Skills (Sorted):</h3>
-        <div style={{ display: "flex", flexWrap: "wrap", gap: "10px" }}>
-          {data.map((slice, index) => {
-            const isSelected = selectedSkill === slice.name;
-            const color = PIE_COLORS[index % PIE_COLORS.length];
-            const tooltipText = getTooltipText(slice.name, slice.percent);
-            
-            return (
-              <button
-                key={slice.name}
-                onClick={() => onSelectSkill(slice.name)}
-                title={tooltipText} 
-                style={{
-                  display: "flex", alignItems: "center", gap: "8px",
-                  padding: "8px 12px",
-                  border: isSelected ? "2px solid #000" : "1px solid #e5e7eb",
-                  borderRadius: "20px",
-                  background: isSelected ? "#f3f4f6" : "#fff",
-                  cursor: "pointer",
-                  fontSize: "0.9rem",
-                  fontWeight: isSelected ? "bold" : "normal",
-                  transition: "all 0.2s"
-                }}
-              >
-                <span style={{ display: "block", width: "12px", height: "12px", borderRadius: "50%", background: color }}></span>
-                {slice.name} <span style={{ color: "#6b7280", fontSize: "0.85rem" }}>{slice.percent}%</span>
-              </button>
-            );
-          })}
-        </div>
       </div>
     </div>
   );
@@ -149,50 +98,26 @@ function InteractivePieChart({ data, onSelectSkill, selectedSkill, jobTitle, loc
 // ============================================================================
 // MAIN COMPONENT
 // ============================================================================
-
 function SearchByJob() {
   const navigate = useNavigate();
-  
+  const [limit, setLimit] = useState(10);
   const [jobInput, setJobInput] = useState("");
   const [locationInput, setLocationInput] = useState("");
-  
+  const [timeLimit, setTimeLimit] = useState("all");
   const [loading, setLoading] = useState(false);
   const [skillsData, setSkillsData] = useState([]); 
   const [selectedSkill, setSelectedSkill] = useState(null);
-  
   const [trendData, setTrendData] = useState([]);
   const [coursesData, setCoursesData] = useState([]);
-
   const [showJobSugg, setShowJobSugg] = useState(false);
   const [showLocSugg, setShowLocSugg] = useState(false);
+  const [noDataReason, setNoDataReason] = useState(null);
 
-  const [availableJobs, setAvailableJobs] = useState([]);
-  const [availableLocations, setAvailableLocations] = useState([]);
+  const availableJobs = useMemo(() => [...new Set(JOBS_DEMO.map(j => j.title))].sort(), []);
+  const availableLocations = useMemo(() => [...new Set(JOBS_DEMO.map(j => j.location))].sort(), []);
 
-  useEffect(() => {
-    let cancelled = false;
-    Promise.all([getJobTitles(), getLocations()])
-      .then(([jobs, locs]) => {
-        if (cancelled) return;
-        setAvailableJobs(jobs || []);
-        setAvailableLocations(locs || []);
-      })
-      .catch((err) => console.error("Failed to load meta:", err));
-    return () => {
-      cancelled = true;
-    };
-  }, []);
-
-  const availableJobsMemo = useMemo(() => availableJobs.slice().sort(), [availableJobs]);
-  const availableLocationsMemo = useMemo(() => availableLocations.slice().sort(), [availableLocations]);
-
-  const filteredJobSuggestions = availableJobsMemo.filter(j => 
-    j.toLowerCase().includes(jobInput.toLowerCase()) && jobInput.length > 0
-  );
-  
-  const filteredLocSuggestions = availableLocationsMemo.filter(l => 
-    l.toLowerCase().includes(locationInput.toLowerCase()) && locationInput.length > 0
-  );
+  const filteredJobSuggestions = availableJobs.filter(j => j.toLowerCase().includes(jobInput.toLowerCase()) && jobInput.length > 0);
+  const filteredLocSuggestions = availableLocations.filter(l => l.toLowerCase().includes(locationInput.toLowerCase()) && locationInput.length > 0);
 
   const handleSearch = async () => {
     if (!jobInput) return;
@@ -200,341 +125,251 @@ function SearchByJob() {
     setSkillsData([]);
     setSelectedSkill(null);
     setTrendData([]);
-    setCoursesData([]);
-    setShowJobSugg(false);
-    setShowLocSugg(false);
-
+    setNoDataReason(null);
     try {
-      const result = await getJobSkillDistribution({ jobTitle: jobInput, location: locationInput });
-      
-      if (result && Array.isArray(result.skills)) {
-        const formattedSkills = result.skills
-          .map((s) => ({ name: s.name, percent: s.percentage }))
+      const result = await mockApi.searchByJob({ job: jobInput, location: locationInput, timeLimit });
+      if (result && result.skills && Object.keys(result.skills).length > 0) {
+        const formatted = Object.entries(result.skills)
+          .map(([name, data]) => ({ name, percent: data.percentage, count: data.count }))
           .sort((a, b) => b.percent - a.percent);
-
-        setSkillsData(formattedSkills);
-
-        if (formattedSkills.length > 0) {
-          handleSkillSelect(formattedSkills[0].name);
-        }
+        setSkillsData(formatted);
+        if (formatted.length > 0) handleSkillSelect(formatted[0].name);
+      } else {
+        const fallbackResult = await mockApi.searchByJob({ job: jobInput, location: locationInput, timeLimit: 'all' });
+        setNoDataReason(fallbackResult && fallbackResult.total_jobs > 0 ? 'period' : 'general');
       }
-    } catch (err) {
-      console.error(err);
-    } finally {
-      setLoading(false);
-    }
+    } catch (err) { console.error(err); } finally { setLoading(false); }
   };
 
   const handleSkillSelect = async (skill) => {
     setSelectedSkill(skill);
     try {
       const [trend, courses] = await Promise.all([
-        getSkillTrend({ skill, jobTitle: jobInput, location: locationInput }), 
-        getCoursesForSkill(skill)
+        mockApi.getSkillTrendData(skill, jobInput, locationInput, timeLimit), 
+        mockApi.getTUMCoursesBySkill(skill)
       ]);
-      setTrendData(trend?.points || []);
-      setCoursesData(courses);
-    } catch (err) {
-      console.error(err);
+      setTrendData(trend || []);
+      setCoursesData(courses || []);
+    } catch (err) { console.error(err); }
+  };
+
+  const displayedSkills = useMemo(() => limit === "All" ? skillsData : skillsData.slice(0, Number(limit)), [skillsData, limit]);
+  const maxPercent = useMemo(() => skillsData.length === 0 ? 1 : Math.max(...skillsData.map(s => s.percent)), [skillsData]);
+
+  const currentSkillColor = useMemo(() => {
+    const idx = skillsData.findIndex(s => s.name === selectedSkill);
+    return idx !== -1 ? PIE_COLORS[idx % PIE_COLORS.length] : "#059669";
+  }, [selectedSkill, skillsData]);
+
+  const parseDate = (dStr) => { 
+    if (!dStr) return new Date();
+    const parts = dStr.split('/');
+    
+    // Logic: Always treat as DD/MM/YYYY
+    if (parts.length === 3) {
+      return new Date(parseInt(parts[2]), parseInt(parts[1]) - 1, parseInt(parts[0]));
     }
+    // Fallback for MM/YYYY
+    if (parts.length === 2) {
+      return new Date(parseInt(parts[1]), parseInt(parts[0]) - 1, 1);
+    }
+    return new Date(dStr); 
   };
 
-  const formatTooltipDate = (dateStr) => {
-    const [month, year] = dateStr.split('.');
-    const date = new Date(parseInt(year), parseInt(month) - 1);
-    return date.toLocaleString('en-US', { month: 'long', year: 'numeric' });
+  const growthStat = useMemo(() => {
+    if (!trendData || trendData.length < 2) return null;
+    const oldest = trendData[0], newest = trendData[trendData.length - 1];
+    const diff = Number((newest.y - oldest.y).toFixed(1));
+    const start = parseDate(oldest.x), end = parseDate(newest.x);
+    
+    const diffTime = Math.abs(end - start);
+    const totalDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+    
+    let durationLabel = "";
+    if (totalDays >= 365) durationLabel = `${(totalDays / 365).toFixed(1).replace('.0', '')} years`;
+    else if (totalDays >= 30) durationLabel = `${Math.round(totalDays / 30)} months`;
+    else if (totalDays > 0) durationLabel = `${totalDays} days`;
+    else durationLabel = "this period";
+
+    return {
+      isUp: diff > 0, isDown: diff < 0, isStable: diff === 0,
+      color: diff > 0 ? "#16a34a" : diff < 0 ? "#dc2626" : "#475569",
+      text: `${diff === 0 ? 'stable ' : (diff > 0 ? 'up ' : 'down ')}${Math.abs(diff)}% over the last ${durationLabel}`
+    };
+  }, [trendData]);
+
+  const getX = (dStr, min, max) => {
+    const t = parseDate(dStr).getTime();
+    return max === min ? CHART_WIDTH / 2 : ((t - min) / (max - min)) * CHART_WIDTH;
   };
 
-  // --- CHART SETUP ---
-  const CHART_WIDTH = 500;
-  const CHART_HEIGHT = 180;
-  const MAX_VAL = 100;
+  const getAxisTicks = () => {
+    if (!trendData || trendData.length === 0) return [];
+    const times = trendData.map(d => parseDate(d.x).getTime());
+    const minTime = Math.min(...times), maxTime = Math.max(...times);
+    if (minTime === maxTime) return [parseDate(trendData[0].x)];
+    const ticks = [];
+    for (let i = 0; i <= 4; i++) ticks.push(new Date(minTime + ((maxTime - minTime) / 4) * i));
+    return ticks;
+  };
 
   const getLinePath = () => {
-    if (trendData.length < 2) return "";
-    return trendData.map((point, i) => {
-      const x = (i / (trendData.length - 1)) * CHART_WIDTH;
-      const y = CHART_HEIGHT - (point.y / MAX_VAL) * CHART_HEIGHT;
-      return `${i === 0 ? 'M' : 'L'} ${x} ${y}`;
-    }).join(" ");
-  };
-
-  const suggestionListStyle = {
-    position: "absolute", top: "100%", left: 0, right: 0,
-    background: "#fff", border: "2px solid #000", borderTop: "none",
-    listStyle: "none", padding: 0, margin: 0, zIndex: 10,
-    maxHeight: "200px", overflowY: "auto", borderRadius: "0 0 8px 8px"
-  };
-  // --- NEW: CHART TIME SCALING LOGIC ---
-  const parseDate = (dateStr) => {
-    const [month, year] = dateStr.split('.');
-    return new Date(parseInt(year), parseInt(month) - 1);
-  };
-
-  const formatAxisDate = (dateObj) => {
-    const month = String(dateObj.getMonth() + 1).padStart(2, '0');
-    const year = dateObj.getFullYear();
-    return `${month}.${year}`;
-  };
-
-  // Calculate X position based on Time (Timestamp) instead of Index
-  const getX = (dateStr, minTime, maxTime) => {
-    const time = parseDate(dateStr).getTime();
-    if (maxTime === minTime) return CHART_WIDTH / 2; // Center if only 1 point
-    return ((time - minTime) / (maxTime - minTime)) * CHART_WIDTH;
-  };
-
-  // Generate exactly 5 evenly spaced dates for the labels
-  const getAxisTicks = () => {
-    if (!trendData.length) return [];
-    
+    if (!trendData || trendData.length < 2) return "";
     const times = trendData.map(d => parseDate(d.x).getTime());
-    const minTime = Math.min(...times);
-    const maxTime = Math.max(...times);
-
-    if (minTime === maxTime) return [parseDate(trendData[0].x)];
-
-    const ticks = [];
-    const step = (maxTime - minTime) / 4; // 4 intervals = 5 ticks
-    for (let i = 0; i <= 4; i++) {
-      ticks.push(new Date(minTime + step * i));
-    }
-    return ticks;
+    const min = Math.min(...times), max = Math.max(...times);
+    return trendData.map((p, i) => `${i === 0 ? 'M' : 'L'} ${getX(p.x, min, max)} ${CHART_HEIGHT - (p.y / MAX_VAL) * CHART_HEIGHT}`).join(" ");
   };
 
   return (
     <main style={{ padding: "2rem", maxWidth: "1200px", margin: "0 auto", fontFamily: 'sans-serif' }}>
-      
-      {/* HEADER */}
-      <button 
-        onClick={() => navigate(-1)} 
-        style={{ 
-          cursor: "pointer", marginBottom: "1rem", background: "#ecfdf5", 
-          border: "1px solid #059669", padding: "5px 15px", borderRadius: "4px", color: "#065f46"
-        }}
-      >
-        ← Back
-      </button>
+      <button onClick={() => navigate(-1)} style={{ cursor: "pointer", marginBottom: "1rem", background: "#ecfdf5", border: "1px solid #059669", padding: "5px 15px", borderRadius: "4px", color: "#065f46" }}>← Back</button>
 
       <header style={{ textAlign: "center", marginBottom: "3rem" }}>
-        {/* ADDED ICON HERE */}
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '15px' }}>
-          <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="#1f2937" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-            <rect x="2" y="7" width="20" height="14" rx="2" ry="2"></rect>
-            <path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"></path>
-          </svg>
+          <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="#1f2937" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><rect x="2" y="7" width="20" height="14" rx="2" ry="2"></rect><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"></path></svg>
           <h1 style={{ fontSize: "2.5rem", margin: 0, color: "#1f2937" }}>Find Skills for your Dream Job</h1>
         </div>
-        <p style={{ color: "#666", fontSize: "1.1rem", marginTop: "0.5rem" }}>
-          Enter a job field and a location to get tailored insights.
+        
+        <p style={{ fontSize: "1.1rem", color: "#4b5563", marginTop: "10px", fontWeight: "400" }}>
+          Enter your dream job and we will show you the skills you need to get there
         </p>
       </header>
 
-      {/* SEARCH BAR */}
       <section style={{ display: "flex", gap: "15px", justifyContent: "center", alignItems: "end", marginBottom: "3rem" }}>
-        
-        {/* Job Field Input */}
-        <div style={{ position: "relative", width: "300px" }}>
-          <label style={{ display: "block", marginBottom: "5px", fontWeight: "bold", fontSize: "1.2rem" }}>Job Field</label>
-          <input 
-            placeholder="Start typing a job field..." 
-            value={jobInput}
-            onChange={(e) => { setJobInput(e.target.value); setShowJobSugg(true); }}
-            onFocus={() => { setShowJobSugg(true); setShowLocSugg(false); }}
-            style={{ padding: "15px", width: "100%", border: "2px solid #000", fontSize: "1rem", borderRadius: "8px" }}
-          />
+        <div style={{ position: "relative", width: "230px" }}>
+          <label style={{ display: "block", marginBottom: "5px", fontWeight: "bold" }}>Job Field</label>
+          <input placeholder="Job field..." value={jobInput} onChange={(e) => { setJobInput(e.target.value); setShowJobSugg(true); }} style={{ padding: "15px", width: "100%", border: "2px solid #000", borderRadius: "8px" }} />
           {showJobSugg && filteredJobSuggestions.length > 0 && (
-            <ul style={suggestionListStyle}>
-              {filteredJobSuggestions.map((j) => (
-                <li key={j} 
-                    onClick={() => { setJobInput(j); setShowJobSugg(false); }}
-                    style={{ padding: "12px", cursor: "pointer", borderBottom: "1px solid #eee" }}
-                    onMouseEnter={(e) => e.target.style.background = "#ecfdf5"}
-                    onMouseLeave={(e) => e.target.style.background = "#fff"}>
-                  {j}
-                </li>
-              ))}
+            <ul style={{ position: "absolute", top: "100%", left: 0, right: 0, background: "#fff", border: "2px solid #000", listStyle: "none", padding: 0, zIndex: 10, maxHeight: "200px", overflowY: "auto", borderRadius: "0 0 8px 8px" }}>
+              {filteredJobSuggestions.map(j => <li key={j} onClick={() => { setJobInput(j); setShowJobSugg(false); }} style={{ padding: "12px", cursor: "pointer", borderBottom: "1px solid #eee" }}>{j}</li>)}
             </ul>
           )}
         </div>
-
-        {/* Location Input */}
-        <div style={{ position: "relative", width: "300px" }}>
-          <label style={{ display: "block", marginBottom: "5px", fontWeight: "bold", fontSize: "1.2rem" }}>Location <span style={{fontWeight:'normal', fontSize:'0.9rem', color:'#666'}}>(Optional)</span></label>
-          <input 
-            placeholder="City, Country, or Remote" 
-            value={locationInput}
-            onChange={(e) => { setLocationInput(e.target.value); setShowLocSugg(true); }}
-            onFocus={() => { setShowLocSugg(true); setShowJobSugg(false); }}
-            style={{ padding: "15px", width: "100%", border: "2px solid #000", fontSize: "1rem", borderRadius: "8px" }}
-          />
+        <div style={{ position: "relative", width: "230px" }}>
+          <label style={{ display: "block", marginBottom: "5px", fontWeight: "bold" }}>Location</label>
+          <input placeholder="Location..." value={locationInput} onChange={(e) => { setLocationInput(e.target.value); setShowLocSugg(true); }} style={{ padding: "15px", width: "100%", border: "2px solid #000", borderRadius: "8px" }} />
           {showLocSugg && filteredLocSuggestions.length > 0 && (
-            <ul style={suggestionListStyle}>
-              {filteredLocSuggestions.map((l) => (
-                <li key={l} 
-                    onClick={() => { setLocationInput(l); setShowLocSugg(false); }}
-                    style={{ padding: "12px", cursor: "pointer", borderBottom: "1px solid #eee" }}
-                    onMouseEnter={(e) => e.target.style.background = "#ecfdf5"}
-                    onMouseLeave={(e) => e.target.style.background = "#fff"}>
-                  {l}
-                </li>
-              ))}
+            <ul style={{ position: "absolute", top: "100%", left: 0, right: 0, background: "#fff", border: "2px solid #000", listStyle: "none", padding: 0, zIndex: 10, maxHeight: "200px", overflowY: "auto", borderRadius: "0 0 8px 8px" }}>
+              {filteredLocSuggestions.map(l => <li key={l} onClick={() => { setLocationInput(l); setShowLocSugg(false); }} style={{ padding: "12px", cursor: "pointer", borderBottom: "1px solid #eee" }}>{l}</li>)}
             </ul>
           )}
         </div>
-
-        <button 
-          onClick={handleSearch}
-          style={{ 
-            padding: "15px 30px", background: "#6ee7b7", 
-            color: "#000", border: "2px solid #000", 
-            cursor: "pointer", fontWeight: "bold", fontSize: "1.1rem", borderRadius: "8px",
-            marginBottom: "1px"
-          }}
-        >
-          {loading ? "Searching..." : "Find Required Skills"}
-        </button>
+        <div style={{ position: "relative", width: "180px" }}>
+          <label style={{ display: "block", marginBottom: "5px", fontWeight: "bold" }}>Time Limit</label>
+          <select value={timeLimit} onChange={(e) => setTimeLimit(e.target.value)} style={{ padding: "15px", width: "100%", border: "2px solid #000", borderRadius: "8px", background: "white", cursor: 'pointer' }}>
+            {TIME_LIMITS.map(opt => <option key={opt.value} value={opt.value}>{opt.label}</option>)}
+          </select>
+        </div>
+        <button onClick={handleSearch} style={{ padding: "15px 30px", background: "#6ee7b7", border: "2px solid #000", fontWeight: "bold", borderRadius: "8px", cursor: 'pointer' }}>Search</button>
       </section>
 
-      {/* RESULTS GRID */}
-      {skillsData.length > 0 && (
-        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "50px", border: "2px solid #e5e7eb", padding: "40px", borderRadius: "12px" }}>
-          
-          {/* LEFT: PIE CHART & LIST */}
+      {!loading && noDataReason && (
+        <div style={{ padding: "32px", textAlign: "center", backgroundColor: "#f0f9ff", borderRadius: "16px", border: "1px solid #bae6fd", color: "#0369a1", maxWidth: "700px", margin: "40px auto", boxShadow: "0 4px 12px rgba(186, 230, 253, 0.25)" }}>
+          <div style={{ marginBottom: "16px" }}><svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="16" x2="12" y2="12"></line><line x1="12" y1="8" x2="12.01" y2="8"></line></svg></div>
+          {noDataReason === 'period' ? (
+            <div><h3 style={{ margin: "0 0 8px 0", fontSize: "1.25rem" }}>No results for this timeframe</h3><p style={{ margin: 0, opacity: 0.9 }}>It looks like there aren't any postings for <strong>{jobInput}</strong> in the selected period. Try expanding to <strong>Last 3 months</strong> or <strong>All Data</strong>.</p></div>
+          ) : (
+            <div><h3 style={{ margin: "0 0 8px 0", fontSize: "1.25rem" }}>Location not found</h3><p style={{ margin: 0, opacity: 0.9 }}>We couldn't find data for <strong>{jobInput}</strong> in <strong>{locationInput || 'this area'}</strong>. Try clearing the location or searching for a larger city.</p></div>
+          )}
+        </div>
+      )}
+
+      {!loading && skillsData && skillsData.length > 0 && (
+        <div style={{ display: "grid", gridTemplateColumns: "1fr 1.2fr", gap: "50px", border: "2px solid #e5e7eb", padding: "40px", borderRadius: "12px" }}>
           <section>
-            <h2 style={{ textAlign: "center", marginBottom: "20px" }}>
-              Required Skills for <span style={{ color: "#059669" }}>{jobInput}</span>
-              {locationInput && <span style={{fontWeight: 'bold', color: '#000'}}> in {locationInput}</span>}
-            </h2>
-            <p style={{ textAlign: "center", marginBottom: "30px", fontSize: "0.9rem", color: "#666" }}>
-              Distribution of skill requirements in job postings.
-            </p>
-            
-            <InteractivePieChart 
-              data={skillsData} 
-              onSelectSkill={handleSkillSelect} 
-              selectedSkill={selectedSkill}
-              jobTitle={jobInput}
-              location={locationInput}
-            />
+            <h2 style={{ textAlign: "center", marginBottom: "10px" }}>Skill Breakdown for <span style={{ color: "#059669" }}>{jobInput}</span> {locationInput && `in ${locationInput}`}</h2>
+            <SkillBarChart data={displayedSkills} onSelectSkill={handleSkillSelect} selectedSkill={selectedSkill} limit={limit} onLimitChange={setLimit} maxPercent={maxPercent} jobTitle={jobInput} location={locationInput} timeLimit={timeLimit} />
           </section>
 
-          {/* RIGHT: TRENDS & COURSES */}
           <section style={{ display: "flex", flexDirection: "column", gap: "30px" }}>
-            
-            {/* Trend Chart */}
-            <div style={{ opacity: selectedSkill ? 1 : 0.5, transition: "opacity 0.3s" }}>
-              <div style={{ marginBottom: "25px", textAlign: "left" }}>
-                <div style={{ background: "#d1fae5", padding: "5px 15px", borderRadius: "20px", display: "inline-block", fontWeight: "bold" }}>
-                  Demand for {selectedSkill || "..."}
-                  {locationInput ? ` in ${locationInput}` : ""}
+            <div style={{ opacity: selectedSkill ? 1 : 0.5 }}>
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '15px', width: '100%' }}>
+                <div style={{ background: "#f8fafc", padding: "5px 15px", borderRadius: "20px", fontWeight: "bold", border: `2px solid ${currentSkillColor}` }}>
+                  Demand for {selectedSkill} as a {jobInput} {locationInput && `in ${locationInput}`}
                 </div>
-                {/* --- UPDATED TEXT LABEL HERE --- */}
-                <div style={{ marginTop: "10px", fontSize: "0.9rem", color: "#555" }}>
-                  % of <strong>{jobInput}</strong> jobs requiring <strong>{selectedSkill ? selectedSkill.toLowerCase() : "..."}</strong>
-                  {locationInput && <span> in <strong>{locationInput}</strong></span>}
-                </div>
-              </div>
-              
-              <div style={{ height: "200px", borderLeft: "2px solid #000", borderBottom: "2px solid #000", position: "relative", marginLeft: "30px" }}>
-                <span style={{ position: "absolute", left: "-30px", top: "-10px", fontSize: "0.8rem" }}>100</span>
-                <span style={{ position: "absolute", left: "-25px", top: "45%", fontSize: "0.8rem" }}>50</span>
-                <span style={{ position: "absolute", left: "-15px", bottom: "-5px", fontSize: "0.8rem" }}>0</span>
-
-                {trendData.length > 0 ? (
-                    <>
-                        <svg width="100%" height="100%" viewBox={`0 0 ${CHART_WIDTH} ${CHART_HEIGHT}`} style={{ overflow: 'visible' }}>
-                        <path d={(() => {
-                            // Calculate Line Path using Time Scale
-                            const times = trendData.map(d => parseDate(d.x).getTime());
-                            const minTime = Math.min(...times);
-                            const maxTime = Math.max(...times);
-                            
-                            return trendData.map((point, i) => {
-                            const x = getX(point.x, minTime, maxTime);
-                            const y = CHART_HEIGHT - (point.y / MAX_VAL) * CHART_HEIGHT;
-                            return `${i === 0 ? 'M' : 'L'} ${x} ${y}`;
-                            }).join(" ");
-                        })()} fill="none" stroke="#059669" strokeWidth="3" />
-
-                        {/* Render Dots using Time Scale */}
-                        {trendData.map((point, i) => {
-                            const times = trendData.map(d => parseDate(d.x).getTime());
-                            const minTime = Math.min(...times);
-                            const maxTime = Math.max(...times);
-                            const cx = getX(point.x, minTime, maxTime);
-                            const cy = CHART_HEIGHT - (point.y / MAX_VAL) * CHART_HEIGHT;
-                            const dateText = formatTooltipDate(point.x);
-                            const locSuffix = locationInput ? ` in ${locationInput}` : "";
-                            const tooltipText = `In ${dateText}, ${point.y}% of ${jobInput} jobs${locSuffix} required ${selectedSkill}`;
-
-                            return (
-                            <circle key={i} cx={cx} cy={cy} r={4} fill="#fff" stroke="#059669" strokeWidth="2">
-                                <title>{tooltipText}</title>
-                            </circle>
-                            );
-                        })}
-                        </svg>
-
-                        {/* NEW: Time-Scaled X-Axis Labels (Absolute Positioning) */}
-                        <div style={{ position: "absolute", top: "210px", width: "100%", height: "20px" }}>
-                        {getAxisTicks().map((date, i) => (
-                            <span 
-                            key={i} 
-                            style={{ 
-                                position: 'absolute', 
-                                // Percentage left position ensures even spacing regardless of container width
-                                left: `${(i / 4) * 100}%`, 
-                                transform: 'translateX(-50%)',
-                                fontSize: "0.8rem", 
-                                fontWeight: "bold" 
-                            }}
-                            >
-                            {formatAxisDate(date)}
-                            </span>
-                        ))}
-                        </div>
-                    </>
-                    ) : (
-                    <div style={{ height: "100%", display: "flex", alignItems: "center", justifyContent: "center", color: "#999" }}>
-                        Select a skill to see history
-                    </div>
-                    )}
-              </div>
-            </div>
-
-            {/* TUM Courses Table */}
-            <div style={{ opacity: selectedSkill ? 1 : 0.5, transition: "opacity 0.3s" }}>
-              <div style={{ background: "#d1fae5", padding: "5px 15px", borderRadius: "20px", display: "inline-block", marginBottom: "10px" }}>
-                <strong>Top TUM courses teaching {selectedSkill ? selectedSkill.toLowerCase() : "..."}</strong>
-              </div>
-              
-              <div style={{ border: "2px solid #000", borderRadius: "8px", overflow: "hidden" }}>
-                {coursesData.length > 0 ? coursesData.map((course, i) => (
-                  <div key={i} style={{ 
-                    padding: "12px", 
-                    borderBottom: i === coursesData.length - 1 ? "none" : "1px solid #eee",
-                    display: "flex", justifyContent: "space-between", alignItems: "center",
-                    background: "#fff"
-                  }}>
-                    <a href={course.url} target="_blank" rel="noopener noreferrer" 
-                       style={{ color: "#000", textDecoration: "none", fontWeight: "500", fontSize: "0.95rem" }}
-                       onMouseEnter={(e) => e.target.style.textDecoration = "underline"}
-                       onMouseLeave={(e) => e.target.style.textDecoration = "none"}>
-                      {course.title}
-                    </a>
-                    <span style={{ fontSize: "0.8rem", background: "#f3f4f6", padding: "2px 8px", borderRadius: "4px" }}>
-                      {course.semester}
-                    </span>
-                  </div>
-                )) : (
-                  <div style={{ padding: "20px", textAlign: "center", color: "#666" }}>
-                    Select a skill to see relevant courses
+                {growthStat && (
+                  <div style={{ fontSize: "0.85rem", fontWeight: "700", color: growthStat.color, backgroundColor: growthStat.isUp ? "#f0fdf4" : (growthStat.isDown ? "#fef2f2" : "#f1f5f9"), padding: "5px 12px", borderRadius: "12px", border: `1px solid ${growthStat.color}`, display: 'flex', alignItems: 'center', gap: '4px' }}>
+                    {growthStat.isUp && <span>▲</span>} {growthStat.isDown && <span>▼</span>} {growthStat.text}
                   </div>
                 )}
               </div>
+
+              <div style={{ height: "200px", borderLeft: "2px solid #000", borderBottom: "2px solid #000", position: "relative", marginLeft: "45px", marginBottom: "40px" }}>
+                {[100, 75, 50, 25, 0].map(val => (<span key={val} style={{ position: "absolute", left: "-45px", top: `${100 - val}%`, transform: "translateY(-50%)", fontSize: "0.75rem", fontWeight: "bold" }}>{val}%</span>))}
+                {trendData && trendData.length > 0 ? (
+                  <>
+                    <svg width="100%" height="100%" viewBox={`0 0 ${CHART_WIDTH} ${CHART_HEIGHT}`} style={{ overflow: 'visible' }}>
+                      <path d={getLinePath()} fill="none" stroke={currentSkillColor} strokeWidth="3" />
+                      {trendData.map((p, i) => {
+                        const times = trendData.map(d => parseDate(d.x).getTime());
+                        const cx = getX(p.x, Math.min(...times), Math.max(...times));
+                        const cy = CHART_HEIGHT - (p.y / MAX_VAL) * CHART_HEIGHT;
+
+                        // --- REPLACE YOUR dateText LOGIC WITH THIS ---
+                        const date = parseDate(p.x);
+                        const isDaily = timeLimit === '1w' || timeLimit === '2w';
+                        const dateText = isDaily 
+                          ? date.toLocaleDateString('en-US', { day: 'numeric', month: 'short', year: 'numeric' })
+                          : date.toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
+                        // ----------------------------------------------
+
+                        return (
+                          <circle 
+                            key={i} 
+                            cx={cx} 
+                            cy={cy} 
+                            r={6} 
+                            fill="#fff" 
+                            stroke={currentSkillColor} 
+                            strokeWidth="2" 
+                            style={{ cursor: 'pointer' }}
+                          >
+                            <title>{`On ${dateText}, ${p.y}% of ${jobInput} jobs ${locationInput ? `in ${locationInput}` : ''} required ${selectedSkill}`}</title>
+                          </circle>
+                        );
+                      })}
+                    </svg>
+                    <div style={{ position: "absolute", top: "100%", left: 0, right: 0, height: "20px", marginTop: "10px" }}>
+                      {getAxisTicks().map((date, i) => {
+                        // Determine if we should show the day (DD/MM) or just Month/Year
+                        const isDaily = timeLimit === '1w' || timeLimit === '2w';
+                        const label = isDaily 
+                          ? date.toLocaleDateString('en-US', { day: '2-digit', month: '2-digit' }) // e.g., 15/01
+                          : date.toLocaleDateString('en-US', { month: '2-digit', year: 'numeric' }); // e.g., 01/2026
+
+                        return (
+                          <span 
+                            key={i} 
+                            style={{ 
+                              position: 'absolute', 
+                              left: `${(i / 4) * 100}%`, 
+                              transform: 'translateX(-50%)', 
+                              fontSize: "0.75rem", 
+                              fontWeight: "bold", 
+                              whiteSpace: "nowrap" 
+                            }}
+                          >
+                            {label}
+                          </span>
+                        );
+                      })}
+                    </div>
+                  </>
+                ) : <div style={{ textAlign: "center", color: "#999", paddingTop: "80px" }}>Select a skill to see history</div>}
+              </div>
             </div>
 
+            <div style={{ opacity: selectedSkill ? 1 : 0.5, marginTop: "30px" }}>
+              <div style={{ background: "#f8fafc", padding: "5px 15px", borderRadius: "20px", display: "inline-block", marginBottom: "10px", fontWeight: "bold", border: `2px solid ${currentSkillColor}` }}>Top TUM courses teaching {selectedSkill || "..."}</div>
+              <div style={{ border: `2px solid ${currentSkillColor}`, borderRadius: "8px", overflow: "hidden", background: "#fff", boxShadow: "0 2px 8px rgba(0,0,0,0.05)" }}>
+                {coursesData && coursesData.length > 0 ? coursesData.map((c, i) => (
+                  <div key={i} style={{ padding: "12px", borderBottom: i === coursesData.length - 1 ? "none" : "1px solid #eee", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                    <a href={c.url} target="_blank" rel="noopener noreferrer" style={{ color: "#000", fontWeight: "500", textDecoration: "none" }}>{c.title}</a>
+                    <span style={{ fontSize: "0.8rem", background: "#f1f5f9", padding: "2px 8px", borderRadius: "4px", fontWeight: "bold" }}>{c.semester}</span>
+                  </div>
+                )) : <div style={{ padding: "20px", textAlign: "center", color: "#64748b" }}>No courses found</div>}
+              </div>
+            </div>
           </section>
         </div>
       )}

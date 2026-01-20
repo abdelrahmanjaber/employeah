@@ -1,7 +1,10 @@
 import { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { getLocations, getSkills, reportJobTitleDetails, reportJobsBySkills } from "../lib/apiClient";
-
+//UNCOMMENT WHEN DONE
+//import { getLocations, getSkills, reportJobTitleDetails, reportJobsBySkills } from "../lib/apiClient";
+//REMOVE WHEN DONE
+import mockApi from "../lib/mockApi";
+import { JOBS_DEMO } from "../lib/mock_database";
 // ============================================================================
 // CONFIGURATION
 // ============================================================================
@@ -290,7 +293,8 @@ function SearchBySkills() {
   };
 
   // ========== FILTERED SUGGESTIONS ==========
-
+  //UNCOMMENT WHEN DONE:
+  /*
   useEffect(() => {
     // Try session cache first
     const cachedLoc = sessionStorage.getItem("locations_cache");
@@ -336,7 +340,33 @@ function SearchBySkills() {
     }, 200);
     return () => clearTimeout(t);
   }, [skillInput, selectedSkills]);
+  */
+  //REMOVE WHEN DONE A// 1. Get unique locations
+  useEffect(() => {
+    const locs = [...new Set(JOBS_DEMO.map(j => j.location))];
+    setAvailableLocations(locs);
+  }, []);
 
+  // 2. Get unique skills for the suggestions
+  useEffect(() => {
+    const skills = [...new Set(JOBS_DEMO.flatMap(j => j.skills))];
+    setAllSkills(skills);
+  }, []);
+  // 3. Handle skill suggestions based on typing (Local Only)
+  useEffect(() => {
+    if (!skillInput) {
+      setSkillSuggestions([]);
+      return;
+    }
+    const filtered = allSkills.filter((s) => 
+      s.toLowerCase().includes(skillInput.toLowerCase()) && 
+      !selectedSkills.includes(s)
+    );
+    setSkillSuggestions(filtered.slice(0, 15));
+  }, [skillInput, selectedSkills, allSkills]);
+  //b
+  //UNCOMMENT WHEN DONE
+  /*
   // Prefetch full skills list on mount and store in session cache for the session
   useEffect(() => {
     const cached = sessionStorage.getItem("skills_cache");
@@ -358,7 +388,7 @@ function SearchBySkills() {
         })
         .catch((err) => console.error("Failed to prefetch skills:", err));
     }
-  }, []);
+  }, []); */
 
   const filteredSkillSuggestions = useMemo(
     () => (skillSuggestions || []).filter((s) => s.toLowerCase().includes(skillInput.toLowerCase())),
@@ -390,7 +420,67 @@ function SearchBySkills() {
     setLocationInput(loc);
     setShowLocationSugg(false);
   };
+  //REMOVE WHEN DONE a
+  // Search Handler
+  const handleSearch = async () => {
+    if (selectedSkills.length === 0) {
+      alert("Please select at least one skill.");
+      return;
+    }
+    setResults(null);
+    setLoading(true);
+    setHasSearched(true);
 
+    try {
+      const resp = await mockApi.searchBySkills({
+        skills: selectedSkills,
+        location: locationInput || null,
+      });
+
+      setResults({
+        jobFields: Object.entries(resp.jobs || {}).map(([name, stats]) => ({
+          name,
+          percent: stats.percentage,
+          count: stats.count
+        })).sort((a, b) => b.percent - a.percent),
+        topField: resp.jobs ? Object.keys(resp.jobs)[0] : null,
+        lastAnnouncements: JOBS_DEMO
+          .filter(j => j.skills.some(s => selectedSkills.includes(s)))
+          .slice(0, 5)
+          .map(j => ({ ...j, date: j.date_posted }))
+      });
+    } catch (err) {
+      console.error(err);
+    } finally {
+      setLoading(false);
+    }
+  };
+  
+  // Detail Handler
+  const handleFieldClick = async (fieldName) => {
+    setSelectedField(fieldName);
+    setLoading(true);
+    try {
+      const details = await mockApi.getJobTitleDetails({
+        jobTitle: fieldName,
+        location: locationInput || null,
+      });
+
+      setFieldDetails({
+        topSkills: details?.top_skills || [],
+        topCompanies: details?.top_companies || [],
+        lastAnnouncements: (details?.last_announcements || []).map(j => ({...j, date: j.date_posted})),
+        totalJobs: details?.total_jobs || 0,
+      });
+    } catch (err) {
+      console.error(err);
+    } finally {
+      setLoading(false);
+    }
+  };
+  //b
+  //UNCOMMENT WHEN DONE
+  /*
   // Search Handler
   const handleSearch = async () => {
     if (selectedSkills.length === 0) {
@@ -403,7 +493,8 @@ function SearchBySkills() {
     setHasSearched(true);
     setSelectedField(null);
     setFieldDetails(null);
-
+    //UNCOMMENT WHEN DONE
+    /*
     try {
       const resp = await reportJobsBySkills({
         skills: selectedSkills,
@@ -421,12 +512,70 @@ function SearchBySkills() {
       setResults({ jobFields: [], topField: null, lastAnnouncements: [] });
     } finally {
       setLoading(false);
-    }
-  };
+    }*/
+    //REMOVE WHEN DONE a
+    try {
+      const resp = await mockApi.searchBySkills({
+        skills: selectedSkills,
+        location: locationInput || null,
+      });
 
+      // Transform object into sorted array for UI
+      const jobFields = Object.entries(resp.jobs || {})
+        .map(([name, stats]) => ({
+          name,
+          percent: stats.percentage,
+          count: stats.count
+        }))
+        .sort((a, b) => b.percent - a.percent);
+
+      setResults({
+        jobFields,
+        topField: jobFields.length > 0 ? jobFields[0].name : null,
+        lastAnnouncements: JOBS_DEMO
+          .filter(j => j.skills.some(s => selectedSkills.includes(s)))
+          .slice(0, 5)
+          .map(j => ({ ...j, date: j.date_posted }))
+      });
+    } catch (err) {
+      console.error(err);
+      setResults({ jobFields: [], topField: null, lastAnnouncements: [] });
+    } finally {
+      setLoading(false);
+    }//b
+  };*/
+  //REMOVE WHEN DONE a
   const handleFieldClick = async (fieldName) => {
     setSelectedField(fieldName);
     setLoading(true);
+    try {
+      // Assumes you added getJobTitleDetails to your mockApi.js
+      const details = await mockApi.getJobTitleDetails({
+        jobTitle: fieldName,
+        location: locationInput || null,
+      });
+
+      if (details) {
+        setFieldDetails({
+          topSkills: details.top_skills || [],
+          topCompanies: details.top_companies || [],
+          lastAnnouncements: details.last_announcements || [],
+          totalJobs: details.total_jobs || 0,
+        });
+      }
+    } catch (err) {
+      console.error("Failed to load details:", err);
+      setFieldDetails({ topSkills: [], topCompanies: [], lastAnnouncements: [], totalJobs: 0 });
+    } finally {
+      setLoading(false);
+    }
+  };
+  //b
+  //UNCOMMENT WHEN DONE /*
+  const handleFieldClick = async (fieldName) => {
+    setSelectedField(fieldName);
+    setLoading(true);
+    
     try {
       const details = await reportJobTitleDetails({
         jobTitle: fieldName,
@@ -441,13 +590,30 @@ function SearchBySkills() {
         lastAnnouncements: details?.last_announcements || [],
         totalJobs: details?.total_jobs || 0,
       });
+      //REMOVE WHEN DONE a
+      try {
+      const details = await mockApi.getJobTitleDetails({
+        jobTitle: fieldName,
+        location: locationInput || null,
+      });
+
+      setFieldDetails({
+        topSkills: details?.top_skills || [],
+        topCompanies: details?.top_companies || [],
+        lastAnnouncements: details?.last_announcements || [],
+        totalJobs: details?.total_jobs || 0,
+      });
+    } catch (err) {
+      console.error(err);
+      setFieldDetails({ topSkills: [], topCompanies: [], lastAnnouncements: [] });
+    } //b
     } catch (err) {
       console.error(err);
       setFieldDetails({ topSkills: [], topCompanies: [], lastAnnouncements: [] });
     } finally {
       setLoading(false);
     }
-  };
+  };*/
 
   const handleBackToResults = () => {
     setSelectedField(null);

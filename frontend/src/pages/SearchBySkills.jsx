@@ -1,7 +1,12 @@
 import { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { getLocations, getSkills, reportJobsBySkills } from "../lib/apiClient";
 
+//UNCOMMENT WHEN DONE
+//import { getLocations, getSkills, reportJobsBySkills } from "../lib/apiClient";
+//REMOVE WHEN DONE:a
+import mockApi from "../lib/mockApi";
+import { JOBS_DEMO } from "../lib/mock_database";
+//b
 // ============================================================================
 // CONFIGURATION
 // ============================================================================
@@ -69,8 +74,8 @@ function SearchBySkills() {
   };
 
   // ========== FILTERED SUGGESTIONS ==========
-
-  useEffect(() => {
+  //UNCOMMENT WHEN DONE
+  /*useEffect(() => {
     // Try session cache first
     const cachedLoc = sessionStorage.getItem("locations_cache");
     if (cachedLoc) {
@@ -91,10 +96,17 @@ function SearchBySkills() {
         })
         .catch((err) => console.error("Failed to load locations:", err));
     }
-  }, []);
-
-  // Restore State on Mount
+  }, []);*/
+  //REMOVE WHEN DONE a
   useEffect(() => {
+    // Extract unique locations from mock data
+    const locs = [...new Set(JOBS_DEMO.map(j => j.location))];
+    setAvailableLocations(locs);
+  }, []);
+  //b
+  //UNCOMMENT WHEN DONE!!
+  // Restore State on Mount
+  /*useEffect(() => {
     const savedSkills = sessionStorage.getItem("sbs_skills");
     if (savedSkills) setSelectedSkills(JSON.parse(savedSkills));
 
@@ -113,7 +125,30 @@ function SearchBySkills() {
       } catch(e) { console.error(e);}
     }
   }, []);
-
+  */
+ // REMOVE WHEN DONE: a
+  useEffect(() => {
+    if (!skillInput) {
+      setSkillSuggestions([]);
+      return;
+    }
+    // Filter from the local 'allSkills' list instead of calling an API
+    const filtered = allSkills.filter((s) => 
+      s.toLowerCase().includes(skillInput.toLowerCase()) && 
+      !selectedSkills.includes(s)
+    );
+    setSkillSuggestions(filtered.slice(0, 15));
+  }, [skillInput, selectedSkills, allSkills]);
+  // b
+ //REMOVE WHEN DONE a
+  useEffect(() => {
+    // Extract all unique skills from mock data
+    const skills = [...new Set(JOBS_DEMO.flatMap(j => j.skills))];
+    setAllSkills(skills);
+  }, []);
+  //b
+  //UNCOMMENT WHEN DONE
+  /*
   useEffect(() => {
     if (!skillInput) {
       setSkillSuggestions([]);
@@ -134,9 +169,11 @@ function SearchBySkills() {
         .catch((err) => console.error("Failed to load skills:", err));
     }, 200);
     return () => clearTimeout(t);
-  }, [skillInput, selectedSkills]);
+  }, [skillInput, selectedSkills]); */
 
   // Prefetch full skills list on mount and store in session cache for the session
+  //UNCOMMENT WHEN DONE
+  /*
   useEffect(() => {
     const cached = sessionStorage.getItem("skills_cache");
     if (cached) {
@@ -158,7 +195,7 @@ function SearchBySkills() {
         .catch((err) => console.error("Failed to prefetch skills:", err));
     }
   }, []); // Run only once on mount
-
+  */
   const filteredSkillSuggestions = useMemo(
     () => (skillSuggestions || []).filter((s) => s.toLowerCase().includes(skillInput.toLowerCase())),
     [skillSuggestions, skillInput]
@@ -211,7 +248,8 @@ function SearchBySkills() {
     sessionStorage.setItem("sbs_skills", JSON.stringify(selectedSkills));
     sessionStorage.setItem("sbs_location", locationInput);
     sessionStorage.setItem("sbs_timeLimit", timeLimit);
-
+    //UNCOMMENT WHEN DONE!!
+    /*
     try {
       const resp = await reportJobsBySkills({
         skills: selectedSkills,
@@ -233,7 +271,60 @@ function SearchBySkills() {
       setResults({ jobFields: [], topField: null, lastAnnouncements: [] });
     } finally {
       setLoading(false);
+    }*/
+    //REMOVE WHEN DONE:a
+    try {
+      // 1. Call your mock API
+      const resp = await mockApi.searchBySkills({
+        skills: selectedSkills,
+        location: locationInput || null
+      });
+
+      // 2. Map the stats object to the array format your UI uses
+      const jobFields = Object.entries(resp.jobs || {}).map(([name, stats]) => ({
+        name: name,
+        percent: stats.percentage,
+        count: stats.count
+      }));
+
+      // 3. Find the last 5 job postings for the sidebar
+      const now = new Date();
+      const timeMap = { "1w": 7, "2w": 14, "1m": 30, "3m": 90 };
+      const daysAllowed = timeMap[timeLimit] || 90;
+      const cutoffDate = new Date(now.setDate(now.getDate() - daysAllowed));
+
+      const lastAnnouncements = JOBS_DEMO
+        .filter(j => {
+          const isMatch = j.skills.some(s => selectedSkills.includes(s));
+          const isRecent = new Date(j.date_posted) >= cutoffDate;
+          return isMatch && isRecent;
+        })
+        .sort((a, b) => new Date(b.date_posted) - new Date(a.date_posted))
+        .slice(0, 5)
+        .map(j => ({
+          id: j.id,
+          title: j.title,
+          company: j.company,
+          date: j.date_posted,
+          url: j.url
+        }));
+      
+      const resData = {
+        jobFields: jobFields,
+        topField: jobFields.length > 0 ? jobFields[0].name : null,
+        lastAnnouncements: lastAnnouncements,
+      };
+      
+      setResults(resData);
+      sessionStorage.setItem("sbs_results", JSON.stringify(resData));
+
+    } catch (err) {
+      console.error(err);
+      setResults({ jobFields: [], topField: null, lastAnnouncements: [] });
+    } finally {
+      setLoading(false);
     }
+    //b
   };
 
   const handleFieldClick = (fieldName) => {
