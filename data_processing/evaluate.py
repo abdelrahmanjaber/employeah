@@ -4,11 +4,11 @@ import numpy as np
 
 def compare_skills_columns():
     # Path to the Parquet file
-    parquet_path = Path(__file__).parent.parent / "data_pipeline" / "data" / "job_data" / "ALL_JOB_DATA.snappy.parquet"
+    csv_path = Path(__file__).parent.parent / "data_pipeline" / "data" / "job_data" / "ALL_JOB_DATA.csv.gz"
     
     # Load the DataFrame
     print("Loading Parquet file...")
-    df = pd.read_parquet(parquet_path)
+    df = pd.read_parquet(csv_path)
     
     print(f"Loaded {len(df)} rows")
     print(f"Columns: {df.columns.tolist()}")

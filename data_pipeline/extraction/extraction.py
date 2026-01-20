@@ -1,7 +1,10 @@
 import re
+import sys 
 import pandas as pd
+from pathlib import Path
 from sentence_transformers import SentenceTransformer, util
 from tqdm import tqdm
+sys.path.append(str(Path(__file__).parent.parent.parent))
 from data_processing.llm_with_chunking import search_for_skills
 
 
@@ -134,3 +137,23 @@ def extract_level(title):
     cleaned = re.sub(senior_pattern, "", cleaned)  
 
     return level
+
+if __name__ == "__main__":
+    #If this is the main file, run extraction on the full parquet
+    # Get skills from df
+    csv_path = Path(__file__).parent.parent / "data" / "job_data" / "ALL_JOBS.csv.gz"
+    #skill_path = "./extraction/lists/skill_areas_flattened.txt"
+    skill_path = Path(__file__).parent / "lists" / "skill_areas_flattened.txt"
+    print("Loading ZIP file...")
+    df = pd.read_csv(csv_path)
+    df = extract_from_description(df, skill_path)
+
+    # Get fields from df
+    #field_path = "./extraction/lists/fields.txt"
+    field_path = Path(__file__).parent / "lists" / "fields.txt"
+    model_name = "TechWolf/JobBERT-v2" 
+    df = extract_from_title(df,field_path,treshold=0.3,model_name=model_name)
+
+    # Save back to parquet
+    df.to_parquet(csv_path, compression='snappy', index=False)
+    print(f"Saved extracted DataFrame back to {csv_path}")
