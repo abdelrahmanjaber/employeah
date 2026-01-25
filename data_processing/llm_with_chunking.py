@@ -4,6 +4,9 @@ import pandas as pd
 import tqdm
 import matplotlib.pyplot as plt
 import time
+from pathlib import Path
+sys.path.append(str(Path(__file__).parent.parent))
+#import regex_scill_extract
 
 from pathlib import Path
 parent_dir = Path(__file__).parent
@@ -38,8 +41,6 @@ import spacy
 import faiss
 
 language = "en"
-
-adzuna_df = pd.read_csv("adzuna_test_for_llm.csv")
 
 # Load skills from txt file
 file_path = parent_dir / "skills.txt"
@@ -123,7 +124,7 @@ def ner_filter(candidates, nlp):
         idx.append(i)
     return out, idx
 
-def extract_skills_batched(job_descriptions, skills, model, threshold=0.75, low_similarity_threshold=0.5):
+def extract_skills_batched(job_descriptions, skills, model, threshold=0.75, low_similarity_threshold=0.5) -> Tuple[List[List[str]], List[List[str]], List[str], List[str]]:
     """
     job_descriptions: List[str]
     skills: List[str]
@@ -137,7 +138,7 @@ def extract_skills_batched(job_descriptions, skills, model, threshold=0.75, low_
     """
     global_new_skills = defaultdict(int)
     start_time = time.time()
-
+    
     # === Embed all skills once ===
     skill_start = time.time()
     skill_embeddings = model.encode(skills, normalize_embeddings=True)
@@ -166,7 +167,8 @@ def extract_skills_batched(job_descriptions, skills, model, threshold=0.75, low_
     sims = cand_emb @ skill_embeddings.T
     sim_time = time.time() - sim_start
     print(f"✓ Computed similarities in {sim_time:.2f}s")
-
+    #clean cache
+    del cand_emb
     # === Prepare output ===
     match_start = time.time()
     per_job_skills = [set() for _ in job_descriptions]
@@ -407,6 +409,42 @@ def remove_job_titles_from_candidates(candidates, blacklist):
             filtered.append(c)
     return filtered
 
+def search_for_skills(df: pd.DataFrame, skills_list: List[str]):
+    _, per_job_skills, all_used_skills,all_new_skills = extract_skills_batched(
+        job_descriptions=df['Description'].tolist(),
+        skills=skills_list,
+        model=EmbeddingEngine().model,
+        threshold=0.75
+    )
+    return per_job_skills
+
+def search_for_skills_batch(df: pd.DataFrame, skills_list: List[str]):
+    skill_start = time.time()
+    print(f"Processing {len(skills_list)} skills")
+    #skill_embeddings = EmbeddingEngine().model.encode(skills_list, normalize_embeddings=True)
+    
+    
+    batch_size = 10_000
+    per_job_skills = []
+
+    descriptions = df['Description'].tolist()
+
+    for start_idx in range(0, len(descriptions), batch_size):
+        batch = descriptions[start_idx:start_idx + batch_size]
+
+        _, per_job_skills_batch, all_used_skills, all_new_skills = extract_skills_batched(
+            job_descriptions=batch,
+            skills=skills_list,
+            model=EmbeddingEngine().model,
+            threshold=0.75,
+        )
+
+        per_job_skills.extend(per_job_skills_batch)
+    skill_time = time.time() - skill_start
+    print(f"✓ Assigned {len(skills_list)} skills in {skill_time:.2f}s")
+        
+    return per_job_skills
+
 def search_for_skills_and_find_new_ones(df: pd.DataFrame, skills_list: List[str]):
 
 
@@ -416,7 +454,6 @@ def search_for_skills_and_find_new_ones(df: pd.DataFrame, skills_list: List[str]
         model=EmbeddingEngine().model,
         threshold=0.75
     )
-
     # Attach skills to subset and merge back into full dataframe
 
     print(f"Starting new skill discovery from {len(all_new_skills)} candidates...")
@@ -451,18 +488,24 @@ def search_for_skills_and_find_new_ones(df: pd.DataFrame, skills_list: List[str]
         for item in filtered_candidates:
             f.write(str(item) + "\n")    
 
-    # Save to CSV
-    # Visualize skill distribution for processed subset
+    #Save to CSV
+    #Visualize skill distribution for processed subset
     visualize_skill_distribution(per_job_skills, top_n=20)
 
-    return per_job_skills,filtered_candidates
+    return per_job_skills#,filtered_candidates
     
 
 if __name__ == "__main__":
-    p = parent_dir.parent / "database" / "data" / "job_data" / "ALL_JOB_DATA.csv.gz"
-    full_df = pd.read_parquet(parent_dir.parent / "database" / "data" / "job_data" / "ALL_JOB_DATA.snappy.parquet", engine="pyarrow")
-    per_job_skills, new_skills = search_for_skills_and_find_new_ones(full_df, skills_list)
-    full_df['Extracted_skills'] = per_job_skills
-    with open("discovered_new_skills.txt", "w", encoding="utf-8") as f:
-        for item in new_skills:
-            f.write(str(item) + "\n")   
+    p = parent_dir.parent / "data_pipeline" / "data" / "job_data" / "ALL_JOBS.csv.gz"
+    full_df = pd.read_csv(p, compression="gzip", engine="c", low_memory=False)
+    #take only a subset for testing
+    full_df = full_df.sample(n=5000, random_state=42).reset_index(drop=True)
+    per_job_skills = search_for_skills_and_find_new_ones(full_df, skills_list)#, new_skills
+    full_df['Extracted_skills_embeddings'] = per_job_skills
+    #save full df with new column
+    #regex_scill_extract.add_skills_column(full_df, skills_list)
+    #full_df.to_parquet(parent_dir.parent / "data_pipeline" / "data" / "job_data" / "ALL_JOBS_with_extracted_skills.parquet", index=False)
+
+    # with open("discovered_new_skills.txt", "w", encoding="utf-8") as f:
+    #     for item in new_skills:
+    #         f.write(str(item) + "\n")   

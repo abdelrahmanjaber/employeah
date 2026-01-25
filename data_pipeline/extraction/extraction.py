@@ -5,10 +5,10 @@ from pathlib import Path
 from sentence_transformers import SentenceTransformer, util
 from tqdm import tqdm
 sys.path.append(str(Path(__file__).parent.parent.parent))
-from data_processing.llm_with_chunking import search_for_skills
+from data_processing.llm_with_chunking import search_for_skills, search_for_skills_batch
 
 
-def extract_from_description(df, skill_path):
+def extract_from_description(df, skill_path, batch_embedding = False):
     """
     Extract skills from job description with regex and adds them as in list in Skills colums
     """
@@ -44,7 +44,10 @@ def extract_from_description(df, skill_path):
         df.at[idx, "Skills"] = unique_skills  
 
     print("SKILLS WITH REGEX EXTRACTED SUCCESFULLY \n")
-    df["embedded_skills"] = search_for_skills(df, known_skills)
+    if batch_embedding:
+        df["embedded_skills"] = search_for_skills_batch(df, known_skills)
+    else:
+         df["embedded_skills"] = search_for_skills(df, known_skills)
     df["Skills"] = df.apply(lambda row: sorted(list(set(row["Skills"]) | set(row["embedded_skills"]))), axis=1)
     return df
 
@@ -146,7 +149,8 @@ if __name__ == "__main__":
     skill_path = Path(__file__).parent / "lists" / "skill_areas_flattened.txt"
     print("Loading ZIP file...")
     df = pd.read_csv(csv_path)
-    df = extract_from_description(df, skill_path)
+    #Computing the skills for the whole dataset can take to much RAM, so we process it in chunks of 10000 rows
+    df = extract_from_description(df, skill_path, batch_embedding=True)
 
     # Get fields from df
     #field_path = "./extraction/lists/fields.txt"
