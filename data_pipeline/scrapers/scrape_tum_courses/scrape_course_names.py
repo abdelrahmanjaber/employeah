@@ -1,216 +1,158 @@
+import requests
 import csv
 import time
 import re
 import os
-from selenium import webdriver
-from selenium.webdriver.chrome.service import Service
-from selenium.webdriver.common.by import By
-from selenium.webdriver.support.ui import WebDriverWait
-from selenium.webdriver.support import expected_conditions as EC
-from webdriver_manager.chrome import ChromeDriverManager
 
-# STEP 1: SCRAPING ALL COURSE TITLES FROM TUM ONLINE (adds to csv: title, semester,url)
+"""
+STEP 1: FETCHING COURSE LIST (API)
+----------------------------------
+This script gets a list of all TUM courses from "Lehrveranstaltungen" (Courses)
+We use the public TUMOnline API because it's fast and gives us the
+correct Semester and Course Title.
 
-# Play this code first. 
-# It will scrape all course titles with their semester and save to a CSV for Step 2.
-# here we make sure to exclude any titles that are clearly not main courses, like tutorials, exercises, internships or seminars.
-# when you run this, it will open the tum online website and wait for you to go to:
-# 1. Weiter ohne Anmeldung -> Lehrveranstaltungen -> 2025 W (then it will scrape all courses from winter 2025)
-# 2. Change 2025 W to 2026 S (then it will scrape all courses from summer 2026)
+We are fetching data for:
+1. Winter Semester 2025 (205)
+2. Summer Semester 2026 (206)
 
-# CSV "tum courses step1 collection" Structure:  Title, Semester, Description, Skills, URL
+!!! This step doesn't get descriptions and skills yet (those are empty here and will be fetched in tum_skills.ipynb)!!!
 
-CSV_FILE_PATH = "tum_courses_step1_collection.csv"
-COURSE_LIST_URL = "https://campus.tum.de/tumonline/webnav.ini"
+"""
 
-SEMESTERS_TO_SCRAPE = ["2025 W", "2026 S"]
-# This function cleans the raw title strings according to several rules
+# CONFIGURATION
+# This is the public API endpoint for the course catalog (Lehrveranstaltungen)
+BASE_API_URL = "https://campus.tum.de/tumonline/ee/rest/slc.tm.cp/student/courses"
+
+HEADERS = {
+    "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/121.0.0.0 Safari/537.36",
+    "Accept": "application/json",
+    "Content-Type": "application/json"
+}
+
+CSV_FILE_PATH = r"C:\Users\daphn\OneDrive\Bureau\employeah\data_pipeline\data\tum_data\tum_courses_without_skills.csv"
+
+# Defining the specific semesters we need
+# ID 205 = Winter 2025
+# ID 206 = Summer 2026
+SEMESTERS = [
+    {"id": 205, "name": "2025 W"},
+    {"id": 206, "name": "2026 S"}
+]
+
+# CLEANING FUNCTIONS
+
+# Simple helper to extract the string from the messy API object
+def get_raw_title(title_obj):
+    if isinstance(title_obj, dict):
+        return title_obj.get('de') or title_obj.get('en') or title_obj.get('value') or ""
+    return str(title_obj)
+
+# This cleans up the title so the search bot has an easier time later.
+# Removes things like "[IN001]", "(Lecture)", and semester numbers.
 def clean_title_string(raw_title):
+    if not raw_title: return ""
     title = raw_title.strip()
-
-    # 1. Remove [0000...] block (e.g., [0000003889])
     title = re.sub(r'\[.*?\]', '', title)
-    
-    # 2. Remove leading ordering numbers (e.g., "1. Introduction")
     title = re.sub(r'^\d+\.?\s*', '', title)
-
-    # 3. Remove Code Prefix (e.g. "CITHN8003 – Data Science" -> "Data Science")
     title = re.sub(r'^[A-Z0-9]*\d[A-Z0-9]*\s*[-–]\s*', '', title)
-    
-    # 4. Remove known administrative phrases
     title = title.replace("Teilnahmekriterien und Anmeldeinformationen", "")
-
-    # 5. If there is a colon, take only what is BEFORE it.
-    if ':' in title:
-        title = title.split(':')[0].strip()
-
-    # 6. Remove "Teil X" or "Part X" at the end
+    if ':' in title: title = title.split(':')[0].strip()
     title = re.sub(r'[-–,]\s*(Teil|Part)\s*\d+$', '', title, flags=re.IGNORECASE)
-
-    # 7. Remove "Lecture" / "Vorlesung" suffixes (Separator can be comma OR hyphen)
-    # Matches: ", Vorlesung", " - Lecture"
     title = re.sub(r'[-–,]\s*(Lecture|Vorlesung)$', '', title, flags=re.IGNORECASE)
-
-    # 8. Remove Codes in Parentheses (Anywhere in string)
-    # Logic: Look for parens containing at least one digit (likely a code like WIB01...)
-    # This catches "(WIB01832, englisch)" in the middle of a string.
     title = re.sub(r'\s*\([^)]*?\d+[^)]*?\)', '', title)
-
-    # 9. Remove ANY remaining parentheses at the very END of the string
-    # This catches "(CH4790a)" or "(Review)" if it wasn't caught by rule #8
     title = re.sub(r'\s*\([^)]+\)$', '', title)
-
-    # 10. Fix punctuation left behind (e.g., trailing spaces or commas)
     title = re.sub(r'\s+,', ',', title)
-    title = re.sub(r',\s*$', '', title) # Remove trailing comma if any
-
-    # 11. Clean ONLY Newlines (Keep commas/quotes for Step 2)
-    title = title.replace('\n', ' ')
-    
+    title = re.sub(r',\s*$', '', title)
     return title.strip()
 
-#this function saves a batch of rows to the CSV file
-def save_batch_to_csv(data_list, filename):
-    keys = ["Title", "Semester", "Description", "Skills","URL"]
-    file_exists = os.path.isfile(filename)
-    
-    with open(filename, 'a', newline='', encoding='utf-8') as f:
-        # QUOTE_MINIMAL automatically handles commas/quotes safely
-        writer = csv.DictWriter(f, fieldnames=keys, quoting=csv.QUOTE_MINIMAL)
-        if not file_exists:
-            writer.writeheader()
-        for row in data_list:
-            writer.writerow(row)
 
-#this function scrapes all course titles from tum online
-def main_step_1():
-    options = webdriver.ChromeOptions()
-    prefs = {"profile.managed_default_content_settings.images": 2}
-    options.add_experimental_option("prefs", prefs)
-    
-    driver = webdriver.Chrome(service=Service(ChromeDriverManager().install()), options=options)
-    wait = WebDriverWait(driver, 10)
-    
-    # Reset file to ensure fresh clean data
+#  MAIN LOGIC
+
+def fetch_and_save_courses():
+    # Start fresh: delete the old file if it exists
     if os.path.exists(CSV_FILE_PATH):
         os.remove(CSV_FILE_PATH)
-
-    seen_titles = set()
-
-    try:
-        driver.get(COURSE_LIST_URL)
         
-        for semester in SEMESTERS_TO_SCRAPE:
-            print("\n" + "="*60)
-            print(f" STEP 1: COLLECTING TITLES FOR {semester}")
-            print("="*60)
-            print(f"1. Select '{semester}' in the UI.")
-            print("2. CHANGE 'Entries per page' to MAXIMUM.")
-            input(f">>> PRESS ENTER WHEN TABLE IS LOADED <<<")
+    print(f"📄 Creating new file: {CSV_FILE_PATH}")
+    
+    with open(CSV_FILE_PATH, 'w', newline='', encoding='utf-8') as f:
+        fieldnames = ["Title", "Semester", "Description", "Skills", "URL"]
+        writer = csv.DictWriter(f, fieldnames=fieldnames, quoting=csv.QUOTE_MINIMAL)
+        writer.writeheader()
+        # Loop through both semesters (Winter 25 & Summer 26)
+        for sem in SEMESTERS:
+            print(f"\n" + "="*50)
+            print(f"🚀 Fetching {sem['name']} (ID: {sem['id']})")
+            print("="*50)
+            # Filter settings for the API request:
+            # courseNormKey=LVEAB means "Standard Courses"
+            # orgId=1 is TUM main organization
+            filter_str = f"courseNormKey-eq=LVEAB;orgId-eq=1;termId-eq={sem['id']}"
             
-            page_num = 1
-            semester_count = 0
-            
+            params = {
+                "$filter": filter_str,
+                "$orderBy": "title=ascnf",
+                "$skip": 0,
+                "$top": 100
+            }
+
+            total_saved_for_sem = 0
+            # Keep asking for pages of courses until we run out
             while True:
-                print(f"   Scraping Page {page_num}...", end="", flush=True)
-
-                raw_data = driver.execute_script("""
-                    var results = [];
-                    var links = document.querySelectorAll("a");
-                    for (var i = 0; i < links.length; i++) {
-                        var href = links[i].href;
-                        var title = links[i].innerText.trim();
-                        if (href.includes('student/courses/') && title.length > 3 && !title.includes('Details')) {
-                            results.push({"raw_title": title, "url": href});
-                        }
-                    }
-                    return results;
-                """)
-
-                batch_to_save = []
-                new_items = 0
-                
-                for item in raw_data:
-                    clean = clean_title_string(item['raw_title'])
-                    
-                    if len(clean) < 3: continue
-                    if clean in seen_titles: continue 
-                    
-                    # --- STRICT LOWERCASE FILTER ---
-                    lower = clean.lower()
-                    # filter words to exclude from course titles
-                    # we want to exlude tutorials, exercises, internships, seminars, theses, colloquiums, etc.
-                    filter_keywords = [
-                        "teilnahmekriterien", "anmeldeinformationen", 
-                        "tutorial", "tutorium", 
-                        "exercise", "übung", 
-                        "praktikum", "internship",
-                        "lab course", "seminar course", "seminar",
-                        "abschlussarbeiten", 
-                        "absolventinnen- und absolventenfeier",
-                        "thesis","bachelor",
-                        "master", "kolloquium",
-                        "thesis","phd", 
-                        "abschlussarbeit", "colloquium"
-                    ]
-                    
-                    if any(keyword in lower for keyword in filter_keywords): 
-                        continue
-                    # -------------------------------
-                    
-                    seen_titles.add(clean)
-                    
-                    batch_to_save.append({
-                        "Title": clean,
-                        "Semester": semester,
-                        "Description": "Pending...",
-                        "Skills": "Pending...",
-                        "URL": item['url']
-                    })
-                    new_items += 1
-                    semester_count += 1
-                
-                if batch_to_save:
-                    save_batch_to_csv(batch_to_save, CSV_FILE_PATH)
-                
-                print(f" Saved {new_items} courses. (Total: {semester_count})")
-
-                # Pagination, here we make sure to go to the next page if it exists
                 try:
-                    try: first_link = driver.find_element(By.XPATH, "//a[contains(@href, 'student/courses/')]")
-                    except: first_link = None
+                    response = requests.get(BASE_API_URL, headers=HEADERS, params=params)
 
-                    next_btns = driver.find_elements(By.CSS_SELECTOR, "a[title='Nächste Seite'], a[title='Next page'], a[aria-label='Nächste Seite']")
-                    valid_next = None
-                    for btn in next_btns:
-                        if btn.is_displayed() and "disabled" not in btn.get_attribute("class"):
-                            valid_next = btn
-                            break
-                    
-                    if not valid_next:
-                        print(f"   🛑 No more pages for {semester}.")
+                    if response.status_code != 200:
+                        print(f"❌ Error {response.status_code}: {response.text}")
+                        return
+
+                    data = response.json()
+                    courses = data.get('courses', [])
+                    # If the list is empty, we are done with this semester
+                    if not courses:
                         break
+
+                    batch = []
+                    for item in courses:
+                        raw_t = get_raw_title(item.get('courseTitle'))
+                        clean_t = clean_title_string(raw_t)
+                        # Skip stuff that isn't a real class (like internships or thesis placeholders)
+                        blacklist = ["internship", "tutorial", "exercise", "praktikum", "thesis"]
+                        if any(x in clean_t.lower() for x in blacklist):
+                            continue
+                        if len(clean_t) < 3: continue
+
+                        c_id = item.get('id')
                         
-                    valid_next.click()
-                    
-                    if first_link:
-                        try: wait.until(EC.staleness_of(first_link))
-                        except: time.sleep(2)
-                    else:
-                        time.sleep(2)
-                    page_num += 1
-                    
+                        # Save the link to the course page (useful for checking later)
+                        url = f"https://campus.tum.de/tumonline/ee/ui/ca2/app/desktop/#/slc.tm.cp/student/courses/{c_id}"
+                        # Note: Description is set to 'Pending...' because we get that in Step 2 in tum_skills.ipynb
+                        batch.append({
+                            "Title": clean_t,
+                            "Semester": sem['name'],
+                            "Description": "Pending...",
+                            "Skills": "Pending...",
+                            "URL": url
+                        })
+
+                    writer.writerows(batch)
+                    total_saved_for_sem += len(batch)
+                    print(f"   Saved {len(batch)} courses... (Total for {sem['name']}: {total_saved_for_sem})")
+                    # Check if we reached the last page
+                    total_count = data.get('totalCount', 0)
+                    if params['$skip'] + len(courses) >= total_count:
+                        break
+                    # Prepare next page
+                    params['$skip'] += 100
+                    time.sleep(0.2)
+
                 except Exception as e:
-                    print(f"   ⚠️ Pagination ended: {e}")
+                    print(f"❌ Critical Error: {e}")
                     break
+            
+            print(f"✅ Finished {sem['name']}. Total Saved: {total_saved_for_sem}")
 
-        print(f"\n✅ STEP 1 COMPLETE. All titles saved to {CSV_FILE_PATH}")
-
-    except Exception as e:
-        print(f"\n❌ Critical Error: {e}")
-
-    finally:
-        driver.quit()
+    print(f"\n🎉 DONE. All data saved to {CSV_FILE_PATH}")
 
 if __name__ == "__main__":
-    main_step_1()
+    fetch_and_save_courses()
