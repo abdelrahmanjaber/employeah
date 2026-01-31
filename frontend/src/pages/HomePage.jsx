@@ -1,10 +1,19 @@
 import { useNavigate } from "react-router-dom";
 import { useState, useEffect } from "react";
-//UNCOMMENT WHEN DONE!!
+//UNCOMMENT WHEN DONE!! this was the docker version:
 //import { getStats } from "../lib/apiClient";
 
 //REMOVE WHEN DONE
 import { JOBS_DEMO } from "../lib/mock_database";
+
+/* THIS IS THE HOME PAGE
+  --------------------------------
+  It is the first thing users see. It has a big title animation and 3 main cards
+  that direct users to the different tools:
+  1. Skill-to-Job Search
+  2. Job-to-Skill Search
+  3. Historical Skill Analysis
+*/
 // --- CSS Keyframes for Animations ---
 const globalStyles = `
   @keyframes fadeInUp {
@@ -21,6 +30,9 @@ const globalStyles = `
 
 function HomePage() {
   const navigate = useNavigate();
+  // STATE 
+  // Tracks which card is currently being hovered (for the pop-up effect)
+  // and the total count of jobs in the database to show in the hero section.
   const [hoveredIndex, setHoveredIndex] = useState(null);
   const [titleHover, setTitleHover] = useState(false);
   const [totalAnnouncements, setTotalAnnouncements] = useState(null);
@@ -36,8 +48,11 @@ function HomePage() {
     // Simply use the length of your mock array
     setTotalAnnouncements(JOBS_DEMO.length);
   }, []);//b
-
-  // Configuration for the three main actions with ICONS
+  
+  // CARD CONFIGURATION 
+  // Configuration for the three main actions with ICONS:
+  // Storing the data for the 3 main buttons here so the JSX is cleaner.
+  // Each one has a title, description, color, route path, and SVG icon.
   const actions = [
     {
       title: "See where your skills can take you",

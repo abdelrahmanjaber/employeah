@@ -2,10 +2,16 @@ import { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import mockApi from "../lib/mockApi";
 import { JOBS_DEMO } from "../lib/mock_database";
+/* THIS IS THE "DREAM JOB" ANALYSIS PAGE
+  --------------------------------------
+  Here, the user enters a specific Job Field (like "Data Scientist").
+  The app then:
+  1. Shows which SKILLS are most demanded for that job (e.g., Python, SQL).
+  2. Displays a historical graph for each skill to see if it's growing or fading.
+  3. Recommends TUM courses that teach those exact skills.
+*/
 
-// ============================================================================
 // CONFIGURATION
-// ============================================================================
 const PIE_COLORS = [
   "#86efac", "#fde047", "#93c5fd", "#fca5a5", 
   "#d8b4fe", "#fdba74", "#cbd5e1", "#6ee7b7", 
@@ -24,12 +30,13 @@ const CHART_WIDTH = 500;
 const CHART_HEIGHT = 180;
 const MAX_VAL = 100;
 
-// ============================================================================
 // SUB-COMPONENT: SKILL BAR CHART
-// ============================================================================
+// This component renders the list of skills on the left side.
+// It also fetches a tiny trend summary (up/down arrow) for each skill automatically.
 function SkillBarChart({ data, onSelectSkill, selectedSkill, limit, onLimitChange, maxPercent, jobTitle, location, timeLimit }) {
   const [trends, setTrends] = useState({});
-
+  // When the skill list loads, we check the trend for every skill in the background
+  // so we can show the green/red arrows next to the names
   useEffect(() => {
     if (!data || data.length === 0) return;
     
@@ -95,9 +102,11 @@ function SkillBarChart({ data, onSelectSkill, selectedSkill, limit, onLimitChang
   );
 }
 
-// ============================================================================
+
 // MAIN COMPONENT
-// ============================================================================
+// STATE 
+  // Storing search inputs, the list of skills found, 
+  // and the data for the detailed view (trend graph + courses).
 function SearchByJob() {
   const navigate = useNavigate();
   const [limit, setLimit] = useState(10);
@@ -112,13 +121,15 @@ function SearchByJob() {
   const [showJobSugg, setShowJobSugg] = useState(false);
   const [showLocSugg, setShowLocSugg] = useState(false);
   const [noDataReason, setNoDataReason] = useState(null);
-
+  // AUTOCOMPLETE LOGIC 
   const availableJobs = useMemo(() => [...new Set(JOBS_DEMO.map(j => j.title))].sort(), []);
   const availableLocations = useMemo(() => [...new Set(JOBS_DEMO.map(j => j.location))].sort(), []);
 
   const filteredJobSuggestions = availableJobs.filter(j => j.toLowerCase().includes(jobInput.toLowerCase()) && jobInput.length > 0);
   const filteredLocSuggestions = availableLocations.filter(l => l.toLowerCase().includes(locationInput.toLowerCase()) && locationInput.length > 0);
-
+  // SEARCH HANDLER
+  // This runs when the user clicks "Search"
+  // It fetches the big list of skills required for the Job field.
   const handleSearch = async () => {
     if (!jobInput) return;
     setLoading(true);
@@ -140,7 +151,9 @@ function SearchByJob() {
       }
     } catch (err) { console.error(err); } finally { setLoading(false); }
   };
-
+  // SKILL CLICK HANDLER 
+  // When the user clicks a specific skill in the bar chart,
+  // we fetch the History Graph and TUM Courses for that specific skill.
   const handleSkillSelect = async (skill) => {
     setSelectedSkill(skill);
     try {
@@ -160,7 +173,7 @@ function SearchByJob() {
     const idx = skillsData.findIndex(s => s.name === selectedSkill);
     return idx !== -1 ? PIE_COLORS[idx % PIE_COLORS.length] : "#059669";
   }, [selectedSkill, skillsData]);
-
+  //CHART HELPERS (Parsing dates, calculating axes)
   const parseDate = (dStr) => { 
     if (!dStr) return new Date();
     const parts = dStr.split('/');
@@ -262,7 +275,7 @@ function SearchByJob() {
         </div>
         <button onClick={handleSearch} style={{ padding: "15px 30px", background: "#6ee7b7", border: "2px solid #000", fontWeight: "bold", borderRadius: "8px", cursor: 'pointer' }}>Search</button>
       </section>
-
+      {/* ERROR / NO DATA MESSAGE */}
       {!loading && noDataReason && (
         <div style={{ padding: "32px", textAlign: "center", backgroundColor: "#f0f9ff", borderRadius: "16px", border: "1px solid #bae6fd", color: "#0369a1", maxWidth: "700px", margin: "40px auto", boxShadow: "0 4px 12px rgba(186, 230, 253, 0.25)" }}>
           <div style={{ marginBottom: "16px" }}><svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="16" x2="12" y2="12"></line><line x1="12" y1="8" x2="12.01" y2="8"></line></svg></div>
@@ -273,14 +286,15 @@ function SearchByJob() {
           )}
         </div>
       )}
-
+      {/* RESULTS GRID (Left: Skill List, Right: Charts & Courses) */}
       {!loading && skillsData && skillsData.length > 0 && (
         <div style={{ display: "grid", gridTemplateColumns: "1fr 1.2fr", gap: "50px", border: "2px solid #e5e7eb", padding: "40px", borderRadius: "12px" }}>
+          {/* LEFT SIDE: Skill Bar Chart */}
           <section>
             <h2 style={{ textAlign: "center", marginBottom: "10px" }}>Skill Breakdown for <span style={{ color: "#059669" }}>{jobInput}</span> {locationInput && `in ${locationInput}`}</h2>
             <SkillBarChart data={displayedSkills} onSelectSkill={handleSkillSelect} selectedSkill={selectedSkill} limit={limit} onLimitChange={setLimit} maxPercent={maxPercent} jobTitle={jobInput} location={locationInput} timeLimit={timeLimit} />
           </section>
-
+          {/* RIGHT SIDE: Trend Graph & Course List */}
           <section style={{ display: "flex", flexDirection: "column", gap: "30px" }}>
             <div style={{ opacity: selectedSkill ? 1 : 0.5 }}>
               <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '15px', width: '100%' }}>
@@ -305,7 +319,7 @@ function SearchByJob() {
                         const cx = getX(p.x, Math.min(...times), Math.max(...times));
                         const cy = CHART_HEIGHT - (p.y / MAX_VAL) * CHART_HEIGHT;
 
-                        // --- REPLACE YOUR dateText LOGIC WITH THIS ---
+                        //  FORMATTING DATE TEXT ON HOVER 
                         const date = parseDate(p.x);
                         const isDaily = timeLimit === '1w' || timeLimit === '2w';
                         const dateText = isDaily 
