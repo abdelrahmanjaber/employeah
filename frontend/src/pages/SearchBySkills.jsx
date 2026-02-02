@@ -1,32 +1,24 @@
 import { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { getLocations, getSkills, reportJobsBySkills } from "../lib/apiClient";
 
-//UNCOMMENT WHEN DONE to get back to real API calls:
-//import { getLocations, getSkills, reportJobsBySkills } from "../lib/apiClient";
-//REMOVE WHEN DONE to remove mock data logic (remove everything from a to b):a
-import mockApi from "../lib/mockApi";
-import { JOBS_DEMO } from "../lib/mock_database";
-//b
-
-
-/* THIS IS THE SKILL-TO-JOB SEARCH PAGE
-  --------------------------------------
-  This page flips the usual logic. Instead of searching for a job title,
-  the user enters the SKILLS they possess (e.g., "Python", "React").
-  
-  The app then:
-  1. Calculates which Job Fields match those skills best (e.g., "Frontend Dev").
-  2. Shows the "Top Field" match statistics.
-  3. Lists the 5 most recent real job postings that require those specific skills.
+/* THIS IS THE SEARCH BY SKILLS PAGE
+  --------------------------------
+  It allows users to input their skills and optional location to find matching job postings.
+  The results include a breakdown of job fields that match the skills and a list of recent announcements.
 */
 
+// ============================================================================
 // CONFIGURATION
+// ============================================================================
+// Colors for Segments
 const PIE_COLORS = [
   "#86efac", "#fde047", "#93c5fd", "#fca5a5", 
   "#d8b4fe", "#fdba74", "#cbd5e1", "#6ee7b7", 
   "#f9a8d4", "#c4b5fd", "#94a3b8", "#a7f3d0"
 ];
 
+// Time Limit Options
 const TIME_LIMITS = [
   { value: "1w", label: "Last week" },
   { value: "2w", label: "Last 2 weeks" },
@@ -34,213 +26,176 @@ const TIME_LIMITS = [
   { value: "3m", label: "Last 3 months" }
 ];
 
+// ============================================================================
 // MAIN COMPONENT
-
+// ============================================================================
 
 function SearchBySkills() {
   const navigate = useNavigate();
   
-  // STATE 
-  // We need to manage a list of selected skills (the "chips" user adds),
-  // plus the text inputs for searching new skills/locations.
+  // ========== STATE ==========
   
   // Skills Input State
-  const [selectedSkills, setSelectedSkills] = useState([]);
-  const [skillInput, setSkillInput] = useState("");
-  const [showSkillSugg, setShowSkillSugg] = useState(false);
+  const [selectedSkills, setSelectedSkills] = useState([]); // Array of selected skills
+  const [skillInput, setSkillInput] = useState(""); // Current text input for skills
+  const [showSkillSugg, setShowSkillSugg] = useState(false); // Show/hide skill suggestions
 
   // Location Input State
-  const [locationInput, setLocationInput] = useState("");
-  const [showLocationSugg, setShowLocationSugg] = useState(false);
-
+  const [locationInput, setLocationInput] = useState(""); // Current text input for location
+  const [showLocationSugg, setShowLocationSugg] = useState(false); // Show/hide location suggestions
   // Other Form State
-  const [timeLimit, setTimeLimit] = useState("3m");
+  const [timeLimit, setTimeLimit] = useState("3m"); // Default time limit
   
   // Cached datasets for session
-  const [allSkills, setAllSkills] = useState([]);
+  const [allSkills, setAllSkills] = useState([]); // Full skills list for client-side filtering
   
   // UI State
-  const [hasSearched, setHasSearched] = useState(false);
-  const [loading, setLoading] = useState(false);
-  const [results, setResults] = useState(null);
+  const [hasSearched, setHasSearched] = useState(false); // Whether a search has been performed
+  const [loading, setLoading] = useState(false); // Loading state for API calls
+  const [results, setResults] = useState(null); // Search results
 
-  const [availableLocations, setAvailableLocations] = useState([]);
-  const [skillSuggestions, setSkillSuggestions] = useState([]);
+  const [availableLocations, setAvailableLocations] = useState([]); // Cached locations for suggestions
+  const [skillSuggestions, setSkillSuggestions] = useState([]); // Skill suggestions based on input
 
-  // Helper to extract a valid link from the messy API job object
+  // Resolve possible URL fields from API result objects
   const getJobUrl = (job) => {
-    if (!job) return "#";
-    if (job.url) return job.url;
-    if (job.link) return job.link;
-    if (job.job_link) return job.job_link;
+    if (!job) return "#"; // Return placeholder if job is null
+    if (job.url) return job.url; // Return URL if present
+    if (job.link) return job.link; // Return link if present
+    if (job.job_link) return job.job_link; // Return job_link if present
     if (job.data_source) {
-      if (typeof job.data_source === 'string') return job.data_source;
-      if (job.data_source.link) return job.data_source.link;
+      if (typeof job.data_source === 'string') return job.data_source; // Return data_source if it's a string
+      if (job.data_source.link) return job.data_source.link; // Return link from data_source object
     }
     if (job.data_sources && Array.isArray(job.data_sources) && job.data_sources.length > 0) {
       const ds = job.data_sources[0];
-      return ds && ds.link ? ds.link : (ds && ds.name ? ds.name : "#");
+      return ds && ds.link ? ds.link : (ds && ds.name ? ds.name : "#"); // Return link or name from first data_source
     }
-    return "#";
+    return "#"; // Fallback to placeholder
   };
 
   // ========== FILTERED SUGGESTIONS ==========
-  //UNCOMMENT WHEN DONE
-  /*useEffect(() => {
+ /*  Load available locations on mount and cache in session storage */
+  useEffect(() => {
     // Try session cache first
     const cachedLoc = sessionStorage.getItem("locations_cache");
+    // if cache exists, load it
     if (cachedLoc) {
       try {
-        setAvailableLocations(JSON.parse(cachedLoc));
-      } catch (e) {
-        sessionStorage.removeItem("locations_cache");
+        setAvailableLocations(JSON.parse(cachedLoc)); // Load from cache
+      } catch (e) { // if corrupted, remove it
+        sessionStorage.removeItem("locations_cache"); // Remove corrupted cache
       }
     }
 
     // Fetch and cache locations if not present
-    if (!cachedLoc) {
-      getLocations()
+    if (!cachedLoc) { // Fetch from API
+      getLocations() // getLocations API call
         .then((locs) => {
-          const arr = locs || [];
-          setAvailableLocations(arr);
-          try { sessionStorage.setItem("locations_cache", JSON.stringify(arr)); } catch (e) {}
-        })
-        .catch((err) => console.error("Failed to load locations:", err));
+          const arr = locs || []; // Ensure array
+          setAvailableLocations(arr); // Set state
+          try { sessionStorage.setItem("locations_cache", JSON.stringify(arr)); } catch (e) {} 
+        }) // Set cache 
+        .catch((err) => console.error("Failed to load locations:", err)); // Log errors
     }
-  }, []);*/
-  //REMOVE WHEN DONE a
-  // FILTERED SUGGESTIONS
-  
-  // This effect loads all unique locations from our database 
-  // so the autocomplete works immediately when the page loads.
-  useEffect(() => {
-    // Extract unique locations from mock data
-    const locs = [...new Set(JOBS_DEMO.map(j => j.location))];
-    setAvailableLocations(locs);
-  }, []);
-  //b
+  }, []); // Run only once on mount
 
-  //UNCOMMENT WHEN DONE to get back to api logic!!
   // Restore State on Mount
-  /*useEffect(() => {
-    const savedSkills = sessionStorage.getItem("sbs_skills");
-    if (savedSkills) setSelectedSkills(JSON.parse(savedSkills));
+  useEffect(() => {
+    const savedSkills = sessionStorage.getItem("sbs_skills"); // Get saved skills from session storage
+    if (savedSkills) setSelectedSkills(JSON.parse(savedSkills)); // Parse and set selected skills
 
-    const savedLoc = sessionStorage.getItem("sbs_location");
+    const savedLoc = sessionStorage.getItem("sbs_location"); // Get saved location from session storage
     if (savedLoc) setLocationInput(savedLoc);
 
-    const savedTime = sessionStorage.getItem("sbs_timeLimit");
+    const savedTime = sessionStorage.getItem("sbs_timeLimit"); // Get saved time limit from session storage
     if (savedTime) setTimeLimit(savedTime);
     
     // Explicitly restore results if available
     const savedResults = sessionStorage.getItem("sbs_results");
-    if (savedResults) {
+    if (savedResults) { // If previous results exist
       try {
-        setResults(JSON.parse(savedResults));
-        setHasSearched(true);
-      } catch(e) { console.error(e);}
+        setResults(JSON.parse(savedResults));  // Parse and set previous results
+        setHasSearched(true); // Mark that a search has been performed
+      } catch(e) { console.error(e);} // Log parsing errors
     }
   }, []);
-  */
- // REMOVE WHEN DONE: a
- // This effect updates the "Skill Suggestions" dropdown in real-time
-  // as the user types into the search box.
-  useEffect(() => {
+
+  useEffect(() => { // Update skill suggestions when input changes
     if (!skillInput) {
-      setSkillSuggestions([]);
-      return;
-    }
-    // Filter from the local 'allSkills' list instead of calling an API
-    const filtered = allSkills.filter((s) => 
-      s.toLowerCase().includes(skillInput.toLowerCase()) && 
-      !selectedSkills.includes(s)
-    );
-    setSkillSuggestions(filtered.slice(0, 15));
-  }, [skillInput, selectedSkills, allSkills]);
-  // b
- //REMOVE WHEN DONE a
-  useEffect(() => {
-    // Extract all unique skills from mock data
-    const skills = [...new Set(JOBS_DEMO.flatMap(j => j.skills))];
-    setAllSkills(skills);
-  }, []);
-  //b
-  //UNCOMMENT WHEN DONE
-  /*
-  useEffect(() => {
-    if (!skillInput) {
-      setSkillSuggestions([]);
+      setSkillSuggestions([]); // Clear suggestions if input is empty
       return;
     }
 
     const t = setTimeout(() => {
       // If we have a cached full skills list, filter client-side (avoid API per keystroke)
       if (allSkills && allSkills.length > 0) {
-        const filtered = allSkills.filter((s) => s.toLowerCase().includes(skillInput.toLowerCase()));
-        setSkillSuggestions(filtered.filter((s) => !selectedSkills.includes(s)).slice(0, 20));
-        return;
+        const filtered = allSkills.filter((s) => s.toLowerCase().includes(skillInput.toLowerCase())); // Filter skills
+        setSkillSuggestions(filtered.filter((s) => !selectedSkills.includes(s)).slice(0, 20)); // Exclude selected skills and limit to 20
+        return; // Exit early to avoid API call
       }
 
       // Fallback to server search
-      getSkills({ q: skillInput, limit: 20 })
-        .then((skills) => setSkillSuggestions((skills || []).filter((s) => !selectedSkills.includes(s))))
-        .catch((err) => console.error("Failed to load skills:", err));
+      getSkills({ q: skillInput, limit: 20 }) // getSkills API call
+        .then((skills) => setSkillSuggestions((skills || []).filter((s) => !selectedSkills.includes(s)))) // Exclude selected skills
+        .catch((err) => console.error("Failed to load skills:", err)); // Log errors
     }, 200);
-    return () => clearTimeout(t);
-  }, [skillInput, selectedSkills]); */
+    return () => clearTimeout(t); // Debounce timeout
+  }, [skillInput, selectedSkills]); // Run when skillInput or selectedSkills change
 
   // Prefetch full skills list on mount and store in session cache for the session
-  //UNCOMMENT WHEN DONE
-  /*
   useEffect(() => {
-    const cached = sessionStorage.getItem("skills_cache");
-    if (cached) {
+    const cached = sessionStorage.getItem("skills_cache"); // Check session cache
+    if (cached) { // If cache exists, load it
       try {
-        setAllSkills(JSON.parse(cached));
-      } catch (e) {
+        setAllSkills(JSON.parse(cached)); // Load from cache
+      } catch (e) { // if corrupted, remove it
         sessionStorage.removeItem("skills_cache");
       }
     }
 
     if (!cached) {
       // attempt to fetch a large list once
-      getSkills({ q: "", limit: 1000 })
-        .then((skills) => {
-          const arr = skills || [];
-          setAllSkills(arr);
-          try { sessionStorage.setItem("skills_cache", JSON.stringify(arr)); } catch (e) {}
+      getSkills({ q: "", limit: 1000 }) // getSkills API call
+        .then((skills) => { // Fetch up to 1000 skills
+          const arr = skills || []; 
+          setAllSkills(arr); // Set state
+          try { sessionStorage.setItem("skills_cache", JSON.stringify(arr)); } catch (e) {} 
         })
-        .catch((err) => console.error("Failed to prefetch skills:", err));
+        .catch((err) => console.error("Failed to prefetch skills:", err)); // Log errors
     }
   }, []); // Run only once on mount
-  */
+
+  // Filtered Suggestions
   const filteredSkillSuggestions = useMemo(
-    () => (skillSuggestions || []).filter((s) => s.toLowerCase().includes(skillInput.toLowerCase())),
-    [skillSuggestions, skillInput]
+    () => (skillSuggestions || []).filter((s) => s.toLowerCase().includes(skillInput.toLowerCase())), // Filter skill suggestions based on input
+    [skillSuggestions, skillInput] // Memoize filtered skill suggestions
   );
 
+  // Filtered Location Suggestions
   const filteredLocationSuggestions = useMemo(
-    () => (availableLocations || []).filter((l) => l.toLowerCase().includes(locationInput.toLowerCase())),
-    [availableLocations, locationInput]
+    () => (availableLocations || []).filter((l) => l.toLowerCase().includes(locationInput.toLowerCase())), // Filter location suggestions based on input
+    [availableLocations, locationInput] // Memoize filtered location suggestions
   );
 
-  // HANDLERS 
+  // ========== HANDLERS ==========
 
-  // Add a skill chip when user clicks a suggestion
+  // Skill Handlers
   const handleAddSkill = (skill) => {
-    if (skill && !selectedSkills.includes(skill)) {
-      const newSkills = [...selectedSkills, skill];
-      setSelectedSkills(newSkills);
-      setSkillInput("");
-      setShowSkillSugg(false);
+    if (skill && !selectedSkills.includes(skill)) { // Avoid duplicates
+      const newSkills = [...selectedSkills, skill]; // Add new skill
+      setSelectedSkills(newSkills); // Update state
+      setSkillInput(""); // Clear input
+      setShowSkillSugg(false); // Hide suggestions
       // Persist immediately on change if desired, but handleSearch does it too
       // sessionStorage.setItem("sbs_skills", JSON.stringify(newSkills));
     }
   };
 
-  const handleRemoveSkill = (skillToRemove) => {
-    const newSkills = selectedSkills.filter(s => s !== skillToRemove);
-    setSelectedSkills(newSkills);
+  // Remove Skill Handler
+  const handleRemoveSkill = (skillToRemove) => { // Remove skill from selected list
+    const newSkills = selectedSkills.filter(s => s !== skillToRemove); // Filter out the skill to remove
+    setSelectedSkills(newSkills); // Update state
     // sessionStorage.setItem("sbs_skills", JSON.stringify(newSkills));
   };
 
@@ -252,9 +207,9 @@ function SearchBySkills() {
   };
 
   // Search Handler
-  const handleSearch = async () => {
+  const handleSearch = async () => { // Perform search based on selected skills and location
     if (selectedSkills.length === 0) {
-      alert("Please select at least one skill.");
+      alert("Please select at least one skill."); // at least one skill is required
       return;
     }
     // Clear previous results immediately (do not merge)
@@ -266,97 +221,46 @@ function SearchBySkills() {
     sessionStorage.setItem("sbs_skills", JSON.stringify(selectedSkills));
     sessionStorage.setItem("sbs_location", locationInput);
     sessionStorage.setItem("sbs_timeLimit", timeLimit);
-    //UNCOMMENT WHEN DONE!!
-    /*
+
     try {
+      // API Call to get jobs by skills
       const resp = await reportJobsBySkills({
         skills: selectedSkills,
         location: locationInput || null,
         timeWindow: timeLimit,
       });
 
+      // Process response data and set results
       const resData = {
-        jobFields: (resp?.job_titles || []).map((j) => ({ name: j.name, percent: j.percent, count: j.count })),
-        topField: resp?.top_job_title || null,
-        lastAnnouncements: resp?.last_announcements || [],
+        jobFields: (resp?.job_titles || []).map((j) => ({ name: j.name, percent: j.percent, count: j.count })), // Map job titles to desired format
+        topField: resp?.top_job_title || null, // Top job title
+        lastAnnouncements: resp?.last_announcements || [], // Recent job announcements
       };
       
       setResults(resData);
-      sessionStorage.setItem("sbs_results", JSON.stringify(resData));
+      sessionStorage.setItem("sbs_results", JSON.stringify(resData)); // Cache results
 
-    } catch (err) {
-      console.error(err);
-      setResults({ jobFields: [], topField: null, lastAnnouncements: [] });
+    } catch (err) { // Handle errors
+      console.error(err); // Log error
+      setResults({ jobFields: [], topField: null, lastAnnouncements: [] }); // Set empty results on error
     } finally {
-      setLoading(false);
-    }*/
-    //REMOVE WHEN DONE:a
-    try {
-      // 1. Call your mock API
-      const resp = await mockApi.searchBySkills({
-        skills: selectedSkills,
-        location: locationInput || null
-      });
-
-      // 2. Map the stats object to the array format your UI uses
-      const jobFields = Object.entries(resp.jobs || {}).map(([name, stats]) => ({
-        name: name,
-        percent: stats.percentage,
-        count: stats.count
-      }));
-
-      // 3. Find the last 5 job postings for the sidebar
-      const now = new Date();
-      const timeMap = { "1w": 7, "2w": 14, "1m": 30, "3m": 90 };
-      const daysAllowed = timeMap[timeLimit] || 90;
-      const cutoffDate = new Date(now.setDate(now.getDate() - daysAllowed));
-
-      const lastAnnouncements = JOBS_DEMO
-        .filter(j => {
-          const isMatch = j.skills.some(s => selectedSkills.includes(s));
-          const isRecent = new Date(j.date_posted) >= cutoffDate;
-          return isMatch && isRecent;
-        })
-        .sort((a, b) => new Date(b.date_posted) - new Date(a.date_posted))
-        .slice(0, 5)
-        .map(j => ({
-          id: j.id,
-          title: j.title,
-          company: j.company,
-          date: j.date_posted,
-          url: j.url
-        }));
-      
-      const resData = {
-        jobFields: jobFields,
-        topField: jobFields.length > 0 ? jobFields[0].name : null,
-        lastAnnouncements: lastAnnouncements,
-      };
-      
-      setResults(resData);
-      sessionStorage.setItem("sbs_results", JSON.stringify(resData));
-
-    } catch (err) {
-      console.error(err);
-      setResults({ jobFields: [], topField: null, lastAnnouncements: [] });
-    } finally {
-      setLoading(false);
+      setLoading(false); // Clear loading state
     }
-    //b
   };
 
-  const handleFieldClick = (fieldName) => {
-    const params = new URLSearchParams();
-    params.set("field", fieldName);
-    if(selectedSkills.length) params.set("skills", selectedSkills.join(","));
-    if(locationInput) params.set("location", locationInput);
-    if(timeLimit) params.set("timeLimit", timeLimit);
-    navigate(`/field-analysis?${params.toString()}`);
+  const handleFieldClick = (fieldName) => { // Handle click on a job field to navigate to detailed analysis
+    const params = new URLSearchParams(); // Create URLSearchParams object
+    params.set("field", fieldName); // Set job field parameter
+    if(selectedSkills.length) params.set("skills", selectedSkills.join(",")); // Set skills parameter
+    if(locationInput) params.set("location", locationInput); // Set location parameter
+    if(timeLimit) params.set("timeLimit", timeLimit); // Set time limit parameter
+    navigate(`/field-analysis?${params.toString()}`); // Navigate to Field Analysis page with parameters
   };
 
-  // RENDER HELPERS
+  // ========== RENDER HELPERS ==========
 
   const renderSearchBar = () => (
+    // Render the search bar section with skills and location inputs
     <section style={{ display: "flex", gap: "15px", justifyContent: "center", alignItems: "end", marginBottom: "3rem" }}>
       
       {/* Skills Input Section */}
@@ -372,6 +276,7 @@ function SearchBySkills() {
               }}>
                 {skill}
                 <button 
+                // Button to remove a selected skill
                   onClick={() => handleRemoveSkill(skill)}
                   style={{ border: "none", background: "none", cursor: "pointer", color: "#1e40af", fontWeight: "bold", padding: 0, fontSize: "16px", lineHeight: 1 }}
                 >
@@ -382,15 +287,16 @@ function SearchBySkills() {
           </div>
 
           <input
+          // Skill Input Field
             type="text"
             placeholder="Type to add a skill..."
             value={skillInput}
             onChange={(e) => {
-              setSkillInput(e.target.value);
-              setShowSkillSugg(true);
+              setSkillInput(e.target.value); // Update input value
+              setShowSkillSugg(true); // Show suggestions
             }}
-            onFocus={() => setShowSkillSugg(true)}
-            onBlur={() => setTimeout(() => setShowSkillSugg(false), 200)}
+            onFocus={() => setShowSkillSugg(true)} // Show suggestions on focus
+            onBlur={() => setTimeout(() => setShowSkillSugg(false), 200)} // Hide suggestions on blur with delay
             style={{ 
               width: "100%", border: "none", outline: "none", fontSize: "1rem" 
             }}
@@ -512,9 +418,9 @@ function SearchBySkills() {
           <p style={{ color: "#64748b", fontSize: "14px", marginBottom: "20px" }}>
             Showing fields with &gt; 2% match. Click to view details.
           </p>
-          
-          <div style={{ maxHeight: "400px", overflowY: "auto", paddingRight: "10px" }}>
-            {filteredFields.map((field, idx) => (
+        
+          <div style={{ maxHeight: "400px", overflowY: "auto", paddingRight: "10px" }}> {/* Scrollable container */}
+            {filteredFields.map((field, idx) => ( 
               <div 
                 key={field.name}
                 onClick={() => handleFieldClick(field.name)}
@@ -611,7 +517,7 @@ function SearchBySkills() {
   return (
     <div style={{ maxWidth: "1200px", margin: "0 auto", padding: "20px", fontFamily: "'Inter', sans-serif" }}>
       
-      <button 
+      <button // Back Button
         onClick={() => navigate(-1)} 
         style={{ 
           cursor: "pointer", marginBottom: "1rem", background: "#eff6ff", 
