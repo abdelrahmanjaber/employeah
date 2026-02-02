@@ -16,37 +16,20 @@ from typing import List, Tuple, Dict
 import re
 from collections import Counter, defaultdict
 import numpy as np
-
-
 from sentence_transformers import SentenceTransformer, util
-
 import hdbscan
+import spacy
+
 
 # --------------------------------------------------------------------
 # CONFIG
 # --------------------------------------------------------------------
 VALID_POS = {"NOUN", "PROPN"}
 REMOVE_ENTS = {"GPE", "LOC", "PERSON", "DATE", "TIME"}
-
-
 EMBEDDING_BACKEND = "sbert"
-import spacy
-# spaCy is a modern, high-performance NLP library used for:
-# tokenization (splitting text into words)
-# lemmatization (converting words to their base form)
-# part-of-speech tagging
-# dependency parsing
-# named entity recognition (NER)
-# It’s extremely fast (Cython optimized) and widely used in production.
-import faiss
-
 language = "en"
 
-# Load skills from txt file
-file_path = parent_dir / "skills.txt"
 
-with open(file_path, "r") as f:
-    skills_list = [skill.strip() for skill in f.readlines() if skill.strip()] 
 
 class EmbeddingEngine:
     def __init__(self):
