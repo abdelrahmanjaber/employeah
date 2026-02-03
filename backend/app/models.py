@@ -5,6 +5,7 @@ from datetime import datetime
 from sqlalchemy import (
     DateTime,
     ForeignKey,
+    Float,
     Integer,
     String,
     Text,
@@ -74,8 +75,8 @@ class Job(Base):
     id: Mapped[int] = mapped_column(primary_key=True)
     title: Mapped[str] = mapped_column(String(500), index=True)
     date: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
-    description: Mapped[str | None] = mapped_column(Text, nullable=True)
     salary: Mapped[int | None] = mapped_column(Integer, nullable=True)
+    level: Mapped[float | None] = mapped_column(Float, nullable=True)
 
     company_id: Mapped[int | None] = mapped_column(ForeignKey("company.id"), nullable=True, index=True)
     company: Mapped[Company | None] = relationship(back_populates="jobs")
@@ -125,6 +126,7 @@ class Course(Base):
     title: Mapped[str] = mapped_column(String(500), unique=True, index=True)
     semester: Mapped[str | None] = mapped_column(String(50), nullable=True)
     url: Mapped[str | None] = mapped_column(Text, nullable=True)
+    description: Mapped[str | None] = mapped_column(Text, nullable=True)
 
     universities: Mapped[list[University]] = relationship(
         secondary="university_course",
