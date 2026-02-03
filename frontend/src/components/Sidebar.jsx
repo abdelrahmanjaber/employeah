@@ -1,6 +1,15 @@
 import { useNavigate } from "react-router-dom";
 import { useState } from "react";
 
+/* SIDEBAR 
+  - Fixed 320px width chosen to accommodate verbose navigation labels ("See where your skills can take you...") without wrapping.
+  - Implements a backdrop overlay pattern to handle "click-outside-to-close" behavior.
+  - Uses a darker shadow depth to ensure contrast against the dashboard background.
+*/
+
+// Main sidebar container.
+// I used 'fixed' so it stays put when scrolling.
+// zIndex 1000 means this layer sits ON TOP of everything else (like charts).
 const sidebarStyle = {
   position: "fixed",
   top: 0,
@@ -17,6 +26,8 @@ const sidebarStyle = {
   transition: "transform 0.3s",
 };
 
+// Dark background behind the menu.
+// This covers the screen so the user knows to click outside to close it.
 const overlayStyle = {
   position: "fixed",
   top: 0,
@@ -27,7 +38,9 @@ const overlayStyle = {
   zIndex: 999,
 };
 
-// Base style for buttons
+// Styles for the links.
+// I put them here to keep the main code (JSX) clean and easy to read.
+// Flexbox here lines up the Icon and Text perfectly in a row.
 const buttonBaseStyle = {
   display: "flex",
   alignItems: "center",
@@ -51,7 +64,8 @@ function Sidebar({ open, onClose }) {
   const [hovered, setHovered] = useState(null);
 
   if (!open) return null;
-
+  // A reusable button component.
+  // I made this so I don't have to copy-paste the same button code 4 times
   const NavButton = ({ to, label, icon, id }) => (
     <button
       style={{
@@ -72,6 +86,7 @@ function Sidebar({ open, onClose }) {
 
   return (
     <>
+      {/* Clicking this dark background closes the menu */}
       <div style={overlayStyle} onClick={onClose} />
       <nav style={sidebarStyle}>
         <button
@@ -93,7 +108,7 @@ function Sidebar({ open, onClose }) {
         </button>
 
         <h2 style={{ marginBottom: "2.5rem", fontSize: "1.5rem", fontWeight: 700, paddingLeft: "10px" }}>Menu</h2>
-
+        {/* The 4 main links */}
         <NavButton
           id="home"
           to="/"
