@@ -1,12 +1,7 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 
-//UNCOMMENT WHEN DONE to get back to real API calls:
-//import { getLocations, getSkills, reportJobsBySkills } from "../lib/apiClient";
-//REMOVE WHEN DONE to remove mock data logic (remove everything from a to b):a
-import mockApi from "../lib/mockApi";
-import { JOBS_DEMO } from "../lib/mock_database";
-//b
+import { getSkills, reportFieldsBySkills, reportLocationsBySkills } from "../lib/apiClient";
 
 
 /* THIS IS THE SKILL-TO-JOB SEARCH PAGE
@@ -57,8 +52,6 @@ function SearchBySkills() {
   const [timeLimit, setTimeLimit] = useState("3m");
   
   // Cached datasets for session
-  const [allSkills, setAllSkills] = useState([]);
-  
   // UI State
   const [hasSearched, setHasSearched] = useState(false);
   const [loading, setLoading] = useState(false);
@@ -66,6 +59,7 @@ function SearchBySkills() {
 
   const [availableLocations, setAvailableLocations] = useState([]);
   const [skillSuggestions, setSkillSuggestions] = useState([]);
+  const autoSearchTimer = useRef(null);
 
   // Helper to extract a valid link from the messy API job object
   const getJobUrl = (job) => {
@@ -84,41 +78,15 @@ function SearchBySkills() {
     return "#";
   };
 
-  // ========== FILTERED SUGGESTIONS ==========
-  //UNCOMMENT WHEN DONE
-  /*useEffect(() => {
-    // Try session cache first
-    const cachedLoc = sessionStorage.getItem("locations_cache");
-    if (cachedLoc) {
-      try {
-        setAvailableLocations(JSON.parse(cachedLoc));
-      } catch (e) {
-        sessionStorage.removeItem("locations_cache");
-      }
-    }
-
-    // Fetch and cache locations if not present
-    if (!cachedLoc) {
-      getLocations()
-        .then((locs) => {
-          const arr = locs || [];
-          setAvailableLocations(arr);
-          try { sessionStorage.setItem("locations_cache", JSON.stringify(arr)); } catch (e) {}
-        })
-        .catch((err) => console.error("Failed to load locations:", err));
-    }
-  }, []);*/
-  //REMOVE WHEN DONE a
-  // FILTERED SUGGESTIONS
-  
-  // This effect loads all unique locations from our database 
-  // so the autocomplete works immediately when the page loads.
   useEffect(() => {
-    // Extract unique locations from mock data
-    const locs = [...new Set(JOBS_DEMO.map(j => j.location))];
-    setAvailableLocations(locs);
-  }, []);
-  //b
+    if (!selectedSkills || selectedSkills.length === 0) {
+      setAvailableLocations([]);
+      return;
+    }
+    reportLocationsBySkills({ skills: selectedSkills, timeWindow: timeLimit })
+      .then((locs) => setAvailableLocations(locs || []))
+      .catch((err) => console.error("Failed to load locations:", err));
+  }, [selectedSkills, timeLimit]);
 
   //UNCOMMENT WHEN DONE to get back to api logic!!
   // Restore State on Mount
@@ -142,31 +110,6 @@ function SearchBySkills() {
     }
   }, []);
   */
- // REMOVE WHEN DONE: a
- // This effect updates the "Skill Suggestions" dropdown in real-time
-  // as the user types into the search box.
-  useEffect(() => {
-    if (!skillInput) {
-      setSkillSuggestions([]);
-      return;
-    }
-    // Filter from the local 'allSkills' list instead of calling an API
-    const filtered = allSkills.filter((s) => 
-      s.toLowerCase().includes(skillInput.toLowerCase()) && 
-      !selectedSkills.includes(s)
-    );
-    setSkillSuggestions(filtered.slice(0, 15));
-  }, [skillInput, selectedSkills, allSkills]);
-  // b
- //REMOVE WHEN DONE a
-  useEffect(() => {
-    // Extract all unique skills from mock data
-    const skills = [...new Set(JOBS_DEMO.flatMap(j => j.skills))];
-    setAllSkills(skills);
-  }, []);
-  //b
-  //UNCOMMENT WHEN DONE
-  /*
   useEffect(() => {
     if (!skillInput) {
       setSkillSuggestions([]);
@@ -174,46 +117,12 @@ function SearchBySkills() {
     }
 
     const t = setTimeout(() => {
-      // If we have a cached full skills list, filter client-side (avoid API per keystroke)
-      if (allSkills && allSkills.length > 0) {
-        const filtered = allSkills.filter((s) => s.toLowerCase().includes(skillInput.toLowerCase()));
-        setSkillSuggestions(filtered.filter((s) => !selectedSkills.includes(s)).slice(0, 20));
-        return;
-      }
-
-      // Fallback to server search
       getSkills({ q: skillInput, limit: 20 })
         .then((skills) => setSkillSuggestions((skills || []).filter((s) => !selectedSkills.includes(s))))
         .catch((err) => console.error("Failed to load skills:", err));
     }, 200);
     return () => clearTimeout(t);
-  }, [skillInput, selectedSkills]); */
-
-  // Prefetch full skills list on mount and store in session cache for the session
-  //UNCOMMENT WHEN DONE
-  /*
-  useEffect(() => {
-    const cached = sessionStorage.getItem("skills_cache");
-    if (cached) {
-      try {
-        setAllSkills(JSON.parse(cached));
-      } catch (e) {
-        sessionStorage.removeItem("skills_cache");
-      }
-    }
-
-    if (!cached) {
-      // attempt to fetch a large list once
-      getSkills({ q: "", limit: 1000 })
-        .then((skills) => {
-          const arr = skills || [];
-          setAllSkills(arr);
-          try { sessionStorage.setItem("skills_cache", JSON.stringify(arr)); } catch (e) {}
-        })
-        .catch((err) => console.error("Failed to prefetch skills:", err));
-    }
-  }, []); // Run only once on mount
-  */
+  }, [skillInput, selectedSkills]);
   const filteredSkillSuggestions = useMemo(
     () => (skillSuggestions || []).filter((s) => s.toLowerCase().includes(skillInput.toLowerCase())),
     [skillSuggestions, skillInput]
@@ -254,7 +163,6 @@ function SearchBySkills() {
   // Search Handler
   const handleSearch = async () => {
     if (selectedSkills.length === 0) {
-      alert("Please select at least one skill.");
       return;
     }
     // Clear previous results immediately (do not merge)
@@ -266,71 +174,17 @@ function SearchBySkills() {
     sessionStorage.setItem("sbs_skills", JSON.stringify(selectedSkills));
     sessionStorage.setItem("sbs_location", locationInput);
     sessionStorage.setItem("sbs_timeLimit", timeLimit);
-    //UNCOMMENT WHEN DONE!!
-    /*
     try {
-      const resp = await reportJobsBySkills({
+      const resp = await reportFieldsBySkills({
         skills: selectedSkills,
         location: locationInput || null,
         timeWindow: timeLimit,
       });
 
       const resData = {
-        jobFields: (resp?.job_titles || []).map((j) => ({ name: j.name, percent: j.percent, count: j.count })),
-        topField: resp?.top_job_title || null,
-        lastAnnouncements: resp?.last_announcements || [],
-      };
-      
-      setResults(resData);
-      sessionStorage.setItem("sbs_results", JSON.stringify(resData));
-
-    } catch (err) {
-      console.error(err);
-      setResults({ jobFields: [], topField: null, lastAnnouncements: [] });
-    } finally {
-      setLoading(false);
-    }*/
-    //REMOVE WHEN DONE:a
-    try {
-      // 1. Call your mock API
-      const resp = await mockApi.searchBySkills({
-        skills: selectedSkills,
-        location: locationInput || null
-      });
-
-      // 2. Map the stats object to the array format your UI uses
-      const jobFields = Object.entries(resp.jobs || {}).map(([name, stats]) => ({
-        name: name,
-        percent: stats.percentage,
-        count: stats.count
-      }));
-
-      // 3. Find the last 5 job postings for the sidebar
-      const now = new Date();
-      const timeMap = { "1w": 7, "2w": 14, "1m": 30, "3m": 90 };
-      const daysAllowed = timeMap[timeLimit] || 90;
-      const cutoffDate = new Date(now.setDate(now.getDate() - daysAllowed));
-
-      const lastAnnouncements = JOBS_DEMO
-        .filter(j => {
-          const isMatch = j.skills.some(s => selectedSkills.includes(s));
-          const isRecent = new Date(j.date_posted) >= cutoffDate;
-          return isMatch && isRecent;
-        })
-        .sort((a, b) => new Date(b.date_posted) - new Date(a.date_posted))
-        .slice(0, 5)
-        .map(j => ({
-          id: j.id,
-          title: j.title,
-          company: j.company,
-          date: j.date_posted,
-          url: j.url
-        }));
-      
-      const resData = {
-        jobFields: jobFields,
-        topField: jobFields.length > 0 ? jobFields[0].name : null,
-        lastAnnouncements: lastAnnouncements,
+        jobFields: (resp?.fields || []).map((f) => ({ name: f.name, percent: f.percent, count: f.count })),
+        topField: resp?.top_field || null,
+        lastAnnouncements: resp?.best_jobs || [],
       };
       
       setResults(resData);
@@ -342,8 +196,24 @@ function SearchBySkills() {
     } finally {
       setLoading(false);
     }
-    //b
   };
+
+  useEffect(() => {
+    if (!selectedSkills || selectedSkills.length === 0) {
+      setHasSearched(false);
+      setResults(null);
+      return;
+    }
+
+    if (autoSearchTimer.current) clearTimeout(autoSearchTimer.current);
+    autoSearchTimer.current = setTimeout(() => {
+      handleSearch();
+    }, 300);
+
+    return () => {
+      if (autoSearchTimer.current) clearTimeout(autoSearchTimer.current);
+    };
+  }, [selectedSkills, locationInput, timeLimit]);
 
   const handleFieldClick = (fieldName) => {
     const params = new URLSearchParams();
@@ -476,25 +346,6 @@ function SearchBySkills() {
         {/* Custom arrow for select if appearance is none, but let's keep it simple for now or rely on browser default if we remove appearance: none or add arrow */}
       </div>
 
-      {/* Search Button */}
-      <button
-        onClick={handleSearch}
-        disabled={loading}
-        style={{
-          padding: "15px 30px",
-          backgroundColor: "#93c5fd",
-          color: "#000",
-          border: "2px solid #000",
-          borderRadius: "8px",
-          fontSize: "1.1rem",
-          fontWeight: "bold",
-          cursor: loading ? "not-allowed" : "pointer",
-          opacity: loading ? 0.7 : 1,
-          marginBottom: "1px"
-        }}
-      >
-        {loading ? "Searching..." : "Search"}
-      </button>
     </section>
   );
 
@@ -508,7 +359,7 @@ function SearchBySkills() {
       <div style={{ display: "flex", flexWrap: "wrap", gap: "40px" }}>
         {/* LEFT SIDE: Scrollable List of Job Fields */}
         <div style={{ flex: 1, minWidth: "300px", backgroundColor: "white", padding: "20px", borderRadius: "12px", boxShadow: "0 2px 8px rgba(0,0,0,0.05)" }}>
-          <h3 style={{ marginTop: 0, marginBottom: "20px", color: "#333" }}>Matching Jobs by Job Field</h3>
+          <h3 style={{ marginTop: 0, marginBottom: "20px", color: "#333" }}>Matching Job Fields</h3>
           <p style={{ color: "#64748b", fontSize: "14px", marginBottom: "20px" }}>
             Showing fields with &gt; 2% match. Click to view details.
           </p>
@@ -568,13 +419,13 @@ function SearchBySkills() {
               {results.topField}
             </p>
             <p style={{ margin: "5px 0 0 0", color: "#60a5fa" }}>
-              Highest number of matching announcements
+              Best match based on your selected skills
             </p>
           </div>
 
           {/* Last 5 Announcements */}
           <div style={{ backgroundColor: "white", padding: "20px", borderRadius: "12px", boxShadow: "0 2px 8px rgba(0,0,0,0.05)", flex: 1 }}>
-            <h3 style={{ marginTop: 0, color: "#333" }}>Last 5 Announcements</h3>
+            <h3 style={{ marginTop: 0, color: "#333" }}>Best Job Matches</h3>
             <div style={{ display: "flex", flexDirection: "column", gap: "10px" }}>
               {results.lastAnnouncements.map((job) => (
                 <a 
@@ -597,7 +448,12 @@ function SearchBySkills() {
                   <div style={{ fontWeight: "600", color: "#0f172a" }}>{job.title}</div>
                   <div style={{ fontSize: "14px", color: "#64748b", display: "flex", justifyContent: "space-between", marginTop: "4px" }}>
                     <span>{job.company}</span>
-                    <span>{job.date}</span>
+                    <span style={{ display: "flex", gap: 10, alignItems: "center" }}>
+                      {typeof job.match_percent === "number" && (
+                        <span style={{ color: "#2563eb", fontWeight: 700 }}>{job.match_percent}%</span>
+                      )}
+                      <span>{job.date}</span>
+                    </span>
                   </div>
                 </a>
               ))}

@@ -122,7 +122,6 @@ def upsert_job(db: Session, cache: Cache, item: dict) -> Job:
     obj.title = title
     obj.date = _parse_date(item.get("date_posted"))
     obj.salary = item.get("salary")
-    obj.description = item.get("description")
 
     comp = get_or_create_company(db, cache, item.get("company"))
     obj.company = comp
@@ -191,14 +190,16 @@ def seed(seed_path: Path, reset: bool) -> None:
 
 
 def main() -> None:
-    parser = argparse.ArgumentParser(description="Seed Postgres with frontend mock data.")
+    parser = argparse.ArgumentParser(description="Seed Postgres from a JSON file.")
     parser.add_argument("--path", type=str, default=str(SEED_PATH_DEFAULT), help="Path to mock_data.json")
     parser.add_argument("--reset", action="store_true", help="Wipe DB tables before seeding")
     args = parser.parse_args()
 
     seed_path = Path(args.path)
     if not seed_path.exists():
-        raise FileNotFoundError(f"Seed file not found: {seed_path}. Run scripts/export_mock_data.mjs first.")
+        raise FileNotFoundError(
+            f"Seed file not found: {seed_path}. Provide --path to an existing seed JSON file."
+        )
 
     seed(seed_path=seed_path, reset=args.reset)
 

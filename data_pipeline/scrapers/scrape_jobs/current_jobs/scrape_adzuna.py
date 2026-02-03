@@ -18,7 +18,7 @@ job_file_path = os.path.join(current_folder, "job_categories.txt")
 with open(job_file_path, "r") as f:
     JOB_TYPES = [line.strip() for line in f if line.strip()]
 
-# SCRAPER (modified to accept existing DataFrame)
+# SCRAPER 
 def scrape_adzuna(df, stop_date, max_pages=2):
     """
     Scrape Adzuna jobs until stop_date and append to existing DataFrame.
@@ -51,10 +51,10 @@ def scrape_adzuna(df, stop_date, max_pages=2):
                 "app_key": APP_KEY,
                 "what": job_query,
                 "results_per_page": min(locations.RESULTS_PER_PAGE, 50),
-                "max_days_old": 5  # <- aligns with stop_date
+                "max_days_old": 5 
             }
 
-            # ----- REQUEST WITH TIMEOUT HANDLING -----
+            # Request
             try:
                 r = requests.get(
                     base_url,
@@ -113,7 +113,7 @@ def scrape_adzuna(df, stop_date, max_pages=2):
                     job_date = raw_date.split("T")[0]
 
                     if job_date < stop_date:
-                        break  # <- only stops current page, not entire scraper
+                        break  
 
                     location_area = item.get("location", {}).get("area", [])
                     city = "Unknown"
@@ -135,7 +135,7 @@ def scrape_adzuna(df, stop_date, max_pages=2):
                         "Website": "adzuna"
                     }
 
-                time.sleep(1.5)  # keep polite pause
+                time.sleep(3) 
 
-    print(f"✅ Adzuna collected {len(df) - temp} total jobs")
+    print(f"Adzuna collected {len(df) - temp} total jobs")
     return df

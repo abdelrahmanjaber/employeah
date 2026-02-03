@@ -1,10 +1,6 @@
 import { useNavigate } from "react-router-dom";
 import { useState, useEffect } from "react";
-//UNCOMMENT WHEN DONE!! this was the docker version:
-//import { getStats } from "../lib/apiClient";
-
-//REMOVE WHEN DONE
-import { JOBS_DEMO } from "../lib/mock_database";
+import { getStats } from "../lib/apiClient";
 
 /* THIS IS THE HOME PAGE
   --------------------------------
@@ -36,18 +32,12 @@ function HomePage() {
   const [hoveredIndex, setHoveredIndex] = useState(null);
   const [titleHover, setTitleHover] = useState(false);
   const [totalAnnouncements, setTotalAnnouncements] = useState(null);
-  //UNCOMMENT WHEN DONE!!
-  /*
+
   useEffect(() => {
     getStats()
       .then((d) => setTotalAnnouncements(d?.total_announcements ?? '-'))
       .catch(() => {});
-  }, []);*/
-  //REMOVE WHEN DONE a
-  useEffect(() => {
-    // Simply use the length of your mock array
-    setTotalAnnouncements(JOBS_DEMO.length);
-  }, []);//b
+  }, []);
   
   // CARD CONFIGURATION 
   // Configuration for the three main actions with ICONS:

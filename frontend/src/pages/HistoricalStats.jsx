@@ -1,7 +1,13 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import mockApi from "../lib/mockApi";
-import { JOBS_DEMO } from "../lib/mock_database";
+import {
+  getCoursesForSkill,
+  getFields,
+  getLocations,
+  getSkills,
+  getSkillTopFields,
+  getSkillTrend,
+} from "../lib/apiClient";
 
 /* THIS IS THE SKILL ANALYSIS PAGE
   --------------------------------
@@ -13,14 +19,6 @@ import { JOBS_DEMO } from "../lib/mock_database";
 
 
 const THEME_COLOR = "#7e57c2"; 
-const TIME_LIMITS = [
-  { value: "all", label: "All Data" },
-  { value: "1w", label: "Last week" },
-  { value: "2w", label: "Last 2 weeks" },
-  { value: "1m", label: "Last month" },
-  { value: "3m", label: "Last 3 months" }
-];
-
 const CHART_WIDTH = 600;
 const CHART_HEIGHT = 200;
 const MAX_VAL = 100;
@@ -31,35 +29,61 @@ function HistoricalStats() {
   // Storing what the user types, whether we are loading, 
   // and the data we get back from the API (chart points, job fields, courses)
   const [skillInput, setSkillInput] = useState("");
-  const [jobInput, setJobInput] = useState(""); 
+  const [fieldInput, setFieldInput] = useState("");
   const [locationInput, setLocationInput] = useState("");
-  const [timeLimit, setTimeLimit] = useState("all");
   const [loading, setLoading] = useState(false);
   const [chartData, setChartData] = useState([]);
   const [jobFields, setJobFields] = useState([]);
   const [relevantCourses, setRelevantCourses] = useState([]);
   const [noDataReason, setNoDataReason] = useState(null);
+  const [fieldLimit, setFieldLimit] = useState(10);
 
   const [showSkillSugg, setShowSkillSugg] = useState(false);
-  const [showJobSugg, setShowJobSugg] = useState(false);
+  const [showFieldSugg, setShowFieldSugg] = useState(false);
   const [showLocSugg, setShowLocSugg] = useState(false);
+  const autoSearchTimer = useRef(null);
 
-  // AUTOCOMPLETE LOGIC 
-  // extracting unique lists of jobs/skills/locations from our database
-  // and filtering them based on what the user is currently typing
-  const availableJobs = useMemo(() => [...new Set(JOBS_DEMO.map(j => j.title))].sort(), []);
-  const availableLocations = useMemo(() => [...new Set(JOBS_DEMO.map(j => j.location))].sort(), []);
-  const availableSkills = useMemo(() => [...new Set(JOBS_DEMO.flatMap(j => j.skills))].sort(), []);
 
-  const filteredSkillSuggestions = availableSkills.filter(s => s.toLowerCase().includes(skillInput.toLowerCase()) && skillInput.length > 0);
-  const filteredJobSuggestions = availableJobs.filter(j => j.toLowerCase().includes(jobInput.toLowerCase()) && jobInput.length > 0);
-  const filteredLocSuggestions = availableLocations.filter(l => l.toLowerCase().includes(locationInput.toLowerCase()) && locationInput.length > 0);
+  const [availableFields, setAvailableFields] = useState([]);
+  const [availableLocations, setAvailableLocations] = useState([]);
+  const [skillSuggestions, setSkillSuggestions] = useState([]);
+
+  useEffect(() => {
+    getFields().then((d) => setAvailableFields(d || [])).catch(() => {});
+    getLocations().then((d) => setAvailableLocations(d || [])).catch(() => {});
+  }, []);
+
+  useEffect(() => {
+    if (!skillInput) {
+      setSkillSuggestions([]);
+      return;
+    }
+    const t = setTimeout(() => {
+      getSkills({ q: skillInput, limit: 20 })
+        .then((skills) => setSkillSuggestions(skills || []))
+        .catch(() => {});
+    }, 200);
+    return () => clearTimeout(t);
+  }, [skillInput]);
+
+  const filteredSkillSuggestions = useMemo(
+    () => (skillSuggestions || []).filter((s) => s.toLowerCase().includes(skillInput.toLowerCase()) && skillInput.length > 0),
+    [skillSuggestions, skillInput]
+  );
+  const filteredFieldSuggestions = useMemo(
+    () => (availableFields || []).filter((f) => f.toLowerCase().includes(fieldInput.toLowerCase()) && fieldInput.length > 0),
+    [availableFields, fieldInput]
+  );
+  const filteredLocSuggestions = useMemo(
+    () => (availableLocations || []).filter((l) => l.toLowerCase().includes(locationInput.toLowerCase()) && locationInput.length > 0),
+    [availableLocations, locationInput]
+  );
   // DATA FETCHING 
   // This function runs when we need to update the page. 
   // It calls our mock API to get the Trend Graph, Job Fields, and TUM Courses all at once.
-  const triggerAnalysis = async (skillOverride = null, jobOverride = null, locOverride = null) => {
+  const triggerAnalysis = async (skillOverride = null, fieldOverride = null, locOverride = null) => {
     const finalSkill = skillOverride || skillInput;
-    const finalJob = jobOverride !== null ? jobOverride : jobInput;
+    const finalField = fieldOverride !== null ? fieldOverride : fieldInput;
     const finalLoc = locOverride !== null ? locOverride : locationInput;
     
     if (!finalSkill) return;
@@ -68,32 +92,45 @@ function HistoricalStats() {
     setChartData([]);
 
     try {
+      const apiLimit = fieldLimit === "All" ? 200 : Number(fieldLimit) || 50;
       const [trend, fields, courses] = await Promise.all([
-        mockApi.getSkillTrendData(finalSkill, finalJob, finalLoc, timeLimit),
-        mockApi.getJobFieldsBySkill(finalSkill, finalLoc, timeLimit),
-        mockApi.getTUMCoursesBySkill(finalSkill)
+        getSkillTrend({
+          skill: finalSkill,
+          field: finalField || null,
+          location: finalLoc || null,
+          timeWindow: "all",
+          bucket: "month",
+        }),
+        getSkillTopFields({ skill: finalSkill, location: finalLoc || null, limit: apiLimit }),
+        getCoursesForSkill(finalSkill, { limit: 5 })
       ]);
       
-      if (!trend || trend.length === 0) {
-        const fallback = await mockApi.getSkillTrendData(finalSkill, finalJob, finalLoc, "all");
-        setNoDataReason(fallback && fallback.length > 0 ? 'period' : 'general');
+      const points = trend?.points || [];
+      if (!points || points.length === 0) {
+        setNoDataReason("general");
       } else {
-        setChartData(trend);
+        setChartData(points);
       }
-      setJobFields(fields.map(f => ({ ...f, job_title: f.title })) || []);
+      setJobFields((fields || []).map((f) => ({ field: f.field, percentage: f.percentage, count: f.count })));
       setRelevantCourses(courses || []);
     } catch (err) { console.error(err); } finally { setLoading(false); }
   };
 
-  const handleTableJobClick = (clickedJobTitle) => {
-    setJobInput(clickedJobTitle);
-    triggerAnalysis(null, clickedJobTitle, null);
+  const handleTableFieldClick = (clickedField) => {
+    setFieldInput(clickedField);
+    triggerAnalysis(null, clickedField, null);
   };
 
   // CHART MATH & HELPERS 
   // Parsing dates and calculating X/Y coordinates to draw the line chart manually.
   const parseDate = (dStr) => { 
     if (!dStr) return new Date();
+    if (dStr.includes(".")) {
+      const partsDot = dStr.split(".");
+      if (partsDot.length === 2) {
+        return new Date(parseInt(partsDot[1]), parseInt(partsDot[0]) - 1, 1);
+      }
+    }
     const parts = dStr.split('/');
     
     // If it's MM/YYYY (e.g., 01/2026)
@@ -167,10 +204,28 @@ function HistoricalStats() {
   }, [chartData]);
 
   const capitalize = (str) => str ? str.charAt(0).toUpperCase() + str.slice(1) : "";
-  // auto-refresh the data whenever the user changes a filter (like time limit)
+  const displayedJobFields = useMemo(() => {
+    if (fieldLimit === "All") return jobFields || [];
+    const n = Number(fieldLimit) || 10;
+    return (jobFields || []).slice(0, n);
+  }, [jobFields, fieldLimit]);
+  // Auto-refresh (debounced) whenever the user changes inputs
   useEffect(() => {
-  if (skillInput) triggerAnalysis();
-  }, [timeLimit, skillInput, jobInput, locationInput]); // Updates on ANY change
+    if (!skillInput) {
+      setChartData([]);
+      setJobFields([]);
+      setRelevantCourses([]);
+      setNoDataReason(null);
+      return;
+    }
+    if (autoSearchTimer.current) clearTimeout(autoSearchTimer.current);
+    autoSearchTimer.current = setTimeout(() => {
+      triggerAnalysis();
+    }, 300);
+    return () => {
+      if (autoSearchTimer.current) clearTimeout(autoSearchTimer.current);
+    };
+  }, [skillInput, fieldInput, locationInput, fieldLimit]);
   return (
     <main style={{ padding: "2rem", maxWidth: "1200px", margin: "0 auto", fontFamily: 'sans-serif' }}>
       <button onClick={() => navigate(-1)} style={{ cursor: "pointer", marginBottom: "1rem", background: "#f3e5f5", border: "1px solid #000", padding: "5px 15px", borderRadius: "4px", color: "#4a148c" }}>← Back</button>
@@ -200,16 +255,16 @@ function HistoricalStats() {
           )}
         </div>
         <div style={{ position: "relative", width: "210px" }}>
-          <label style={{ display: "block", marginBottom: "5px", fontWeight: "bold" }}>Job Field <small style={{fontWeight:400}}>(Opt)</small></label>
-          <input placeholder="Job Field" value={jobInput} onChange={(e) => { setJobInput(e.target.value); setShowJobSugg(true); }} onFocus={() => setShowJobSugg(true)} style={{ padding: "15px", width: "100%", border: "2px solid #000", borderRadius: "8px" }} />
-          {showJobSugg && filteredJobSuggestions.length > 0 && (
+          <label style={{ display: "block", marginBottom: "5px", fontWeight: "bold" }}>Job Field</label>
+          <input placeholder="Job Field" value={fieldInput} onChange={(e) => { setFieldInput(e.target.value); setShowFieldSugg(true); }} onFocus={() => setShowFieldSugg(true)} style={{ padding: "15px", width: "100%", border: "2px solid #000", borderRadius: "8px" }} />
+          {showFieldSugg && filteredFieldSuggestions.length > 0 && (
             <ul style={{ position: "absolute", top: "100%", left: 0, right: 0, background: "#fff", border: "2px solid #000", listStyle: "none", padding: 0, zIndex: 10, maxHeight: "200px", overflowY: "auto", borderRadius: "0 0 8px 8px" }}>
-              {filteredJobSuggestions.map(j => <li key={j} onClick={() => { setJobInput(j); setShowJobSugg(false); triggerAnalysis(null, j); }} style={{ padding: "12px", cursor: "pointer", borderBottom: "1px solid #eee" }} onMouseEnter={(e) => e.target.style.background = "#f3e5f5"} onMouseLeave={(e) => e.target.style.background = "#fff"}>{j}</li>)}
+              {filteredFieldSuggestions.map(f => <li key={f} onClick={() => { setFieldInput(f); setShowFieldSugg(false); triggerAnalysis(null, f); }} style={{ padding: "12px", cursor: "pointer", borderBottom: "1px solid #eee" }} onMouseEnter={(e) => e.target.style.background = "#f3e5f5"} onMouseLeave={(e) => e.target.style.background = "#fff"}>{f}</li>)}
             </ul>
           )}
         </div>
         <div style={{ position: "relative", width: "210px" }}>
-          <label style={{ display: "block", marginBottom: "5px", fontWeight: "bold" }}>Location <small style={{fontWeight:400}}>(Opt)</small></label>
+          <label style={{ display: "block", marginBottom: "5px", fontWeight: "bold" }}>Location</label>
           <input placeholder="Location" value={locationInput} onChange={(e) => { setLocationInput(e.target.value); setShowLocSugg(true); }} onFocus={() => setShowLocSugg(true)} style={{ padding: "15px", width: "100%", border: "2px solid #000", borderRadius: "8px" }} />
           {showLocSugg && filteredLocSuggestions.length > 0 && (
             <ul style={{ position: "absolute", top: "100%", left: 0, right: 0, background: "#fff", border: "2px solid #000", listStyle: "none", padding: 0, zIndex: 10, maxHeight: "200px", overflowY: "auto", borderRadius: "0 0 8px 8px" }}>
@@ -217,13 +272,6 @@ function HistoricalStats() {
             </ul>
           )}
         </div>
-        <div style={{ position: "relative", width: "160px" }}>
-          <label style={{ display: "block", marginBottom: "5px", fontWeight: "bold" }}>Time Limit</label>
-          <select value={timeLimit} onChange={(e) => setTimeLimit(e.target.value)} style={{ padding: "15px", width: "100%", border: "2px solid #000", borderRadius: "8px", background: "white", cursor: 'pointer' }}>
-            {TIME_LIMITS.map(opt => <option key={opt.value} value={opt.value}>{opt.label}</option>)}
-          </select>
-        </div>
-        <button onClick={() => triggerAnalysis()} style={{ padding: "15px 25px", background: "#d1c4e9", border: "2px solid #000", fontWeight: "bold", borderRadius: "8px", cursor: 'pointer' }}>{loading ? "..." : "Search"}</button>
       </div>
 
       {/* RESULTS GRID (Chart on left, Tables on right) */}
@@ -232,7 +280,7 @@ function HistoricalStats() {
           <section>
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '30px', width: '100%' }}>
               <div style={{ fontSize: "1.3rem", fontWeight: "bold", border: `2px solid ${THEME_COLOR}`, padding: "5px 15px", borderRadius: "20px", background: "#f8fafc" }}>
-                Historical demand for <span style={{ color: THEME_COLOR }}>{capitalize(skillInput)}</span> {jobInput && `as a ${jobInput}`} {locationInput && `in ${locationInput}`} {timeLimit !== 'all' && `over the ${TIME_LIMITS.find(t => t.value === timeLimit)?.label.toLowerCase()}`}
+                Historical demand for <span style={{ color: THEME_COLOR }}>{capitalize(skillInput)}</span> {fieldInput && `in ${fieldInput}`} {locationInput && `in ${locationInput}`}
               </div>
               {growthStat && (
                 <div style={{ fontSize: "0.85rem", fontWeight: "700", color: growthStat.color, backgroundColor: growthStat.isUp ? "#f0fdf4" : (growthStat.isDown ? "#fef2f2" : "#f1f5f9"), padding: "5px 12px", borderRadius: "12px", border: `1px solid ${growthStat.color}`, display: 'flex', alignItems: 'center', gap: '4px' }}>
@@ -257,9 +305,7 @@ function HistoricalStats() {
 
               <div style={{ position: "absolute", top: "100%", left: 0, right: 0, height: "20px", marginTop: "10px" }}>
                 {getAxisTicks().map((date, i) => {
-                   const label = (timeLimit === '1w' || timeLimit === '2w')
-                     ? `${String(date.getDate()).padStart(2, '0')}/${String(date.getMonth() + 1).padStart(2, '0')}/${date.getFullYear()}`
-                     : `${String(date.getMonth() + 1).padStart(2, '0')}/${date.getFullYear()}`;
+                   const label = `${String(date.getMonth() + 1).padStart(2, '0')}/${date.getFullYear()}`;
                    return (
                      <span key={i} style={{ position: 'absolute', left: `${(i / 4) * 100}%`, transform: 'translateX(-50%)', fontSize: "0.75rem", fontWeight: "bold", whiteSpace: "nowrap" }}>
                        {label}
@@ -273,15 +319,28 @@ function HistoricalStats() {
           <section style={{ display: "flex", flexDirection: "column", gap: "60px" }}>
             {/* Table 1: Which Job Fields need this skill */}
             <div>
-              <div style={{ fontSize: "1.1rem", fontWeight: "bold", marginBottom: "15px", border: `2px solid ${THEME_COLOR}`, padding: "5px 15px", borderRadius: "20px", display: "inline-block", background: "#f8fafc" }}>
-                Job Fields needing {capitalize(skillInput)} {locationInput && `in ${locationInput}`} {timeLimit !== 'all' && `over the last ${TIME_LIMITS.find(t => t.value === timeLimit)?.label.toLowerCase()}`}
+              <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 12, marginBottom: 15 }}>
+                <div style={{ fontSize: "1.1rem", fontWeight: "bold", border: `2px solid ${THEME_COLOR}`, padding: "5px 15px", borderRadius: "20px", display: "inline-block", background: "#f8fafc" }}>
+                  Job Fields needing {capitalize(skillInput)} {locationInput && `in ${locationInput}`}
+                </div>
+                <select
+                  value={fieldLimit}
+                  onChange={(e) => setFieldLimit(e.target.value)}
+                  style={{ padding: "8px 10px", borderRadius: "10px", border: `1px solid ${THEME_COLOR}`, background: "white", cursor: "pointer", fontWeight: 600 }}
+                  title="Limit number of job fields"
+                >
+                  <option value={5}>Top 5</option>
+                  <option value={10}>Top 10</option>
+                  <option value={20}>Top 20</option>
+                  <option value="All">All</option>
+                </select>
               </div>
               <table style={{ width: "100%", border: `2px solid ${THEME_COLOR}`, borderCollapse: "collapse", borderRadius: "8px", overflow: "hidden", background: "#fff" }}>
                 <thead><tr style={{ background: "#f8fafc", borderBottom: `1px solid ${THEME_COLOR}` }}><th style={{ padding: "12px", textAlign: "left" }}>Job Field</th><th style={{ padding: "12px", textAlign: "right" }}>Demand</th></tr></thead>
                 <tbody>
-                  {jobFields.map((field, i) => (
-                    <tr key={i} onClick={() => handleTableJobClick(field.job_title)} style={{ borderBottom: i === jobFields.length - 1 ? "none" : "1px solid #eee", cursor: 'pointer' }} onMouseEnter={(e) => e.currentTarget.style.backgroundColor = "#f3e8ff"} onMouseLeave={(e) => e.currentTarget.style.backgroundColor = "transparent"}>
-                      <td style={{ padding: "12px" }}>{field.job_title}</td>
+                  {displayedJobFields.map((field, i) => (
+                    <tr key={i} onClick={() => handleTableFieldClick(field.field)} style={{ borderBottom: i === displayedJobFields.length - 1 ? "none" : "1px solid #eee", cursor: 'pointer' }} onMouseEnter={(e) => e.currentTarget.style.backgroundColor = "#f3e8ff"} onMouseLeave={(e) => e.currentTarget.style.backgroundColor = "transparent"}>
+                      <td style={{ padding: "12px" }}>{field.field}</td>
                       <td style={{ padding: "12px", textAlign: "right", fontWeight: "bold" }}>{field.percentage}%</td>
                     </tr>
                   ))}

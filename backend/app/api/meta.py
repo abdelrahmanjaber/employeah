@@ -5,7 +5,7 @@ from sqlalchemy import func, select
 from sqlalchemy.orm import Session
 
 from app.db import get_db
-from app.models import Job, Location, Skill
+from app.models import Field, Job, Location, Skill
 
 
 router = APIRouter()
@@ -20,6 +20,11 @@ def list_job_titles(db: Session = Depends(get_db)) -> list[str]:
 @router.get("/locations", response_model=list[str])
 def list_locations(db: Session = Depends(get_db)) -> list[str]:
     rows = db.execute(select(func.distinct(Location.city)).order_by(Location.city.asc())).all()
+    return [r[0] for r in rows if r[0]]
+
+@router.get("/fields", response_model=list[str])
+def list_fields(db: Session = Depends(get_db)) -> list[str]:
+    rows = db.execute(select(func.distinct(Field.name)).order_by(Field.name.asc())).all()
     return [r[0] for r in rows if r[0]]
 
 

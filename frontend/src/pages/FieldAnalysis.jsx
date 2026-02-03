@@ -10,13 +10,7 @@ import { useSearchParams, useNavigate } from "react-router-dom";
   3. Are there open jobs right now? (List of recent job postings)
 */
 
-
-
-//UNCOMMENT WHEN DONE!! to get back to API not mockdata
-
-//import { reportJobTitleDetails } from "../lib/apiClient";
-//REMOVE WHEN DONE, this is mock data logic:
-import { JOBS_DEMO } from "../lib/mock_database";
+import { reportFieldDetails } from "../lib/apiClient";
 
 // Pretty pastel colors for the skill bars so the chart looks nice.
 const PIE_COLORS = [
@@ -31,7 +25,7 @@ function FieldAnalysis() {
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
 
-  const jobTitle = searchParams.get("field");
+  const fieldName = searchParams.get("field");
   const skillsParam = searchParams.get("skills");
   const location = searchParams.get("location");
   const timeLimit = searchParams.get("timeLimit") || "1m";
@@ -43,69 +37,14 @@ function FieldAnalysis() {
   const [details, setDetails] = useState(null);
   const [limit, setLimit] = useState(10); // Default Top 10
   // Main data fetching effect.
-  // Right now it just processes the mock data array locally to simulate an API response.
   useEffect(() => {
-    if (!jobTitle) return;
+    if (!fieldName) return;
 
     const fetchData = async () => {
       setLoading(true);
-      //REMOVE WHEN DONE a
       try {
-        // 1. Filter jobs based on title and location
-        
-        const filteredJobs = JOBS_DEMO.filter(j => {
-          const matchTitle = j.title.toLowerCase() === jobTitle.toLowerCase();
-          const matchLoc = location ? j.location.toLowerCase().includes(location.toLowerCase()) : true;
-          return matchTitle && matchLoc;
-        });
-
-        // 2. Calculate Top Skills, so count up how many times each skill appears in the filtered jobs
-        const skillsCount = {};
-        filteredJobs.forEach(j => {
-          j.skills.forEach(s => {
-            skillsCount[s] = (skillsCount[s] || 0) + 1;
-          });
-        });
-        // Sort skills by frequency to find the most important ones
-        const topSkills = Object.entries(skillsCount)
-          .map(([name, count]) => ({
-            name,
-            count,
-            percent: Number(((count / filteredJobs.length) * 100).toFixed(1))
-          }))
-          .sort((a, b) => b.count - a.count);
-
-        // 3. Calculate Top Companies
-        const companiesCount = {};
-        filteredJobs.forEach(j => {
-          companiesCount[j.company] = (companiesCount[j.company] || 0) + 1;
-        });
-
-        const topCompanies = Object.entries(companiesCount)
-          .map(([name, count]) => ({ name, count }))
-          .sort((a, b) => b.count - a.count)
-          .slice(0, 3);
-
-        // 4. Set the details state to match the UI expectation
-        setDetails({
-          total_jobs: filteredJobs.length,
-          top_skills: topSkills,
-          top_companies: topCompanies,
-          last_announcements: filteredJobs
-            .sort((a, b) => new Date(b.date_posted) - new Date(a.date_posted))
-            .slice(0, 5)
-            .map(j => ({ ...j, date: j.date_posted })) // match UI key 'date'
-        });
-
-      } catch (err) {
-        console.error("Failed to fetch field details", err);
-      } finally {
-        setLoading(false);
-      }
-      //UNCOMMENT WHEN DONE!!
-      /*try {
-        const data = await reportJobTitleDetails({
-          jobTitle,
+        const data = await reportFieldDetails({
+          field: fieldName,
           skills: selectedSkills,
           location: location || null,
           timeWindow: timeLimit,
@@ -115,11 +54,11 @@ function FieldAnalysis() {
         console.error("Failed to fetch field details", err);
       } finally {
         setLoading(false);
-      }*/
+      }
     };
 
     fetchData();
-  }, [jobTitle, selectedSkills, location, timeLimit]);
+  }, [fieldName, selectedSkills, location, timeLimit]);
 
   // Helper to handle messy URL data from different sources.
   // Some jobs have 'url', some 'link', others are nested inside objects
@@ -161,7 +100,7 @@ function FieldAnalysis() {
     return Math.max(...normalizedTopSkills.map(s => s.percent));
   }, [normalizedTopSkills]);
 
-  if (!jobTitle) {
+  if (!fieldName) {
     return <div style={{ padding: 20 }}>Invalid Job Field</div>;
   }
 
@@ -181,7 +120,7 @@ function FieldAnalysis() {
       <header style={{ textAlign: "center", marginBottom: "3rem" }}>
         <h1 style={{ fontSize: "2.5rem", margin: "0 0 10px 0", color: "#1f2937" }}>Job Field Analysis</h1>
         <p style={{ color: "#666", fontSize: "1.1rem" }}>
-          Detailed insights for the {jobTitle} role based on your skills and market data.
+          Detailed insights for the {fieldName} role based on your skills and market data.
         </p>
       </header>
 
@@ -192,7 +131,7 @@ function FieldAnalysis() {
            {/* Info Header */}
            <div style={{ marginBottom: 30 }}>
             <h2 style={{ margin: 0, color: '#1e293b', fontSize: '24px' }}>
-              Job field: <span style={{ color: '#2563eb' }}>{jobTitle}</span>
+              Job field: <span style={{ color: '#2563eb' }}>{fieldName}</span>
             </h2>
             <div style={{ marginTop: 6, color: '#64748b', fontSize: 16 }}>
               {details?.total_jobs ? (
