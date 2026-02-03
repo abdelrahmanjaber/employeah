@@ -13,3 +13,5 @@ scraper/server/.gitkeep
 .vscode/
 **/node_modules/
 *.mp4
+
+.idea/
