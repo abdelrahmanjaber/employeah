@@ -1,7 +1,12 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import mockApi from "../lib/mockApi";
-import { JOBS_DEMO } from "../lib/mock_database";
+import {
+  getFields,
+  getLocations,
+  getCoursesForSkill,
+  getSkillTrend,
+  reportFieldDetails,
+} from "../lib/apiClient";
 /* THIS IS THE "DREAM JOB" ANALYSIS PAGE
   --------------------------------------
   Here, the user enters a specific Job Field (like "Data Scientist").
@@ -19,7 +24,7 @@ const PIE_COLORS = [
 ];
 
 const TIME_LIMITS = [
-  { value: "all", label: "All Data" },
+  { value: "all", label: "All data" },
   { value: "1w", label: "Last week" },
   { value: "2w", label: "Last 2 weeks" },
   { value: "1m", label: "Last month" },
@@ -43,11 +48,24 @@ function SkillBarChart({ data, onSelectSkill, selectedSkill, limit, onLimitChang
     const fetchAllTrends = async () => {
       const trendResults = {};
       try {
+        const bucket =
+          timeLimit === "1w" || timeLimit === "2w"
+            ? "day"
+            : timeLimit === "1m"
+              ? "week"
+              : "month";
         await Promise.all(data.map(async (skill) => {
-          const history = await mockApi.getSkillTrendData(skill.name, jobTitle, location, timeLimit);
-          if (history && history.length >= 2) {
-            const first = history[0].y;
-            const last = history[history.length - 1].y;
+          const resp = await getSkillTrend({
+            skill: skill.name,
+            field: jobTitle,
+            location,
+            timeWindow: timeLimit,
+            bucket,
+          });
+          const points = resp?.points || [];
+          if (points && points.length >= 2) {
+            const first = points[0].y;
+            const last = points[points.length - 1].y;
             trendResults[skill.name] = last - first;
           }
         }));
@@ -92,7 +110,15 @@ function SkillBarChart({ data, onSelectSkill, selectedSkill, limit, onLimitChang
                 <span style={{ fontSize: "12px", color: "#64748b" }}>{skill.count} jobs ({skill.percent}%)</span>
               </div>
               <div onClick={() => onSelectSkill(skill.name)} style={{ width: "100%", backgroundColor: "#f1f5f9", borderRadius: "6px", height: "20px", cursor: "pointer", overflow: "hidden" }}>
-                <div style={{ width: `${(skill.percent / (maxPercent || 1)) * 100}%`, height: "100%", backgroundColor: barColor, transition: "width 0.5s ease", opacity: isSelected ? 1 : 0.7 }} />
+                <div
+                  style={{
+                    width: `${Math.min(100, Math.max(0, Number(skill.percent) || 0))}%`,
+                    height: "100%",
+                    backgroundColor: barColor,
+                    transition: "width 0.5s ease",
+                    opacity: isSelected ? 1 : 0.7
+                  }}
+                />
               </div>
             </div>
           );
@@ -112,7 +138,7 @@ function SearchByJob() {
   const [limit, setLimit] = useState(10);
   const [jobInput, setJobInput] = useState("");
   const [locationInput, setLocationInput] = useState("");
-  const [timeLimit, setTimeLimit] = useState("all");
+  const [timeLimit, setTimeLimit] = useState("3m");
   const [loading, setLoading] = useState(false);
   const [skillsData, setSkillsData] = useState([]); 
   const [selectedSkill, setSelectedSkill] = useState(null);
@@ -121,9 +147,14 @@ function SearchByJob() {
   const [showJobSugg, setShowJobSugg] = useState(false);
   const [showLocSugg, setShowLocSugg] = useState(false);
   const [noDataReason, setNoDataReason] = useState(null);
-  // AUTOCOMPLETE LOGIC 
-  const availableJobs = useMemo(() => [...new Set(JOBS_DEMO.map(j => j.title))].sort(), []);
-  const availableLocations = useMemo(() => [...new Set(JOBS_DEMO.map(j => j.location))].sort(), []);
+  const [availableJobs, setAvailableJobs] = useState([]);
+  const [availableLocations, setAvailableLocations] = useState([]);
+  const autoSearchTimer = useRef(null);
+
+  useEffect(() => {
+    getFields().then((d) => setAvailableJobs(d || [])).catch(() => {});
+    getLocations().then((d) => setAvailableLocations(d || [])).catch(() => {});
+  }, []);
 
   const filteredJobSuggestions = availableJobs.filter(j => j.toLowerCase().includes(jobInput.toLowerCase()) && jobInput.length > 0);
   const filteredLocSuggestions = availableLocations.filter(l => l.toLowerCase().includes(locationInput.toLowerCase()) && locationInput.length > 0);
@@ -138,30 +169,58 @@ function SearchByJob() {
     setTrendData([]);
     setNoDataReason(null);
     try {
-      const result = await mockApi.searchByJob({ job: jobInput, location: locationInput, timeLimit });
-      if (result && result.skills && Object.keys(result.skills).length > 0) {
-        const formatted = Object.entries(result.skills)
-          .map(([name, data]) => ({ name, percent: data.percentage, count: data.count }))
-          .sort((a, b) => b.percent - a.percent);
+      const resp = await reportFieldDetails({
+        field: jobInput,
+        skills: [],
+        location: locationInput || null,
+        timeWindow: timeLimit,
+      });
+      const formatted = (resp?.top_skills || [])
+        .map((s) => ({ name: s.name, percent: s.percent, count: s.count }))
+        .sort((a, b) => b.percent - a.percent);
+
+      if (formatted.length > 0) {
         setSkillsData(formatted);
         if (formatted.length > 0) handleSkillSelect(formatted[0].name);
       } else {
-        const fallbackResult = await mockApi.searchByJob({ job: jobInput, location: locationInput, timeLimit: 'all' });
-        setNoDataReason(fallbackResult && fallbackResult.total_jobs > 0 ? 'period' : 'general');
+        setNoDataReason("general");
       }
     } catch (err) { console.error(err); } finally { setLoading(false); }
   };
+
+  useEffect(() => {
+    if (!jobInput) return;
+    if (autoSearchTimer.current) clearTimeout(autoSearchTimer.current);
+    autoSearchTimer.current = setTimeout(() => {
+      handleSearch();
+    }, 350);
+    return () => {
+      if (autoSearchTimer.current) clearTimeout(autoSearchTimer.current);
+    };
+  }, [jobInput, locationInput, timeLimit]);
   // SKILL CLICK HANDLER 
   // When the user clicks a specific skill in the bar chart,
   // we fetch the History Graph and TUM Courses for that specific skill.
   const handleSkillSelect = async (skill) => {
     setSelectedSkill(skill);
     try {
+      const bucket =
+        timeLimit === "1w" || timeLimit === "2w"
+          ? "day"
+          : timeLimit === "1m"
+            ? "week"
+            : "month";
       const [trend, courses] = await Promise.all([
-        mockApi.getSkillTrendData(skill, jobInput, locationInput, timeLimit), 
-        mockApi.getTUMCoursesBySkill(skill)
+        getSkillTrend({
+          skill,
+          field: jobInput,
+          location: locationInput || null,
+          timeWindow: timeLimit,
+          bucket,
+        }),
+        getCoursesForSkill(skill, { limit: 5 })
       ]);
-      setTrendData(trend || []);
+      setTrendData(trend?.points || []);
       setCoursesData(courses || []);
     } catch (err) { console.error(err); }
   };
@@ -176,6 +235,12 @@ function SearchByJob() {
   //CHART HELPERS (Parsing dates, calculating axes)
   const parseDate = (dStr) => { 
     if (!dStr) return new Date();
+    if (dStr.includes(".")) {
+      const partsDot = dStr.split(".");
+      if (partsDot.length === 2) {
+        return new Date(parseInt(partsDot[1]), parseInt(partsDot[0]) - 1, 1);
+      }
+    }
     const parts = dStr.split('/');
     
     // Logic: Always treat as DD/MM/YYYY
@@ -273,7 +338,6 @@ function SearchByJob() {
             {TIME_LIMITS.map(opt => <option key={opt.value} value={opt.value}>{opt.label}</option>)}
           </select>
         </div>
-        <button onClick={handleSearch} style={{ padding: "15px 30px", background: "#6ee7b7", border: "2px solid #000", fontWeight: "bold", borderRadius: "8px", cursor: 'pointer' }}>Search</button>
       </section>
       {/* ERROR / NO DATA MESSAGE */}
       {!loading && noDataReason && (
