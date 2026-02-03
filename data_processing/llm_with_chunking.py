@@ -43,10 +43,10 @@ import faiss
 language = "en"
 
 # Load skills from txt file
-file_path = parent_dir / "skills.txt"
+# file_path = parent_dir / "skills.txt"
 
-with open(file_path, "r") as f:
-    skills_list = [skill.strip() for skill in f.readlines() if skill.strip()] 
+# with open(file_path, "r") as f:
+#     skills_list = [skill.strip() for skill in f.readlines() if skill.strip()] 
 
 class EmbeddingEngine:
     def __init__(self):

@@ -3,6 +3,15 @@ import { useNavigate } from "react-router-dom";
 import mockApi from "../lib/mockApi";
 import { JOBS_DEMO } from "../lib/mock_database";
 
+/* THIS IS THE SKILL ANALYSIS PAGE
+  --------------------------------
+  Here, the user can enter a specific skill (like "Python") to see:
+  1. A historical graph showing how demand for that skill has evolved over time.
+  2. Which specific job fields (ex: "Software Engineer") require this skill.
+  3. Which TUM courses they can take to learn or improve this skill.
+*/
+
+
 const THEME_COLOR = "#7e57c2"; 
 const TIME_LIMITS = [
   { value: "all", label: "All Data" },
@@ -18,6 +27,9 @@ const MAX_VAL = 100;
 
 function HistoricalStats() {
   const navigate = useNavigate();
+  // STATE MANAGEMENT 
+  // Storing what the user types, whether we are loading, 
+  // and the data we get back from the API (chart points, job fields, courses)
   const [skillInput, setSkillInput] = useState("");
   const [jobInput, setJobInput] = useState(""); 
   const [locationInput, setLocationInput] = useState("");
@@ -32,6 +44,9 @@ function HistoricalStats() {
   const [showJobSugg, setShowJobSugg] = useState(false);
   const [showLocSugg, setShowLocSugg] = useState(false);
 
+  // AUTOCOMPLETE LOGIC 
+  // extracting unique lists of jobs/skills/locations from our database
+  // and filtering them based on what the user is currently typing
   const availableJobs = useMemo(() => [...new Set(JOBS_DEMO.map(j => j.title))].sort(), []);
   const availableLocations = useMemo(() => [...new Set(JOBS_DEMO.map(j => j.location))].sort(), []);
   const availableSkills = useMemo(() => [...new Set(JOBS_DEMO.flatMap(j => j.skills))].sort(), []);
@@ -39,7 +54,9 @@ function HistoricalStats() {
   const filteredSkillSuggestions = availableSkills.filter(s => s.toLowerCase().includes(skillInput.toLowerCase()) && skillInput.length > 0);
   const filteredJobSuggestions = availableJobs.filter(j => j.toLowerCase().includes(jobInput.toLowerCase()) && jobInput.length > 0);
   const filteredLocSuggestions = availableLocations.filter(l => l.toLowerCase().includes(locationInput.toLowerCase()) && locationInput.length > 0);
-
+  // DATA FETCHING 
+  // This function runs when we need to update the page. 
+  // It calls our mock API to get the Trend Graph, Job Fields, and TUM Courses all at once.
   const triggerAnalysis = async (skillOverride = null, jobOverride = null, locOverride = null) => {
     const finalSkill = skillOverride || skillInput;
     const finalJob = jobOverride !== null ? jobOverride : jobInput;
@@ -73,7 +90,8 @@ function HistoricalStats() {
     triggerAnalysis(null, clickedJobTitle, null);
   };
 
-  // --- ROBUST DATE LOGIC ---
+  // CHART MATH & HELPERS 
+  // Parsing dates and calculating X/Y coordinates to draw the line chart manually.
   const parseDate = (dStr) => { 
     if (!dStr) return new Date();
     const parts = dStr.split('/');
@@ -117,6 +135,7 @@ function HistoricalStats() {
       .join(" ");
   }, [chartData, bounds]);
 
+  // calculating the little green/red badge that shows if demand went up or down
   const growthStat = useMemo(() => {
     if (!chartData || chartData.length < 2) return null;
     const oldest = chartData[0], newest = chartData[chartData.length - 1];
@@ -148,6 +167,7 @@ function HistoricalStats() {
   }, [chartData]);
 
   const capitalize = (str) => str ? str.charAt(0).toUpperCase() + str.slice(1) : "";
+  // auto-refresh the data whenever the user changes a filter (like time limit)
   useEffect(() => {
   if (skillInput) triggerAnalysis();
   }, [timeLimit, skillInput, jobInput, locationInput]); // Updates on ANY change
@@ -163,9 +183,6 @@ function HistoricalStats() {
           </svg>
           <h1 style={{ fontSize: "2.5rem", margin: 0, color: "#1f2937" }}>Skill Analysis</h1>
         </div>
-        
-        {/* ADD THIS NEW LINE BELOW */}
-        {/* The new tagline without italics */}
         <p style={{ fontSize: "1.1rem", color: "#4b5563", marginTop: "10px", fontWeight: "400" }}>
           Find the story behind your skill and how to grow it
         </p>
@@ -209,7 +226,7 @@ function HistoricalStats() {
         <button onClick={() => triggerAnalysis()} style={{ padding: "15px 25px", background: "#d1c4e9", border: "2px solid #000", fontWeight: "bold", borderRadius: "8px", cursor: 'pointer' }}>{loading ? "..." : "Search"}</button>
       </div>
 
-      {/* RESULTS GRID */}
+      {/* RESULTS GRID (Chart on left, Tables on right) */}
       {chartData && chartData.length > 0 && (
         <div style={{ display: "grid", gridTemplateColumns: "1.3fr 1fr", gap: "80px" }}>
           <section>
@@ -252,8 +269,9 @@ function HistoricalStats() {
               </div>
             </div>
           </section>
-
+          {/* RIGHT SIDE: Jobs and Courses Tables */}
           <section style={{ display: "flex", flexDirection: "column", gap: "60px" }}>
+            {/* Table 1: Which Job Fields need this skill */}
             <div>
               <div style={{ fontSize: "1.1rem", fontWeight: "bold", marginBottom: "15px", border: `2px solid ${THEME_COLOR}`, padding: "5px 15px", borderRadius: "20px", display: "inline-block", background: "#f8fafc" }}>
                 Job Fields needing {capitalize(skillInput)} {locationInput && `in ${locationInput}`} {timeLimit !== 'all' && `over the last ${TIME_LIMITS.find(t => t.value === timeLimit)?.label.toLowerCase()}`}
@@ -270,7 +288,7 @@ function HistoricalStats() {
                 </tbody>
               </table>
             </div>
-
+            {/* Table 2: Recommended TUM Courses */}
             <div>
               <div style={{ fontSize: "1.1rem", fontWeight: "bold", marginBottom: "15px", border: `2px solid ${THEME_COLOR}`, padding: "5px 15px", borderRadius: "20px", display: "inline-block", background: "#f8fafc" }}>Top TUM courses teaching {capitalize(skillInput)}</div>
               <div style={{ border: `2px solid ${THEME_COLOR}`, borderRadius: "8px", overflow: "hidden", background: "#fff", boxShadow: "0 2px 8px rgba(0,0,0,0.05)" }}>

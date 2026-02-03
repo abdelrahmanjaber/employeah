@@ -1,16 +1,26 @@
 import { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 
-//UNCOMMENT WHEN DONE
+//UNCOMMENT WHEN DONE to get back to real API calls:
 //import { getLocations, getSkills, reportJobsBySkills } from "../lib/apiClient";
-//REMOVE WHEN DONE:a
+//REMOVE WHEN DONE to remove mock data logic (remove everything from a to b):a
 import mockApi from "../lib/mockApi";
 import { JOBS_DEMO } from "../lib/mock_database";
 //b
-// ============================================================================
-// CONFIGURATION
-// ============================================================================
 
+
+/* THIS IS THE SKILL-TO-JOB SEARCH PAGE
+  --------------------------------------
+  This page flips the usual logic. Instead of searching for a job title,
+  the user enters the SKILLS they possess (e.g., "Python", "React").
+  
+  The app then:
+  1. Calculates which Job Fields match those skills best (e.g., "Frontend Dev").
+  2. Shows the "Top Field" match statistics.
+  3. Lists the 5 most recent real job postings that require those specific skills.
+*/
+
+// CONFIGURATION
 const PIE_COLORS = [
   "#86efac", "#fde047", "#93c5fd", "#fca5a5", 
   "#d8b4fe", "#fdba74", "#cbd5e1", "#6ee7b7", 
@@ -24,14 +34,15 @@ const TIME_LIMITS = [
   { value: "3m", label: "Last 3 months" }
 ];
 
-// ============================================================================
 // MAIN COMPONENT
-// ============================================================================
+
 
 function SearchBySkills() {
   const navigate = useNavigate();
   
-  // ========== STATE ==========
+  // STATE 
+  // We need to manage a list of selected skills (the "chips" user adds),
+  // plus the text inputs for searching new skills/locations.
   
   // Skills Input State
   const [selectedSkills, setSelectedSkills] = useState([]);
@@ -56,7 +67,7 @@ function SearchBySkills() {
   const [availableLocations, setAvailableLocations] = useState([]);
   const [skillSuggestions, setSkillSuggestions] = useState([]);
 
-  // Resolve possible URL fields from API result objects
+  // Helper to extract a valid link from the messy API job object
   const getJobUrl = (job) => {
     if (!job) return "#";
     if (job.url) return job.url;
@@ -98,13 +109,18 @@ function SearchBySkills() {
     }
   }, []);*/
   //REMOVE WHEN DONE a
+  // FILTERED SUGGESTIONS
+  
+  // This effect loads all unique locations from our database 
+  // so the autocomplete works immediately when the page loads.
   useEffect(() => {
     // Extract unique locations from mock data
     const locs = [...new Set(JOBS_DEMO.map(j => j.location))];
     setAvailableLocations(locs);
   }, []);
   //b
-  //UNCOMMENT WHEN DONE!!
+
+  //UNCOMMENT WHEN DONE to get back to api logic!!
   // Restore State on Mount
   /*useEffect(() => {
     const savedSkills = sessionStorage.getItem("sbs_skills");
@@ -127,6 +143,8 @@ function SearchBySkills() {
   }, []);
   */
  // REMOVE WHEN DONE: a
+ // This effect updates the "Skill Suggestions" dropdown in real-time
+  // as the user types into the search box.
   useEffect(() => {
     if (!skillInput) {
       setSkillSuggestions([]);
@@ -206,9 +224,9 @@ function SearchBySkills() {
     [availableLocations, locationInput]
   );
 
-  // ========== HANDLERS ==========
+  // HANDLERS 
 
-  // Skill Handlers
+  // Add a skill chip when user clicks a suggestion
   const handleAddSkill = (skill) => {
     if (skill && !selectedSkills.includes(skill)) {
       const newSkills = [...selectedSkills, skill];
@@ -336,7 +354,7 @@ function SearchBySkills() {
     navigate(`/field-analysis?${params.toString()}`);
   };
 
-  // ========== RENDER HELPERS ==========
+  // RENDER HELPERS
 
   const renderSearchBar = () => (
     <section style={{ display: "flex", gap: "15px", justifyContent: "center", alignItems: "end", marginBottom: "3rem" }}>

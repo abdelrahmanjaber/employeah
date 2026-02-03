@@ -1,11 +1,24 @@
 import { useEffect, useState, useMemo } from "react";
+
 import { useSearchParams, useNavigate } from "react-router-dom";
-//UNCOMMENT WHEN DONE!!
+/*
+  Field Analysis Dashboard.
+  This page acts as a detailed market report for a specific job title (e.g., "UX Designer").
+  It visualizes the data to answer three main questions for the user:
+  1. What skills do I need? (Visualized via a bar chart)
+  2. Who is hiring? (Top 3 active companies)
+  3. Are there open jobs right now? (List of recent job postings)
+*/
+
+
+
+//UNCOMMENT WHEN DONE!! to get back to API not mockdata
 
 //import { reportJobTitleDetails } from "../lib/apiClient";
-//REMOVE WHEN DONE
+//REMOVE WHEN DONE, this is mock data logic:
 import { JOBS_DEMO } from "../lib/mock_database";
 
+// Pretty pastel colors for the skill bars so the chart looks nice.
 const PIE_COLORS = [
   "#86efac", "#fde047", "#93c5fd", "#fca5a5", 
   "#d8b4fe", "#fdba74", "#cbd5e1", "#6ee7b7", 
@@ -13,6 +26,8 @@ const PIE_COLORS = [
 ];
 
 function FieldAnalysis() {
+  // Grab search parameters from the URL (like ?field=Software Engineer).
+  // This lets users bookmark or share the analysis page.
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
 
@@ -20,13 +35,15 @@ function FieldAnalysis() {
   const skillsParam = searchParams.get("skills");
   const location = searchParams.get("location");
   const timeLimit = searchParams.get("timeLimit") || "1m";
-
+  // Convert the comma-separated skills string back into an array.
+  // Using useMemo here so it doesn't re-calculate on every single render.
   const selectedSkills = useMemo(() => skillsParam ? skillsParam.split(",") : [], [skillsParam]);
 
   const [loading, setLoading] = useState(true);
   const [details, setDetails] = useState(null);
   const [limit, setLimit] = useState(10); // Default Top 10
-
+  // Main data fetching effect.
+  // Right now it just processes the mock data array locally to simulate an API response.
   useEffect(() => {
     if (!jobTitle) return;
 
@@ -35,20 +52,21 @@ function FieldAnalysis() {
       //REMOVE WHEN DONE a
       try {
         // 1. Filter jobs based on title and location
+        
         const filteredJobs = JOBS_DEMO.filter(j => {
           const matchTitle = j.title.toLowerCase() === jobTitle.toLowerCase();
           const matchLoc = location ? j.location.toLowerCase().includes(location.toLowerCase()) : true;
           return matchTitle && matchLoc;
         });
 
-        // 2. Calculate Top Skills
+        // 2. Calculate Top Skills, so count up how many times each skill appears in the filtered jobs
         const skillsCount = {};
         filteredJobs.forEach(j => {
           j.skills.forEach(s => {
             skillsCount[s] = (skillsCount[s] || 0) + 1;
           });
         });
-
+        // Sort skills by frequency to find the most important ones
         const topSkills = Object.entries(skillsCount)
           .map(([name, count]) => ({
             name,
@@ -103,6 +121,8 @@ function FieldAnalysis() {
     fetchData();
   }, [jobTitle, selectedSkills, location, timeLimit]);
 
+  // Helper to handle messy URL data from different sources.
+  // Some jobs have 'url', some 'link', others are nested inside objects
   const getJobUrl = (job) => {
     if (!job) return "#";
     if (job.url) return job.url;
@@ -119,6 +139,7 @@ function FieldAnalysis() {
     return "#";
   };
 
+  // Safe wrapper for the skills list to prevent crashes if data is missing
   const normalizedTopSkills = useMemo(() => {
     if (!details || !details.top_skills) return [];
     return details.top_skills.map((s) => ({
@@ -128,12 +149,13 @@ function FieldAnalysis() {
     }));
   }, [details]);
 
+  // Handle the "Top 5 / Top 10 / All" dropdown filter logic
   const displayedSkills = useMemo(() => {
     if (limit === "All") return normalizedTopSkills;
     return normalizedTopSkills.slice(0, Number(limit));
   }, [normalizedTopSkills, limit]);
-
-  // Find max percent for bar scaling
+  // Find the highest percentage to scale the bars correctly.
+  // Otherwise the bars might look too small if the top skill is only 20%.
   const maxPercent = useMemo(() => {
     if (normalizedTopSkills.length === 0) return 1;
     return Math.max(...normalizedTopSkills.map(s => s.percent));
@@ -184,9 +206,11 @@ function FieldAnalysis() {
           <div style={{ display: 'flex', flexWrap: 'wrap', gap: '40px' }}>
             
             {/* LEFT SIDE: Skills Bar Chart */}
+            {/* Using flex:1 to make sure it takes up equal space or shrinks properly on mobile */}
             <div style={{ flex: 1, minWidth: '300px', backgroundColor: 'white', padding: '20px', borderRadius: '12px', boxShadow: '0 2px 8px rgba(0,0,0,0.05)' }}>
               <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 20 }}>
                 <h3 style={{ margin: 0, color: '#333' }}>Top Skills Required</h3>
+                {/* Dropdown to control how many skills are shown */}
                 <select 
                   value={limit} 
                   onChange={(e) => setLimit(e.target.value)}
@@ -198,7 +222,7 @@ function FieldAnalysis() {
                   <option value="All">All</option>
                 </select>
               </div>
-
+              {/* Custom Bar Chart implementation using simple divs */}
               <div style={{ display: "flex", flexDirection: "column", gap: "10px" }}>
                 {displayedSkills.map((skill, idx) => (
                   <div key={skill.name} style={{ width: "100%" }}>
