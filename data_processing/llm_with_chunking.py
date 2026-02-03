@@ -29,10 +29,6 @@ REMOVE_ENTS = {"GPE", "LOC", "PERSON", "DATE", "TIME"}
 EMBEDDING_BACKEND = "sbert"
 language = "en"
 
-# Load skills from txt file
-# file_path = parent_dir / "skills.txt"
-
-
 class EmbeddingEngine:
     def __init__(self):
         self.model = SentenceTransformer("sentence-transformers/all-MiniLM-L6-v2")
@@ -70,13 +66,13 @@ def build_skill_index(skills: List[str], engine: EmbeddingEngine):
     skill_texts = [s.lower() for s in skills]
     skill_embs = engine.embed(skill_texts)  # normalized for SBERT
     return skill_texts, skill_embs
+
 def contains_skill(candidate: str, skill: str) -> bool:
     c_tokens = candidate.lower().split()
     s_tokens = skill.lower().split()
     return all(t in c_tokens for t in s_tokens)
-# -------------------------
-# Similarity helpers
-# -------------------------
+
+
 def cosine_sim_matrix(a: np.ndarray, b: np.ndarray) -> np.ndarray:
     # accepts 2D numpy arrays
     # If 'a' and 'b' are normalized (SBERT), dot product is cosine similarity
@@ -95,7 +91,6 @@ def pos_filter(candidates, nlp):
             out.append(c)
             idx.append(i)
     return out, idx
-
 
 def ner_filter(candidates, nlp):
     """Remove named entities like cities, dates, people."""
@@ -454,7 +449,7 @@ def search_for_skills_and_find_new_ones(df: pd.DataFrame, skills_list: List[str]
         n_clusters=5
     )
     
-    job_titles = adzuna_df['title'].dropna().astype(str).tolist()
+    job_titles = df['title'].dropna().astype(str).tolist()
 
     # normalize
     job_titles = [t.lower().strip() for t in job_titles]
@@ -479,18 +474,38 @@ def search_for_skills_and_find_new_ones(df: pd.DataFrame, skills_list: List[str]
 
     return per_job_skills#,filtered_candidates
     
+def create_skills_list(skill_file_path: Path) -> List[str]:
+    known_skills = []
+    categories = []
+    skills = []
 
+    with open(skill_file_path, "r", encoding="utf-8") as f:
+        for line in f:
+            clean_line = line.strip()
+            if clean_line:
+                if clean_line.endswith(':'):
+                    # It's a category (remove the colon)
+                    categories.append(clean_line[:-1])
+                elif clean_line.startswith('-'):
+                    # It's a skill (remove the dash)
+                    skills.append(clean_line[1:].strip())
+                else:
+                    # Some other text, add as is
+                    skills.append(clean_line)
+    known_skills = skills + categories
+    return known_skills
 if __name__ == "__main__":
     p = parent_dir.parent / "data_pipeline" / "data" / "job_data" / "ALL_JOBS.csv.gz"
+    skill_path = Path(__file__).parent / "lists" / "skill_areas_flattened.txt"
+    skill_list = create_skills_list(skill_path)
     full_df = pd.read_csv(p, compression="gzip", engine="c", low_memory=False)
     #take only a subset for testing
     full_df = full_df.sample(n=5000, random_state=42).reset_index(drop=True)
-    per_job_skills = search_for_skills_and_find_new_ones(full_df, skills_list)#, new_skills
+    per_job_skills = search_for_skills_and_find_new_ones(full_df, skill_list)#, new_skills
     full_df['Extracted_skills_embeddings'] = per_job_skills
+
     #save full df with new column
     #regex_scill_extract.add_skills_column(full_df, skills_list)
     #full_df.to_parquet(parent_dir.parent / "data_pipeline" / "data" / "job_data" / "ALL_JOBS_with_extracted_skills.parquet", index=False)
 
-    # with open("discovered_new_skills.txt", "w", encoding="utf-8") as f:
-    #     for item in new_skills:
-    #         f.write(str(item) + "\n")   
+    
